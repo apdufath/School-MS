@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Abaarso School - Management System</title>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Tailwind CSS CDN with Class Dark Mode -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'school-red': '#8B0000',
+            'school-accent': '#C0392B',
+            'school-gold': '#D4AF37',
+            'school-cyan': '#00d4ff',
+          },
+          fontFamily: {
+            headings: ['Exo 2', 'sans-serif'],
+            body: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Chart.js Engine -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Scripts -->
+  <script src="app.js" defer></script>
+</head>
+<body class="antialiased overflow-x-hidden min-h-screen relative flex flex-col">
+
+  <!-- Ambient Glow Blobs in Background -->
+  <div class="ambient-glow-1"></div>
+  <div class="ambient-glow-2"></div>
+  
+  <!-- Dynamic floating particle background canvas -->
+  <canvas id="particles-canvas"></canvas>
+
+  <!-- 1. LOADING SPLASH SCREEN -->
+  <div id="splash-screen">
+    <div class="loader-ring">
+      <span>AS</span>
+    </div>
+    <div class="text-white text-3xl font-bold tracking-widest mt-8 font-headings">Abaarso School</div>
+    <div class="text-school-gold text-sm italic tracking-widest mt-2">"Imagine · Innovate · Inspire"</div>
+    <p class="text-white/40 text-xs mt-12 font-medium tracking-wide">Initializing Cosmic Grid Systems...</p>
+  </div>
+
+  <!-- 2. LOGIN GATE (Session Guard Screen) -->
+  <div id="login-screen" class="fixed inset-0 z-[999] flex items-center justify-center bg-[#060b16] select-none transition-all duration-500">
+    <div class="glass p-8 w-full max-w-[420px] mx-4 relative flex flex-col items-center shadow-[0_0_50px_rgba(0,212,255,0.15)] text-center animate-fade">
+      <!-- Brand Initials avatar with cyan neon outline -->
+      <div class="w-20 h-20 bg-gradient-to-tr from-school-red to-school-accent border-2 border-school-gold rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(0,212,255,0.3)] mb-4">
+        <span class="font-serif font-bold text-school-gold text-3xl tracking-widest">AS</span>
+      </div>
+      <h2 class="font-headings text-2xl font-bold tracking-wider text-white mb-1">Abaarso School</h2>
+      <p class="text-xs text-school-gold tracking-widest uppercase font-semibold mb-6">"Imagine · Innovate · Inspire"</p>
+      
+      <form id="login-form" class="w-full space-y-4" onsubmit="handleLogin(event)">
+        <div class="relative text-left">
+          <label class="block text-[10px] font-bold text-white/50 uppercase mb-1 tracking-wider">Email Address</label>
+          <span class="absolute left-3.5 bottom-3.5 text-white/40"><i class="fa-solid fa-envelope"></i></span>
+          <input type="email" id="login-email" class="glass-input w-full pl-10 pr-4 py-2.5 rounded text-sm placeholder-white/20" placeholder="admin@abaarso.edu" required>
+        </div>
+        <div class="relative text-left">
+          <label class="block text-[10px] font-bold text-white/50 uppercase mb-1 tracking-wider">Password</label>
+          <span class="absolute left-3.5 bottom-3.5 text-white/40"><i class="fa-solid fa-lock"></i></span>
+          <input type="password" id="login-password" class="glass-input w-full pl-10 pr-4 py-2.5 rounded text-sm placeholder-white/20" placeholder="••••••••" required>
+        </div>
+        
+        <button type="submit" class="w-full py-3 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(139,0,0,0.4)] transition-all duration-300 transform hover:scale-[1.02] active:scale-95 cursor-pointer mt-6">
+          Authorize Access
+        </button>
+      </form>
+      <p class="text-[10px] text-white/30 mt-6 tracking-wide">Secure Academic Management Portal</p>
+    </div>
+  </div>
+
+  <!-- 3. MAIN APP WORKSPACE -->
+  <div id="app-layout" class="hidden min-h-screen flex relative">
+    
+    <!-- Mobile sidebar overlay closer -->
+    <div id="overlay" class="fixed inset-0 bg-black/60 opacity-0 pointer-events-none z-40 md:hidden transition-all duration-300" onclick="closeSidebar()"></div>
+
+    <!-- FIXED LEFT SIDEBAR (Width: 260px) - Transparent Glass Style -->
+    <aside id="sidebar" class="w-[260px] h-screen fixed left-0 top-0 z-50 flex flex-col shrink-0 text-white overflow-y-auto">
+      
+      <!-- Brand Logo Header with gold initials & waffles icon -->
+      <div class="p-6 border-b border-white/10 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-school-red border-2 border-school-gold rounded-full flex items-center justify-center shrink-0 shadow-lg">
+            <span class="font-serif font-bold text-school-gold text-base">AS</span>
+          </div>
+          <div>
+            <h2 class="font-serif font-bold text-sm leading-tight text-white">Abaarso School</h2>
+            <p class="text-[9px] text-school-gold uppercase font-bold tracking-wider">Imagine · Innovate</p>
+          </div>
+        </div>
+        <button class="text-school-cyan hover:text-white transition-all pointer-events-auto" title="System Dashboard Grid">
+          <i class="fa-solid fa-border-all text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Logged-in admin circular initials avatar badge -->
+      <div class="px-6 py-4 flex items-center gap-3 border-b border-white/10 bg-white/5">
+        <div class="relative">
+          <div class="w-10 h-10 bg-gradient-to-tr from-school-red to-school-accent text-school-gold rounded-full flex items-center justify-center font-bold border border-school-gold shadow-[0_0_10px_rgba(0,212,255,0.2)]">
+            A
+          </div>
+          <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-[#0a0f1e]" title="Active Session"></div>
+        </div>
+        <div>
+          <h3 class="text-xs font-semibold text-white">Admin Registrar</h3>
+          <p class="text-[9px] text-school-gold font-bold uppercase tracking-wider" data-lang="admin_role">System Admin</p>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="flex-grow py-4 text-xs font-medium uppercase tracking-wider">
+        <ul class="space-y-1">
+          <li>
+            <a href="#" class="sidebar-link active flex items-center gap-4 px-6 py-3" data-view="dashboard" onclick="event.preventDefault(); showSection('dashboard')">
+              <i class="fa-solid fa-chart-line w-5 text-school-cyan text-sm"></i>
+              <span data-lang="dashboard">Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="students" onclick="event.preventDefault(); showSection('students')">
+              <i class="fa-solid fa-graduation-cap w-5 text-school-cyan text-sm"></i>
+              <span data-lang="students">Students</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="teachers" onclick="event.preventDefault(); showSection('teachers')">
+              <i class="fa-solid fa-chalkboard-user w-5 text-school-cyan text-sm"></i>
+              <span data-lang="teachers">Teachers</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="classes" onclick="event.preventDefault(); showSection('classes')">
+              <i class="fa-solid fa-school w-5 text-school-cyan text-sm"></i>
+              <span data-lang="classes">Classes</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="timetable" onclick="event.preventDefault(); showSection('timetable')">
+              <i class="fa-solid fa-calendar-days w-5 text-school-cyan text-sm"></i>
+              <span data-lang="timetable">Timetable</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="exams" onclick="event.preventDefault(); showSection('exams')">
+              <i class="fa-solid fa-file-signature w-5 text-school-cyan text-sm"></i>
+              <span data-lang="exams">Exams</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="fees" onclick="event.preventDefault(); showSection('fees')">
+              <i class="fa-solid fa-wallet w-5 text-school-cyan text-sm"></i>
+              <span data-lang="fees">Fees Ledger</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="announcements" onclick="event.preventDefault(); showSection('announcements')">
+              <i class="fa-solid fa-bullhorn w-5 text-school-cyan text-sm"></i>
+              <span data-lang="announcements">Notices</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="settings" onclick="event.preventDefault(); showSection('settings')">
+              <i class="fa-solid fa-sliders w-5 text-school-cyan text-sm"></i>
+              <span data-lang="settings">Settings</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Sidebar Footer / Logout Anchor -->
+      <div class="p-4 border-t border-white/10">
+        <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-3 py-2.5 bg-red-950/40 hover:bg-school-red/40 border border-red-500/20 hover:border-red-500/50 rounded-lg text-xs font-bold text-red-300 hover:text-white uppercase transition-all duration-300">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>Logout Portal</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- RIGHT SCROLLABLE WORKSPACE (Offset by 260px on Desktop) -->
+    <div id="main-content" class="md:ml-[260px] flex-grow flex flex-col justify-between min-w-0 transition-all duration-300">
+      
+      <!-- TOP NAVIGATION NAVBAR -->
+      <header class="h-[70px] bg-white/5 border-b border-white/10 flex items-center justify-between px-6 sticky top-0 z-30 shadow-md no-print backdrop-blur-md">
+        <div class="flex items-center gap-4">
+          <!-- Waffle responsive menu toggle button -->
+          <button id="sidebar-hamburger" onclick="toggleSidebar()" class="md:hidden text-2xl text-school-gold hover:text-white focus:outline-none transition-all">
+            <i class="fa-solid fa-grip"></i>
+          </button>
+          <h1 id="header-page-title" class="text-xl md:text-2xl font-bold tracking-wide text-white font-headings">Dashboard</h1>
+        </div>
+
+        <div class="flex items-center gap-4 md:gap-6">
+          <!-- Hargeisa time dynamic clock -->
+          <div id="live-clock" class="hidden sm:flex text-xs md:text-sm font-semibold text-white/70 flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
+            <i class="fa-regular fa-clock text-school-cyan"></i>
+            <span>Hargeisa: --:--:--</span>
+          </div>
+          
+          <!-- Sun/Moon synchronization switch -->
+          <button id="theme-toggle" class="rounded-full p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-school-cyan transition-all text-white/80 hover:text-white cursor-pointer flex items-center justify-center" onclick="toggleTheme()" title="Toggle Visual System Theme">
+            <i class="fas fa-moon text-base text-school-cyan"></i>
+          </button>
+
+          <!-- Alarm Bell Trigger -->
+          <div id="notif-trigger" class="relative cursor-pointer text-white/70 hover:text-white transition-colors bg-white/5 p-2.5 rounded-full border border-white/10">
+            <i class="fa-regular fa-bell text-base"></i>
+            <div class="absolute top-0 right-0 bg-school-accent text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-[#0a0f1e]">2</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- VIEWS REGISTRY CONTAINER -->
+      <main class="p-6 md:p-8 flex-grow space-y-8 z-10 relative">
+        
+        <!-- ======================================== -->
+        <!-- VIEW 1: DASHBOARD -->
+        <!-- ======================================== -->
+        <section id="dashboard" class="hidden space-y-8 animate-fade">
+          
+          <!-- Notices moving marquee banner -->
+          <div class="glass p-3 flex items-center gap-4 overflow-hidden select-none border-l-4 border-l-school-cyan">
+            <span class="bg-school-red text-white text-[9px] font-bold px-2 py-0.5 rounded tracking-widest shrink-0 uppercase" data-lang="notice_bar_lbl">Notice</span>
+            <div class="flex-grow whitespace-nowrap overflow-hidden">
+              <span class="inline-block animate-[marquee_20s_linear_infinite] hover:paused text-sm text-school-gold font-semibold tracking-wider">
+                Abaarso School End of Term examinations schedules are finalized and published in the Exams section. Term starts Sunday.
+              </span>
+            </div>
+          </div>
+
+          <!-- Counter Cards (Dashboard Stats) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 select-none">
+            <div class="glass p-6 border-l-4 border-l-school-red flex items-center justify-between card-hover-lift">
+              <div>
+                <h3 class="text-3xl font-bold text-white font-headings" id="count-students">0</h3>
+                <p class="text-[10px] text-white/50 font-bold uppercase tracking-wider mt-1" data-lang="students_lbl">Students</p>
+              </div>
+              <div class="w-12 h-12 bg-white/5 text-school-gold rounded-xl flex items-center justify-center text-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] border border-white/10">
+                <i class="fa-solid fa-graduation-cap text-school-cyan"></i>
+              </div>
+            </div>
+
+            <div class="glass p-6 border-l-4 border-l-school-gold flex items-center justify-between card-hover-lift">
+              <div>
+                <h3 class="text-3xl font-bold text-white font-headings" id="count-teachers">0</h3>
+                <p class="text-[10px] text-white/50 font-bold uppercase tracking-wider mt-1" data-lang="teachers_lbl">Teachers</p>
+              </div>
+              <div class="w-12 h-12 bg-white/5 text-school-gold rounded-xl flex items-center justify-center text-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] border border-white/10">
+                <i class="fa-solid fa-chalkboard-user text-school-gold"></i>
+              </div>
+            </div>
+
+            <div class="glass p-6 border-l-4 border-l-green-500 flex items-center justify-between card-hover-lift">
+              <div>
+                <h3 class="text-3xl font-bold text-white font-headings" id="count-classes">0</h3>
+                <p class="text-[10px] text-white/50 font-bold uppercase tracking-wider mt-1" data-lang="classes_lbl">Classes</p>
+              </div>
+              <div class="w-12 h-12 bg-white/5 text-green-400 rounded-xl flex items-center justify-center text-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] border border-white/10">
+                <i class="fa-solid fa-school text-green-400"></i>
+              </div>
+            </div>
+
+            <div class="glass p-6 border-l-4 border-l-school-cyan flex items-center justify-between card-hover-lift">
+              <div>
+                <h3 class="text-3xl font-bold text-white font-headings" id="count-events">0</h3>
+                <p class="text-[10px] text-white/50 font-bold uppercase tracking-wider mt-1" data-lang="events_lbl">Upcoming Events</p>
+              </div>
+              <div class="w-12 h-12 bg-white/5 text-school-cyan rounded-xl flex items-center justify-center text-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] border border-white/10">
+                <i class="fa-solid fa-calendar-check text-school-cyan"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart.js Graphs Row -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Line graph for Average Student GPA progress -->
+            <div class="glass p-6 lg:col-span-2 flex flex-col justify-between shadow-2xl relative overflow-hidden">
+              <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-3">
+                <h3 class="text-lg font-bold text-white font-headings flex items-center gap-2">
+                  <i class="fa-solid fa-chart-line text-school-cyan"></i>
+                  <span data-lang="performance_graph">Performance GPA Trend</span>
+                </h3>
+                <span class="text-[10px] bg-school-cyan/20 text-school-cyan border border-school-cyan/35 px-2 py-0.5 rounded uppercase font-semibold">Active Registrar</span>
+              </div>
+              <div class="relative h-[280px] w-full">
+                <canvas id="performance-chart"></canvas>
+              </div>
+            </div>
+
+            <!-- Exam pass/fail Donut Chart -->
+            <div class="glass p-6 flex flex-col justify-between shadow-2xl relative overflow-hidden">
+              <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-3">
+                <h3 class="text-lg font-bold text-white font-headings flex items-center gap-2">
+                  <i class="fa-solid fa-chart-pie text-school-gold"></i>
+                  <span data-lang="exam_stats">Exam Passing Ratios</span>
+                </h3>
+                <span class="text-[10px] bg-school-gold/20 text-school-gold border border-school-gold/35 px-2 py-0.5 rounded uppercase font-semibold">Term A</span>
+              </div>
+              <div class="relative h-[250px] w-full flex items-center justify-center">
+                <canvas id="exam-status-chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dashboard bottom details columns -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Left Info Block & Quick Actions -->
+            <div class="glass p-6 lg:col-span-2 card-hover-lift flex flex-col justify-between">
+              <div>
+                <h3 class="text-xl font-bold text-school-gold border-b border-white/10 pb-3 mb-4 font-serif school-name-text" data-lang="welcome_title">Welcome to Abaarso School Management System</h3>
+                <p class="text-sm text-white/80 leading-relaxed school-tagline-text" data-lang="welcome_body">
+                  Abaarso School is a leader in progressive academic excellence. This single page platform enables educators and administrators to maintain student profiles, structure academic timetables, record exams performance, regulate fee collection registers, and manage institutional publications efficiently.
+                </p>
+              </div>
+              
+              <div class="mt-8">
+                <h4 class="text-xs font-bold text-school-cyan tracking-wider uppercase mb-3" data-lang="quick_act_title">Quick Actions</h4>
+                <div class="grid grid-cols-3 gap-3 text-center">
+                  <div class="p-4 bg-white/5 border border-white/10 hover:border-school-cyan hover:bg-white/10 rounded-xl cursor-pointer transition-all group" onclick="openModal('modal-add-student')">
+                    <i class="fa-solid fa-user-plus text-school-cyan text-lg mb-2 group-hover:scale-110 transition-transform"></i>
+                    <p class="text-[9px] font-bold uppercase tracking-wider text-white/70 group-hover:text-white" data-lang="add_stud_btn">Add Student</p>
+                  </div>
+                  <div class="p-4 bg-white/5 border border-white/10 hover:border-school-cyan hover:bg-white/10 rounded-xl cursor-pointer transition-all group" onclick="openModal('modal-add-teacher')">
+                    <i class="fa-solid fa-user-tie text-school-gold text-lg mb-2 group-hover:scale-110 transition-transform"></i>
+                    <p class="text-[9px] font-bold uppercase tracking-wider text-white/70 group-hover:text-white" data-lang="add_teach_btn">Add Teacher</p>
+                  </div>
+                  <div class="p-4 bg-white/5 border border-white/10 hover:border-school-cyan hover:bg-white/10 rounded-xl cursor-pointer transition-all group" onclick="showSection('exams')">
+                    <i class="fa-solid fa-chart-line text-green-400 text-lg mb-2 group-hover:scale-110 transition-transform"></i>
+                    <p class="text-[9px] font-bold uppercase tracking-wider text-white/70 group-hover:text-white" data-lang="enter_score_btn">Enter Score</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mini Calendar and Recent Announcements list -->
+            <div class="space-y-6">
+              <!-- Calendar Card -->
+              <div class="glass p-6 card-hover-lift">
+                <div class="flex justify-between items-center mb-4">
+                  <h4 class="font-bold text-white text-sm" id="mini-calendar-title">May 2026</h4>
+                  <div class="flex gap-2">
+                    <button class="w-6 h-6 border border-white/15 rounded flex items-center justify-center text-xs hover:bg-white/10 cursor-pointer text-white" onclick="prevCalendarMonth()">&larr;</button>
+                    <button class="w-6 h-6 border border-white/15 rounded flex items-center justify-center text-xs hover:bg-white/10 cursor-pointer text-white" onclick="nextCalendarMonth()">&rarr;</button>
+                  </div>
+                </div>
+                <div class="grid grid-cols-7 gap-1" id="mini-calendar-days">
+                  <!-- Injected by app.js -->
+                </div>
+              </div>
+              
+              <!-- Recent Notices Box -->
+              <div class="glass p-6 card-hover-lift">
+                <h4 class="font-bold text-school-gold text-sm border-b border-white/10 pb-2 mb-4 uppercase tracking-wider" data-lang="recent_ann_title">Recent Announcements</h4>
+                <div class="space-y-4 shadow-sm" id="recent-announcements-list">
+                  <!-- Injected by app.js -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ======================================== -->
+        <!-- VIEW 2: STUDENTS -->
+        <!-- ======================================== -->
+        <section id="students" class="hidden space-y-6 animate-fade">
+          <div class="glass overflow-hidden shadow-xl">
+            <div class="p-6 border-b border-white/10 flex flex-wrap justify-between items-center gap-4">
+              <h3 class="text-xl font-bold text-school-gold font-serif" data-lang="student_ledger">Student Registry</h3>
+              <button class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-student')">
+                <i class="fa-solid fa-plus mr-1"></i> <span data-lang="add_stud_btn">Add Student</span>
+              </button>
+            </div>
+            
+            <div class="p-6">
+              <!-- Search and Filter Panel -->
+              <div class="flex flex-wrap gap-4 items-center justify-between mb-6">
+                <div class="flex items-center gap-3 w-full md:max-w-xl">
+                  <div class="relative flex-grow">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 text-sm"></i>
+                    <input type="text" id="search-students" class="glass-input w-full pl-10 pr-4 py-2.5 rounded-lg text-sm focus:outline-none placeholder-white/20" placeholder="Search student by name or code..." oninput="renderStudents()">
+                  </div>
+                  <select id="filter-students-class" class="py-2.5 px-3 glass-input rounded-lg text-sm focus:outline-none max-w-[180px]" onchange="renderStudents()">
+                    <option value="">All Classes</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Main Table -->
+              <div class="overflow-x-auto border border-white/10 rounded-xl bg-black/10">
+                <table class="w-full text-left text-sm border-collapse text-white/90">
+                  <thead>
+                    <tr class="bg-white/5 border-b border-white/10">
+                      <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">ID</th>
+                      <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Name</th>
+                      <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Class</th>
+                      <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Gender</th>
+                      <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Age</th>
+                      <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Status</th>
+                      <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider no-print">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="students-table-body">
+                    <!-- Injected Student List -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Pagination Info and Toggles -->
+              <div class="flex justify-between items-center mt-6">
+                <div class="text-xs text-white/50 font-semibold" id="students-pagination-info">Showing 1-10 of 12 entries</div>
+                <div class="flex gap-2">
+                  <button class="px-3 py-1.5 bg-white/5 border border-white/15 hover:border-school-cyan rounded-lg text-xs font-bold text-white/80 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer" id="btn-students-prev" onclick="prevStudentsPage()">Prev</button>
+                  <button class="px-3 py-1.5 bg-white/5 border border-white/15 hover:border-school-cyan rounded-lg text-xs font-bold text-white/80 hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer" id="btn-students-next" onclick="nextStudentsPage()">Next</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================== -->
+        <!-- VIEW 3: TEACHERS -->
+        <!-- ======================================== -->
+        <section id="teachers" class="hidden space-y-6 animate-fade">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="relative w-full max-w-sm">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 text-sm"></i>
+              <input type="text" id="search-teachers" class="glass-input w-full pl-10 pr-4 py-2.5 rounded-lg text-sm placeholder-white/20 focus:outline-none" placeholder="Search teacher by name or subject..." oninput="renderTeachers()">
+            </div>
+            <button class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-teacher')">
+              <i class="fa-solid fa-plus mr-1"></i> <span data-lang="add_teach_btn">Add Teacher</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="teachers-grid">
+            <!-- Injected Teacher Cards -->
+          </div>
+        </section>
+
+        <!-- ======================================== -->
+        <!-- VIEW 4: CLASSES -->
+        <!-- ======================================== -->
+        <section id="classes" class="hidden space-y-6 animate-fade">
+          <div class="flex justify-end">
+            <button class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-class')">
+              <i class="fa-solid fa-plus mr-1"></i> <span data-lang="add_class_btn">Add Class</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="classes-grid">
+            <!-- Injected Classes Cards -->
+          </div>
+        </section>
+
+        <!-- ======================================== -->
+        <!-- VIEW 5: TIMETABLE -->
+        <!-- ======================================== -->
+        <section id="timetable" class="hidden space-y-6 animate-fade">
+          <div class="glass overflow-hidden shadow-xl">
+            <div class="p-6 border-b border-white/10 flex justify-between items-center">
+              <h3 class="text-xl font-bold text-school-gold font-serif" data-lang="weekly_grid">Weekly Grid Schedule</h3>
+              <button class="px-4 py-2 bg-gradient-to-r from-school-gold to-amber-500 text-gray-950 font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase no-print" onclick="printTimetable()">
+                <i class="fa-solid fa-print mr-1"></i> <span data-lang="print_btn">Print Timetable</span>
+              </button>
+            </div>
+            
+            <div class="p-6">
+              <div class="flex items-center gap-4 mb-6 filter-bar bg-white/5 p-4 rounded-xl border border-white/10 w-fit">
+                <label class="text-sm font-bold text-white/80">Select Class:</label>
+                <select id="timetable-class-select" class="py-2 px-3 glass-input rounded text-sm focus:outline-none" onchange="renderTimetable()">
+                  <!-- Injected classes list -->
+                </select>
+              </div>
+
+              <div class="overflow-x-auto border border-white/10 rounded-xl bg-black/20">
+                <table class="w-full border-collapse border border-white/10 text-sm timetable-grid text-white/90">
+                  <thead>
+                    <tr class="bg-school-red text-white border-b border-white/10">
+                      <th class="border border-white/10 p-4 w-28 uppercase tracking-wider font-bold">Day</th>
+                      <th class="border border-white/10 p-4 font-bold">Period 1<br><span class="text-[9px] font-medium opacity-70">08:00 - 08:45</span></th>
+                      <th class="border border-white/10 p-4 font-bold">Period 2<br><span class="text-[9px] font-medium opacity-70">08:45 - 09:30</span></th>
+                      <th class="border border-white/10 p-4 font-bold">Period 3<br><span class="text-[9px] font-medium opacity-70">09:45 - 10:30</span></th>
+                      <th class="border border-white/10 p-4 font-bold">Period 4<br><span class="text-[9px] font-medium opacity-70">10:30 - 11:15</span></th>
+                      <th class="border border-white/10 p-4 font-bold">Period 5<br><span class="text-[9px] font-medium opacity-70">11:30 - 12:15</span></th>
+                      <th class="border border-white/10 p-4 font-bold">Period 6<br><span class="text-[9px] font-medium opacity-70">12:15 - 01:00</span></th>
+                      <th class="border border-white/10 p-4 font-bold">Period 7<br><span class="text-[9px] font-medium opacity-70">02:00 - 02:45</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="timetable-grid-body">
+                    <!-- Sat - Thu generated by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================== -->
+        <!-- VIEW 6: EXAMS & RESULTS -->
+        <!-- ======================================== -->
+        <section id="exams" class="hidden space-y-6 animate-fade">
+          <div class="border-b border-white/10">
+            <nav class="flex gap-6 text-sm font-semibold select-none">
+              <button id="tab-exam-schedules" class="py-3 border-b-2 border-school-cyan text-school-cyan hover:text-white transition-all focus:outline-none cursor-pointer font-headings text-base font-bold" onclick="switchExamsTab('schedules')">Exam Schedules</button>
+              <button id="tab-exam-results" class="py-3 border-b-2 border-transparent text-white/50 hover:text-school-cyan transition-all focus:outline-none cursor-pointer font-headings text-base font-bold" onclick="switchExamsTab('results')">Results Ledger</button>
+            </nav>
+          </div>
+
+          <!-- PANE A: SCHEDULES -->
+          <div id="pane-exam-schedules" class="space-y-6">
+            <div class="glass overflow-hidden shadow-xl">
+              <div class="p-6 border-b border-white/10 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-school-gold font-serif" data-lang="exam_schedule">Exam Schedule</h3>
+                <button class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-exam')">
+                  <i class="fa-solid fa-plus mr-1"></i> <span data-lang="add_exam_btn">Add Exam</span>
+                </button>
+              </div>
+              
+              <div class="p-6 overflow-x-auto">
+                <div class="border border-white/10 rounded-xl bg-black/10">
+                  <table class="w-full text-left text-sm border-collapse text-white/95">
+                    <thead>
+                      <tr class="bg-white/5 border-b border-white/10">
+                        <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Subject</th>
+                        <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Date</th>
+                        <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Time</th>
+                        <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Room</th>
+                        <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider no-print">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="exams-table-body">
+                      <!-- JS Injected Schedules -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANE B: RESULTS LEDGER -->
+          <div id="pane-exam-results" class="hidden space-y-6">
+            <div class="glass overflow-hidden shadow-xl">
+              <div class="p-6 border-b border-white/10 flex justify-between items-center flex-wrap gap-4">
+                <h3 class="text-xl font-bold text-school-gold font-serif" data-lang="exam_results">Results Ledger</h3>
+                <div class="flex gap-2">
+                  <button class="px-4 py-2 bg-gradient-to-r from-school-gold to-amber-500 text-gray-950 font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="exportExamsResultsCSV()">
+                    <i class="fa-solid fa-file-csv mr-1"></i> <span data-lang="export_csv_btn">Export CSV</span>
+                  </button>
+                  <button class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-result')">
+                    <i class="fa-solid fa-plus mr-1"></i> <span data-lang="enter_score_btn">Enter Score</span>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="p-6">
+                <!-- Ledger Filters -->
+                <div class="flex flex-wrap gap-4 items-center justify-between mb-6 filter-bar bg-white/5 p-4 rounded-xl border border-white/10 w-fit">
+                  <div class="flex items-center gap-3">
+                    <select id="filter-results-class" class="py-2.5 px-3 glass-input rounded text-sm focus:outline-none" onchange="renderResults()">
+                      <option value="">All Classes</option>
+                    </select>
+                    <select id="filter-results-subject" class="py-2.5 px-3 glass-input rounded text-sm focus:outline-none font-medium" onchange="renderResults()">
+                      <option value="">All Subjects</option>
+                      <option value="Mathematics">Mathematics</option>
+                      <option value="English">English</option>
+                      <option value="Science">Science</option>
+                      <option value="History">History</option>
+                      <option value="Somali">Somali</option>
+                      <option value="Art">Art</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Ledger list tables -->
+                <div class="overflow-x-auto border border-white/10 rounded-xl bg-black/10">
+                  <table class="w-full text-left text-sm border-collapse text-white/95">
+                    <thead>
+                      <tr class="bg-white/5 border-b border-white/10">
+                        <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Student Name</th>
+                        <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Class</th>
+                        <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Subject</th>
+                        <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Score</th>
+                        <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Grade</th>
+                        <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider no-print">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="results-table-body">
+                      <!-- JS Injected Ledger items -->
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="mt-6 text-xs text-white/40 font-semibold italic select-none">
+                  Grading Scale Legend: A (90-100), B (80-89), C (70-79), D (60-69), F (Below 60)
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================== -->
+        <!-- VIEW 7: FEES -->
+        <!-- ======================================== -->
+        <section id="fees" class="hidden space-y-6 animate-fade">
+          
+          <!-- Summary card logs -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 select-none">
+            <div class="glass p-6 border-t-4 border-t-green-500 flex items-center justify-between card-hover-lift">
+              <div>
+                <p class="text-[10px] text-white/50 font-bold uppercase tracking-wider" data-lang="total_col_card">Total Collected</p>
+                <h3 class="text-2xl font-bold text-white mt-2 font-headings" id="fees-total-collected">$0</h3>
+              </div>
+              <div class="w-10 h-10 bg-white/5 text-green-400 border border-white/10 rounded-full flex items-center justify-center"><i class="fa-solid fa-circle-check text-lg"></i></div>
+            </div>
+            
+            <div class="glass p-6 border-t-4 border-t-amber-500 flex items-center justify-between card-hover-lift">
+              <div>
+                <p class="text-[10px] text-white/50 font-bold uppercase tracking-wider" data-lang="total_pend_card">Total Pending</p>
+                <h3 class="text-2xl font-bold text-white mt-2 font-headings" id="fees-total-pending">$0</h3>
+              </div>
+              <div class="w-10 h-10 bg-white/5 text-amber-500 border border-white/10 rounded-full flex items-center justify-center"><i class="fa-solid fa-triangle-exclamation text-lg"></i></div>
+            </div>
+
+            <div class="glass p-6 border-t-4 border-t-red-500 flex items-center justify-between card-hover-lift">
+              <div>
+                <p class="text-[10px] text-white/50 font-bold uppercase tracking-wider" data-lang="total_over_card">Total Overdue</p>
+                <h3 class="text-2xl font-bold text-white mt-2 font-headings" id="fees-total-overdue">$0</h3>
+              </div>
+              <div class="w-10 h-10 bg-white/5 text-red-500 border border-white/10 rounded-full flex items-center justify-center"><i class="fa-solid fa-circle-exclamation text-lg"></i></div>
+            </div>
+          </div>
+
+          <div class="glass overflow-hidden shadow-xl">
+            <div class="p-6 border-b border-white/10 flex justify-between items-center">
+              <h3 class="text-xl font-bold text-school-gold font-serif" data-lang="fees_summary">Fees Management Accounts</h3>
+              <button class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-payment')">
+                <i class="fa-solid fa-plus mr-1"></i> <span data-lang="record_pay_btn">Record Payment</span>
+              </button>
+            </div>
+            
+            <div class="p-6 overflow-x-auto">
+              <div class="border border-white/10 rounded-xl bg-black/10">
+                <table class="w-full text-left text-sm border-collapse text-white/95">
+                  <thead>
+                    <tr class="bg-white/5 border-b border-white/10">
+                      <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Student Name</th>
+                      <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Class</th>
+                      <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Amount Due</th>
+                      <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Amount Paid</th>
+                      <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Balance</th>
+                      <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Status</th>
+                      <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider no-print">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="fees-table-body">
+                    <!-- JS Injected Fees lists -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================== -->
+        <!-- VIEW 8: ANNOUNCEMENTS -->
+        <!-- ======================================== -->
+        <section id="announcements" class="hidden space-y-6 animate-fade">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Left timeline announcments log -->
+            <div class="lg:col-span-2 space-y-4" id="announcements-timeline">
+              <!-- JS Injected Notices -->
+            </div>
+
+            <!-- Right Draft notices creation forms -->
+            <div class="glass p-6 card-hover-lift h-fit shadow-2xl">
+              <h3 class="text-lg font-bold text-school-gold border-b border-white/10 pb-3 mb-4 uppercase tracking-wider" data-lang="post_ann">Draft Announcement</h3>
+              
+              <form id="announcement-form" onsubmit="saveAnnouncementForm(event)" novalidate class="space-y-4">
+                <div>
+                  <label class="block text-xs font-bold text-white/50 uppercase mb-2">Title</label>
+                  <input type="text" id="ann-title" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" required>
+                  <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Title is required.</div>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-white/50 uppercase mb-2">Date</label>
+                  <input type="date" id="ann-date" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" required>
+                  <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Date is required.</div>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-white/50 uppercase mb-2">Category</label>
+                  <select id="ann-category" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+                    <option value="Academic">Academic</option>
+                    <option value="Event">Event</option>
+                    <option value="General">General</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-white/50 uppercase mb-2">Message</label>
+                  <textarea id="ann-message" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" rows="5" required></textarea>
+                  <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Fariinta details are required.</div>
+                </div>
+
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs uppercase tracking-wider transition-all shadow-lg cursor-pointer">
+                  <i class="fa-solid fa-paper-plane mr-1"></i> Publish Notice
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================== -->
+        <!-- VIEW 9: SETTINGS -->
+        <!-- ======================================== -->
+        <section id="settings" class="hidden space-y-6 animate-fade">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- Academic properties config -->
+            <div class="glass p-6 card-hover-lift shadow-2xl">
+              <h3 class="text-lg font-bold text-school-gold border-b border-white/10 pb-3 mb-4 uppercase tracking-wider" data-lang="school_details">School Profile Details</h3>
+              <form id="settings-form" onsubmit="saveSettingsForm(event)" class="space-y-4">
+                <div>
+                  <label class="block text-xs font-bold text-white/50 uppercase mb-2">School Name</label>
+                  <input type="text" id="set-name" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-white/50 uppercase mb-2">Tagline</label>
+                  <input type="text" id="set-tagline" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-white/50 uppercase mb-2">Location</label>
+                  <input type="text" id="set-location" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-bold text-white/50 uppercase mb-2">Phone</label>
+                    <input type="text" id="set-phone" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-white/50 uppercase mb-2">Email Address</label>
+                    <input type="email" id="set-email" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+                  </div>
+                </div>
+                
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs uppercase tracking-wider transition-all shadow-lg cursor-pointer">
+                  <i class="fa-solid fa-save mr-1"></i> <span data-lang="save_btn">Save Settings</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- Customizer and toggle preferences -->
+            <div class="glass p-6 card-hover-lift flex flex-col justify-between shadow-2xl">
+              <div>
+                <h3 class="text-lg font-bold text-school-gold border-b border-white/10 pb-3 mb-4 uppercase tracking-wider" data-lang="theme_cust">Theme & Language</h3>
+                
+                <div class="space-y-6">
+                  <!-- Midab selector -->
+                  <div>
+                    <label class="block text-xs font-bold text-white/50 uppercase mb-2" data-lang="color_pick">Primary Theme Accent</label>
+                    <div class="flex items-center gap-3">
+                      <input type="color" id="set-color" class="w-10 h-10 border border-white/10 rounded cursor-pointer bg-transparent" onchange="updatePrimaryAccentColor(this.value)">
+                      <span class="text-xs text-white/80 font-mono" id="color-hex-label">#8B0000</span>
+                    </div>
+                  </div>
+
+                  <!-- Bilingual switcher -->
+                  <div>
+                    <label class="block text-xs font-bold text-white/50 uppercase mb-2 font-headings" data-lang="lang_toggle">System Language</label>
+                    <div class="flex gap-3">
+                      <button id="lang-btn-en" onclick="changeLanguage('en')" class="px-4 py-2 border rounded-lg text-xs font-bold transition-all uppercase tracking-wider cursor-pointer">English</button>
+                      <button id="lang-btn-so" onclick="changeLanguage('so')" class="px-4 py-2 border rounded-lg text-xs font-bold transition-all uppercase tracking-wider cursor-pointer">Somali (Soomaali)</button>
+                    </div>
+                  </div>
+
+                  <!-- Light / Dark Mode preferences -->
+                  <div class="border-t border-white/10 pt-6">
+                    <label class="block text-xs font-bold text-white/50 uppercase mb-3 font-headings">Manual Sync Mode Select</label>
+                    <div class="flex items-center justify-between bg-white/5 p-3 rounded-lg border border-white/10">
+                      <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-circle-half-stroke text-school-cyan"></i>
+                        <span class="text-xs text-white/90">Force Light Translucent theme overlays</span>
+                      </div>
+                      <input type="checkbox" id="dark-theme-mode-check" onchange="toggleTheme()" class="w-5 h-5 rounded border-white/20 bg-transparent text-school-cyan focus:ring-school-cyan focus:ring-opacity-25 cursor-pointer">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="text-[10px] text-white/30 border-t border-white/10 pt-4 mt-6">
+                System Interface Version: v2.5.0-futuristic (Exo & Glass System Integration)
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Standard Global Footer inside workspace wrapper -->
+      <footer class="p-6 border-t border-white/10 text-center text-xs text-white/40 font-semibold tracking-wider bg-black/10 no-print select-none">
+        <span data-lang="footer_text">© 2026 Abaarso School · Hargiesa, Somaliland</span>
+      </footer>
+
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+     === GLASSMODAL REGISTRIES FOR DYNAMIC ACTIONS ===
+     ========================================================================== -->
+
+  <!-- STUDENT ENROLLMENT ADD/EDIT MODAL -->
+  <div id="modal-add-student" class="modal-overlay">
+    <div class="glass modal-box w-full max-w-md overflow-hidden relative shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/15" tabindex="-1">
+      <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center">
+        <h3 id="student-modal-title" class="font-bold text-white text-lg font-headings">Enroll Student</h3>
+        <button class="text-white/45 hover:text-red-500 text-2xl font-bold cursor-pointer" onclick="closeModal('modal-add-student')">&times;</button>
+      </div>
+      <form id="student-form" onsubmit="saveStudentForm(event)" novalidate class="space-y-4">
+        <input type="hidden" id="stud-edit-id">
+        <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Student Full Name</label>
+            <input type="text" id="stud-name" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" required>
+            <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Name values are required.</div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-1">Age</label>
+              <input type="number" id="stud-age" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" min="5" max="30" required>
+              <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Age needs valid limits.</div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-1">Gender</label>
+              <select id="stud-gender" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-1">Class Section</label>
+              <select id="stud-class" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+                <!-- Populated by JS -->
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-1">Parent/Guardian Name</label>
+              <input type="text" id="stud-parent" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" required>
+              <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Parent name is required.</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-1">Phone</label>
+              <input type="text" id="stud-phone" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" required>
+              <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Phone coordinates required.</div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-1">Residential Address</label>
+              <input type="text" id="stud-address" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" required>
+              <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Address values required.</div>
+            </div>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-white/10 flex justify-end gap-2 bg-black/10">
+          <button type="button" class="px-4 py-2 border border-white/15 rounded text-xs font-bold text-white/80 hover:bg-white/5 transition-all cursor-pointer" onclick="closeModal('modal-add-student')">CANCEL</button>
+          <button type="submit" class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs transition-colors cursor-pointer">SAVE STUDENT</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TEACHER PROFILE REGISTRATION MODAL -->
+  <div id="modal-add-teacher" class="modal-overlay">
+    <div class="glass modal-box w-full max-w-md overflow-hidden relative shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/15" tabindex="-1">
+      <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center">
+        <h3 id="teacher-modal-title" class="font-bold text-white text-lg font-headings">Add Teacher</h3>
+        <button class="text-white/45 hover:text-red-500 text-2xl font-bold cursor-pointer" onclick="closeModal('modal-add-teacher')">&times;</button>
+      </div>
+      <form id="teacher-form" onsubmit="saveTeacherForm(event)" novalidate class="space-y-4">
+        <input type="hidden" id="teach-edit-id">
+        <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-1">Full Name</label>
+              <input type="text" id="teach-name" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" required>
+              <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Teacher name required.</div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-1">Subject Specialization</label>
+              <select id="teach-subject" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+                <option value="Mathematics">Mathematics</option>
+                <option value="English">English</option>
+                <option value="Science">Science</option>
+                <option value="History">History</option>
+                <option value="Somali">Somali</option>
+                <option value="Art">Art</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-1">Experience Badge</label>
+              <input type="text" id="teach-exp" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" placeholder="e.g. 5 Years" required>
+              <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Experience metadata required.</div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-1">Academic Qualification</label>
+              <input type="text" id="teach-qual" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" placeholder="e.g. MSc in Physics" required>
+              <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Qualification values required.</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-1">Phone</label>
+              <input type="text" id="teach-phone" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" required>
+              <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Phone values required.</div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-1">Email Address</label>
+              <input type="email" id="teach-email" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" required>
+              <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Valid Email is required.</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-1">Joining Date</label>
+              <input type="date" id="teach-join" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" required>
+              <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Joining Date is required.</div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-1">Status</label>
+              <select id="teach-status" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+                <option value="Active">Active</option>
+                <option value="On Leave">On Leave</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-white/10 flex justify-end gap-2 bg-black/10">
+          <button type="button" class="px-4 py-2 border border-white/15 rounded text-xs font-bold text-white/80 hover:bg-white/5 transition-all cursor-pointer" onclick="closeModal('modal-add-teacher')">CANCEL</button>
+          <button type="submit" class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs transition-colors cursor-pointer">SAVE TEACHER</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CLASS ADD/EDIT MODAL -->
+  <div id="modal-add-class" class="modal-overlay">
+    <div class="glass modal-box w-full max-w-md overflow-hidden relative shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/15" tabindex="-1">
+      <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center">
+        <h3 id="class-modal-title" class="font-bold text-white text-lg font-headings">Add Class</h3>
+        <button class="text-white/45 hover:text-red-500 text-2xl font-bold cursor-pointer" onclick="closeModal('modal-add-class')">&times;</button>
+      </div>
+      <form id="class-form" onsubmit="saveClassForm(event)" novalidate class="space-y-4">
+        <input type="hidden" id="cls-edit-id">
+        <div class="p-6 space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Class Name</label>
+            <input type="text" id="cls-name" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" placeholder="e.g. Grade 10-A" required>
+            <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Class Name required.</div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Assigned Tutor</label>
+            <select id="cls-teacher" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+              <!-- Options populated by JS -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Room Code / Number</label>
+            <input type="text" id="cls-room" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" placeholder="e.g. Room 204" required>
+            <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Room code is required.</div>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-white/10 flex justify-end gap-2 bg-black/10">
+          <button type="button" class="px-4 py-2 border border-white/15 rounded text-xs font-bold text-white/80 hover:bg-white/5 transition-all cursor-pointer" onclick="closeModal('modal-add-class')">CANCEL</button>
+          <button type="submit" class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs transition-colors cursor-pointer">SAVE CLASS</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EXAM SCHEDULE ADD MODAL -->
+  <div id="modal-add-exam" class="modal-overlay">
+    <div class="glass modal-box w-full max-w-md overflow-hidden relative shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/15" tabindex="-1">
+      <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center">
+        <h3 id="exam-modal-title" class="font-bold text-white text-lg font-headings">Schedule Exam</h3>
+        <button class="text-white/45 hover:text-red-500 text-2xl font-bold cursor-pointer" onclick="closeModal('modal-add-exam')">&times;</button>
+      </div>
+      <form id="exam-form" onsubmit="saveExamForm(event)" novalidate class="space-y-4">
+        <input type="hidden" id="ex-edit-id">
+        <div class="p-6 space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Subject</label>
+            <select id="ex-subject" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+              <option value="Mathematics">Mathematics</option>
+              <option value="English">English</option>
+              <option value="Science">Science</option>
+              <option value="History">History</option>
+              <option value="Somali">Somali</option>
+              <option value="Art">Art</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Exam Date</label>
+            <input type="date" id="ex-date" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" required>
+            <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Exam Date required.</div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Start Time</label>
+            <input type="text" id="ex-time" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" placeholder="e.g. 09:00 AM" required>
+            <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Time properties required.</div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Room / Hall</label>
+            <input type="text" id="ex-room" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" placeholder="e.g. Main Examination Hall" required>
+            <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Hall specifications required.</div>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-white/10 flex justify-end gap-2 bg-black/10">
+          <button type="button" class="px-4 py-2 border border-white/15 rounded text-xs font-bold text-white/80 hover:bg-white/5 transition-all cursor-pointer" onclick="closeModal('modal-add-exam')">CANCEL</button>
+          <button type="submit" class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs transition-colors cursor-pointer">SAVE EXAM</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EXAM RESULT SCORE ENTRY MODAL -->
+  <div id="modal-add-result" class="modal-overlay">
+    <div class="glass modal-box w-full max-w-md overflow-hidden relative shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/15" tabindex="-1">
+      <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center">
+        <h3 id="result-modal-title" class="font-bold text-white text-lg font-headings">Enter Exam Score</h3>
+        <button class="text-white/45 hover:text-red-500 text-2xl font-bold cursor-pointer" onclick="closeModal('modal-add-result')">&times;</button>
+      </div>
+      <form id="result-form" onsubmit="saveResultForm(event)" novalidate class="space-y-4">
+        <input type="hidden" id="res-edit-id">
+        <div class="p-6 space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Student Account</label>
+            <select id="res-student" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+              <!-- Dynamically populated options -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Subject</label>
+            <select id="res-subject" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+              <option value="Mathematics">Mathematics</option>
+              <option value="English">English</option>
+              <option value="Science">Science</option>
+              <option value="History">History</option>
+              <option value="Somali">Somali</option>
+              <option value="Art">Art</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Score Obtained (0-100)</label>
+            <input type="number" id="res-score" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" min="0" max="100" required>
+            <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Enter valid score limits (0 to 100).</div>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-white/10 flex justify-end gap-2 bg-black/10">
+          <button type="button" class="px-4 py-2 border border-white/15 rounded text-xs font-bold text-white/80 hover:bg-white/5 transition-all cursor-pointer" onclick="closeModal('modal-add-result')">CANCEL</button>
+          <button type="submit" class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs transition-colors cursor-pointer">SAVE SCORE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- RECORD PAYMENT TRANSACTION MODAL -->
+  <div id="modal-add-payment" class="modal-overlay">
+    <div class="glass modal-box w-full max-w-sm overflow-hidden relative shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/15" tabindex="-1">
+      <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center">
+        <h3 class="font-bold text-white text-lg font-headings">Record Payment</h3>
+        <button class="text-white/45 hover:text-red-500 text-2xl font-bold cursor-pointer" onclick="closeModal('modal-add-payment')">&times;</button>
+      </div>
+      <form id="payment-form" onsubmit="savePaymentForm(event)" novalidate class="space-y-4">
+        <div class="p-6 space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Student Account</label>
+            <select id="pay-student" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+              <!-- Populate dynamically -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Amount Paid ($)</label>
+            <input type="number" id="pay-amount" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" min="1" required>
+            <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Valid payment amount required.</div>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-white/10 flex justify-end gap-2 bg-black/10">
+          <button type="button" class="px-4 py-2 border border-white/15 rounded text-xs font-bold text-white/80 hover:bg-white/5 transition-all cursor-pointer" onclick="closeModal('modal-add-payment')">CANCEL</button>
+          <button type="submit" class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs transition-colors cursor-pointer">LOG TRANSACTION</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TIMETABLE CELL ALLOCATOR MODAL -->
+  <div id="modal-timetable-cell" class="modal-overlay">
+    <div class="glass modal-box w-full max-w-sm overflow-hidden relative shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/15" tabindex="-1">
+      <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center">
+        <h3 class="font-bold text-white text-lg font-headings">Assign Grid Session</h3>
+        <button class="text-white/45 hover:text-red-500 text-2xl font-bold cursor-pointer" onclick="closeModal('modal-timetable-cell')">&times;</button>
+      </div>
+      <form id="timetable-cell-form" onsubmit="saveTimetableCell(event)" class="space-y-4">
+        <input type="hidden" id="tt-day">
+        <input type="hidden" id="tt-period">
+        <div class="p-6 space-y-4">
+          <div id="tt-details-label" class="text-xs font-bold text-school-gold uppercase tracking-wider bg-white/5 p-2.5 rounded-xl border border-white/10 text-center">
+            Day: -- | Period: --
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Subject</label>
+            <select id="tt-subject" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+              <option value="Mathematics">Mathematics</option>
+              <option value="English">English</option>
+              <option value="Science">Science</option>
+              <option value="History">History</option>
+              <option value="Somali">Somali</option>
+              <option value="Art">Art</option>
+              <option value="Free">None (Free Study)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Assigned Teacher</label>
+            <select id="tt-teacher" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+              <!-- Populate teachers -->
+            </select>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-white/10 flex justify-end gap-2 bg-black/10">
+          <button type="button" class="px-4 py-2 border border-white/15 rounded text-xs font-bold text-white/80 hover:bg-white/5 transition-all cursor-pointer" onclick="closeModal('modal-timetable-cell')">CANCEL</button>
+          <button type="submit" class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs transition-colors cursor-pointer">ALLOCATE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- VIEW CLASS ROSTER MODAL -->
+  <div id="modal-class-roster" class="modal-overlay">
+    <div class="glass modal-box w-full max-w-2xl overflow-hidden relative shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/15" tabindex="-1">
+      <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center">
+        <h3 id="roster-modal-title" class="font-bold text-white text-lg font-headings">Class Roster</h3>
+        <button class="text-white/45 hover:text-red-500 text-2xl font-bold cursor-pointer" onclick="closeModal('modal-class-roster')">&times;</button>
+      </div>
+      <div class="p-6 max-h-[60vh] overflow-y-auto">
+        <div class="overflow-x-auto border border-white/10 rounded-xl bg-black/10">
+          <table class="w-full text-left text-sm border-collapse text-white/95">
+            <thead>
+              <tr class="bg-white/5 border-b border-white/10">
+                <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Student ID</th>
+                <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Student Name</th>
+                <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Gender</th>
+                <th class="px-6 py-4 font-bold text-school-cyan uppercase text-xs tracking-wider">Status</th>
+              </tr>
+            </thead>
+            <tbody id="roster-table-body">
+              <!-- Injected by app.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="px-6 py-4 border-t border-white/10 flex justify-end bg-black/10">
+        <button class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs transition-colors cursor-pointer" onclick="closeModal('modal-class-roster')">CLOSE ROSTER</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS POPUP CONTAINER -->
+  <div id="toast-container"></div>
+
+</body>
+</html>

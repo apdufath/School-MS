@@ -1,0 +1,1827 @@
+/* ==========================================================================
+   STATE AND LOCAL STORAGE INITIALIZATION
+   ========================================================================== */
+const SEEDS = {
+  teachers: [
+    { id: 'TCH001', name: 'Dr. John Harrison', subject: 'Mathematics', qualification: 'PhD in Math', phone: '528630', email: 'john@abaarsotechuniversity.org', joiningDate: '2022-09-01', experience: '8 Years', status: 'Active' },
+    { id: 'TCH002', name: 'Mariam Muse', subject: 'English', qualification: 'MA in Applied Linguistics', phone: '528631', email: 'mariam@abaarsotechuniversity.org', joiningDate: '2023-01-15', experience: '5 Years', status: 'Active' },
+    { id: 'TCH003', name: 'Mohamed Duale', subject: 'Science', qualification: 'MSc in Physics', phone: '528632', email: 'm.duale@abaarsotechuniversity.org', joiningDate: '2020-08-10', experience: '12 Years', status: 'Active' },
+    { id: 'TCH004', name: 'Mustafe Gedi', subject: 'Somali', qualification: 'BA in Somali Literature', phone: '528633', email: 'gedi@abaarsotechuniversity.org', joiningDate: '2019-10-01', experience: '15 Years', status: 'Active' },
+    { id: 'TCH005', name: 'Sarah Jenkins', subject: 'History', qualification: 'BA in World History', phone: '528634', email: 'sarah.j@abaarsotechuniversity.org', joiningDate: '2024-02-18', experience: '3 Years', status: 'On Leave' },
+    { id: 'TCH006', name: 'Ayan Elmi', subject: 'Art', qualification: 'MA in Fine Arts', phone: '528635', email: 'ayan@abaarsotechuniversity.org', joiningDate: '2021-05-12', experience: '6 Years', status: 'Active' }
+  ],
+  classes: [
+    { id: 'CLS001', name: 'Grade 10-A', teacherId: 'TCH001', room: 'Room 204' },
+    { id: 'CLS002', name: 'Grade 10-B', teacherId: 'TCH002', room: 'Room 205' },
+    { id: 'CLS003', name: 'Grade 11-A', teacherId: 'TCH003', room: 'Science Lab 1' },
+    { id: 'CLS004', name: 'Grade 11-B', teacherId: 'TCH004', room: 'Room 102' },
+    { id: 'CLS005', name: 'Grade 12-A', teacherId: 'TCH005', room: 'Main Lecture Hall' }
+  ],
+  students: [
+    { id: 'STU001', name: 'Abdiwahab Ahmed', age: 16, gender: 'Male', class: 'Grade 10-A', parentName: 'Ahmed Ali', phone: '511223', address: '26 June District, Hargeisa', status: 'Active' },
+    { id: 'STU002', name: 'Faduma Omer', age: 15, gender: 'Female', class: 'Grade 10-A', parentName: 'Omer Dahir', phone: '511224', address: 'Shaab Area, Hargeisa', status: 'Active' },
+    { id: 'STU003', name: 'Hamza Yusuf', age: 16, gender: 'Male', class: 'Grade 10-B', parentName: 'Yusuf Elmi', phone: '511225', address: 'Koodbuur, Hargeisa', status: 'Active' },
+    { id: 'STU004', name: 'Yasmin Warsame', age: 17, gender: 'Female', class: 'Grade 11-A', parentName: 'Warsame Abdi', phone: '511226', address: 'Jigjiga Yar, Hargeisa', status: 'Active' },
+    { id: 'STU005', name: 'Barkhad Barre', age: 18, gender: 'Male', class: 'Grade 12-A', parentName: 'Barre Hassan', phone: '511227', address: 'Sinay, Hargeisa', status: 'Active' },
+    { id: 'STU006', name: 'Hodan Kahin', age: 15, gender: 'Female', class: 'Grade 10-B', parentName: 'Kahin Farah', phone: '511228', address: 'Goljano, Hargeisa', status: 'Active' },
+    { id: 'STU007', name: 'Zakarie Mohamed', age: 17, gender: 'Male', class: 'Grade 11-B', parentName: 'Mohamed Duale', phone: '511229', address: 'Masalaha, Hargeisa', status: 'Active' },
+    { id: 'STU008', name: 'Nasteha Guleid', age: 16, gender: 'Female', class: 'Grade 11-A', parentName: 'Guleid Haddi', phone: '511230', address: 'Macalin Harun, Hargeisa', status: 'Active' },
+    { id: 'STU009', name: 'Khadar Said', age: 17, gender: 'Male', class: 'Grade 11-B', parentName: 'Said Ahmed', phone: '511231', address: 'Mohamoud Haybe, Hargeisa', status: 'Active' },
+    { id: 'STU010', name: 'Hawa Liban', age: 18, gender: 'Female', class: 'Grade 12-A', parentName: 'Liban Artan', phone: '511232', address: 'Pepsi District, Hargeisa', status: 'Active' },
+    { id: 'STU011', name: 'Sulieman Jama', age: 16, gender: 'Male', class: 'Grade 10-A', parentName: 'Jama Ali', phone: '511233', address: 'Stadium Area, Hargeisa', status: 'Active' },
+    { id: 'STU012', name: 'Muna Gele', age: 17, gender: 'Female', class: 'Grade 12-A', parentName: 'Gele Roble', phone: '511234', address: 'Airport District, Hargeisa', status: 'Active' }
+  ],
+  exams: [
+    { id: 'EX001', subject: 'Mathematics', date: '2026-06-15', time: '09:00 AM', room: 'Main Lecture Hall' },
+    { id: 'EX002', subject: 'English', date: '2026-06-16', time: '09:00 AM', room: 'Room 204 & 205' },
+    { id: 'EX003', subject: 'Science', date: '2026-06-17', time: '11:00 AM', room: 'Science Lab 1' },
+    { id: 'EX004', subject: 'Somali', date: '2026-06-18', time: '09:00 AM', room: 'Main Hall' }
+  ],
+  results: [
+    { id: 'RES001', studentId: 'STU001', subject: 'Mathematics', score: 92 },
+    { id: 'RES002', studentId: 'STU001', subject: 'English', score: 85 },
+    { id: 'RES003', studentId: 'STU002', subject: 'Mathematics', score: 78 },
+    { id: 'RES004', studentId: 'STU002', subject: 'English', score: 94 },
+    { id: 'RES005', studentId: 'STU003', subject: 'Mathematics', score: 62 },
+    { id: 'RES006', studentId: 'STU003', subject: 'English', score: 71 },
+    { id: 'RES007', studentId: 'STU004', subject: 'Science', score: 98 },
+    { id: 'RES008', studentId: 'STU005', subject: 'Mathematics', score: 45 }
+  ],
+  fees: [
+    { studentId: 'STU001', amountDue: 1500, amountPaid: 1500 },
+    { studentId: 'STU002', amountDue: 1500, amountPaid: 1000 },
+    { studentId: 'STU003', amountDue: 1500, amountPaid: 500 },
+    { studentId: 'STU004', amountDue: 1500, amountPaid: 1500 },
+    { studentId: 'STU005', amountDue: 1500, amountPaid: 0 },
+    { studentId: 'STU006', amountDue: 1500, amountPaid: 1200 },
+    { studentId: 'STU007', amountDue: 1500, amountPaid: 300 },
+    { studentId: 'STU008', amountDue: 1500, amountPaid: 1500 },
+    { studentId: 'STU009', amountDue: 1500, amountPaid: 1500 },
+    { studentId: 'STU010', amountDue: 1500, amountPaid: 0 },
+    { studentId: 'STU011', amountDue: 1500, amountPaid: 1500 },
+    { studentId: 'STU012', amountDue: 1500, amountPaid: 800 }
+  ],
+  announcements: [
+    { id: 'ANN001', title: 'End of Term Examinations Schedule', date: '2026-05-28', category: 'Academic', message: 'The end-of-term academic schedules have been posted on the central portal. Testing begins June 15th, 2026. Please check your rooms and timings.', pinned: true },
+    { id: 'ANN002', title: 'Annual Somali Cultural Festival', date: '2026-05-25', category: 'Event', message: 'Join us for our yearly Cultural Celebration on June 5th, 2026. Traditional dances, poetry, and displays of Somaliland history will take place in the main quadrangle.', pinned: false },
+    { id: 'ANN003', title: 'New Science Laboratory Inauguration', date: '2026-05-20', category: 'General', message: 'We are thrilled to unveil our fully upgraded chemistry and physics modules in Lab 1. Modern equipment facilitates experimental learning for Grades 11 and 12 starting Sunday.', pinned: false }
+  ],
+  timetable: {
+    'Grade 10-A': {
+      'Saturday': { '1': { subject: 'Mathematics', teacherId: 'TCH001' }, '2': { subject: 'Mathematics', teacherId: 'TCH001' }, '3': { subject: 'Somali', teacherId: 'TCH004' } },
+      'Sunday': { '1': { subject: 'English', teacherId: 'TCH002' }, '2': { subject: 'English', teacherId: 'TCH002' }, '4': { subject: 'Science', teacherId: 'TCH003' } },
+      'Monday': { '3': { subject: 'History', teacherId: 'TCH005' }, '5': { subject: 'Art', teacherId: 'TCH006' } }
+    }
+  },
+  settings: {
+    name: 'Abaarso School',
+    tagline: 'Imagine · Innovate · Inspire',
+    location: "Sha'ab Area, Hargiesa, Somaliland",
+    phone: '528629',
+    email: 'info@abaarsotechuniversity.org',
+    primaryColor: '#8B0000',
+    language: 'en'
+  }
+};
+
+let teachers = JSON.parse(localStorage.getItem('teachers')) || [...SEEDS.teachers];
+let classes = JSON.parse(localStorage.getItem('classes')) || [...SEEDS.classes];
+let students = JSON.parse(localStorage.getItem('students')) || [...SEEDS.students];
+let exams = JSON.parse(localStorage.getItem('exams')) || [...SEEDS.exams];
+let results = JSON.parse(localStorage.getItem('results')) || [...SEEDS.results];
+let fees = JSON.parse(localStorage.getItem('fees')) || [...SEEDS.fees];
+let announcements = JSON.parse(localStorage.getItem('announcements')) || [...SEEDS.announcements];
+let timetable = JSON.parse(localStorage.getItem('timetable')) || {...SEEDS.timetable};
+let settings = JSON.parse(localStorage.getItem('settings')) || {...SEEDS.settings};
+
+function saveAllToLocalStorage() {
+  localStorage.setItem('teachers', JSON.stringify(teachers));
+  localStorage.setItem('classes', JSON.stringify(classes));
+  localStorage.setItem('students', JSON.stringify(students));
+  localStorage.setItem('exams', JSON.stringify(exams));
+  localStorage.setItem('results', JSON.stringify(results));
+  localStorage.setItem('fees', JSON.stringify(fees));
+  localStorage.setItem('announcements', JSON.stringify(announcements));
+  localStorage.setItem('timetable', JSON.stringify(timetable));
+  localStorage.setItem('settings', JSON.stringify(settings));
+}
+
+/* ==========================================================================
+   TRANSLATION SYSTEM (BILINGUAL DICTIONARY)
+   ========================================================================== */
+const dictionary = {
+  en: {
+    dashboard: "Dashboard", students: "Students", teachers: "Teachers", classes: "Classes",
+    timetable: "Timetable", exams: "Exams & Results", fees: "Fees Ledger", announcements: "Notices",
+    settings: "Settings", admin_role: "System Admin", students_lbl: "Students", teachers_lbl: "Teachers",
+    classes_lbl: "Classes", events_lbl: "Upcoming Events", add_stud_btn: "Add Student", add_teach_btn: "Add Teacher",
+    add_class_btn: "Add Class", add_exam_btn: "Add Exam", enter_score_btn: "Enter Score",
+    record_pay_btn: "Record Payment", export_csv_btn: "Export CSV", print_btn: "Print Timetable",
+    welcome_title: "Welcome to Abaarso School Management System",
+    welcome_body: "Abaarso School is a leader in progressive academic excellence. This single page platform enables educators and administrators to maintain student profiles, structure academic timetables, record exams performance, regulate fee collection registers, and manage institutional publications efficiently.",
+    recent_ann_title: "Recent Announcements", quick_act_title: "Quick Actions", notice_bar_lbl: "Notice",
+    student_ledger: "Student Registry", teacher_ledger: "Teachers Directory", class_ledger: "Classes Overview",
+    weekly_grid: "Weekly Grid Schedule", exam_schedule: "Exam Schedule", exam_results: "Results Ledger",
+    fees_summary: "Fees Management Accounts", post_ann: "Post Announcement", school_details: "School Profile Details",
+    theme_cust: "Theme & Language", color_pick: "Primary Theme Accent", lang_toggle: "System Language",
+    save_btn: "Save Settings", total_col_card: "Total Collected", total_pend_card: "Total Pending",
+    total_over_card: "Total Overdue", footer_text: "© 2026 Abaarso School · Hargiesa, Somaliland",
+    performance_graph: "Performance GPA Trend", exam_stats: "Exam Passing Ratios"
+  },
+  so: {
+    dashboard: "Dashboard-ka", students: "Ardayda", teachers: "Macallimiinta", classes: "Fasallada",
+    timetable: "Jadwalka", exams: "Imtixaannada", fees: "Lacagaha", announcements: "Ogaysiisyada",
+    settings: "Habeeynta", admin_role: "Maamulaha Nidaamka", students_lbl: "Ardayda", teachers_lbl: "Macallimiinta",
+    classes_lbl: "Fasallada", events_lbl: "Dhacdooyinka", add_stud_btn: "Ku Dar Arday", add_teach_btn: "Ku Dar Macallin",
+    add_class_btn: "Ku Dar Fasal", add_exam_btn: "Ku Dar Imtixaan", enter_score_btn: "Geli Natiijo",
+    record_pay_btn: "Diiwaangeli Lacag", export_csv_btn: "U Dhoofi CSV", print_btn: "Daabac Jadwalka",
+    welcome_title: "Ku soo dhowow Nidaamka Dugsiga Abaarso",
+    welcome_body: "Dugsiga Abaarso waa hormuudka tayada waxbarasho. Mashruucan wuxuu u suurtagelinayaa macallimiinta iyo maamulayaasha inay hayaan macluumaadka ardayda, habaynta jadwalka waxbarashada, diiwaangelinta natiijooyinka imtixaanka, xisaabinta lacagaha iyo maamulka ogeysiisyada dugsiga.",
+    recent_ann_title: "Ogeysiisyadii Ugu Dambeeyey", quick_act_title: "Hawlo Degdeg Ah", notice_bar_lbl: "Ogeysiis",
+    student_ledger: "Diiwaanka Ardayda", teacher_ledger: "Macallimiinta Dugsiga", class_ledger: "Guudmar Fasallada",
+    weekly_grid: "Jadwalka Toddobaadlaha ah", exam_schedule: "Jadwalka Imtixaanka", exam_results: "Natiijooyinka",
+    fees_summary: "Maamulka Xisaabaadka Lacagaha", post_ann: "Daabac Ogeysiis cusub", school_details: "Macluumaadka Dugsiga",
+    theme_cust: "Midabada & Luuqadda", color_pick: "Midabka Nidaamka", lang_toggle: "Luuqadda Interface-ka",
+    save_btn: "Keydi Habeeynta", total_col_card: "Wadarta la Ururiyey", total_pend_card: "Wadarta Sugan",
+    total_over_card: "Wadarta Daahday", footer_text: "© 2026 Dugsiga Abaarso · Hargeysa, Somaliland",
+    performance_graph: "GPA-da & Natiijooyinka", exam_stats: "Heerka Gudubka Imtixaanka"
+  }
+};
+
+/* ==========================================================================
+   === LOGIN ACCESS SECURE SYSTEM GATE ===
+   ========================================================================== */
+function checkSessionGuard() {
+  const isAuthorized = sessionStorage.getItem('loggedIn') === 'true';
+  const loginScreen = document.getElementById('login-screen');
+  const appLayout = document.getElementById('app-layout');
+  const splashScreen = document.getElementById('splash-screen');
+
+  if (isAuthorized) {
+    if (loginScreen) loginScreen.classList.add('hidden');
+    if (appLayout) appLayout.classList.remove('hidden');
+    
+    // Play splash screen clean transition
+    if (splashScreen && !splashScreen.classList.contains('fade-out')) {
+      setTimeout(() => {
+        splashScreen.classList.add('fade-out');
+      }, 1000);
+    }
+    
+    // Initialize Dashboard Charts
+    initCharts();
+    showSection(activeSection);
+  } else {
+    if (loginScreen) loginScreen.classList.remove('hidden');
+    if (appLayout) appLayout.classList.add('hidden');
+    if (splashScreen) splashScreen.classList.add('fade-out');
+  }
+}
+
+function handleLogin(event) {
+  event.preventDefault();
+  const emailInput = document.getElementById('login-email').value.trim();
+  const passwordInput = document.getElementById('login-password').value.trim();
+
+  // Validate credentials admin@abaarso.edu / admin123
+  if (emailInput === 'admin@abaarso.edu' && passwordInput === 'admin123') {
+    sessionStorage.setItem('loggedIn', 'true');
+    showToast("Authorization Granted. Welcome Back", "success");
+    
+    // Transition clean fade
+    const loginScreen = document.getElementById('login-screen');
+    const appLayout = document.getElementById('app-layout');
+    
+    if (loginScreen) loginScreen.style.opacity = '0';
+    setTimeout(() => {
+      if (loginScreen) {
+        loginScreen.classList.add('hidden');
+        loginScreen.style.opacity = '1';
+      }
+      if (appLayout) appLayout.classList.remove('hidden');
+      
+      initCharts();
+      showSection('dashboard');
+    }, 400);
+  } else {
+    showToast("Unauthorized entry. Invalid administrator credentials", "error");
+    document.getElementById('login-password').value = '';
+    document.getElementById('login-password').focus();
+  }
+}
+
+function handleLogout() {
+  sessionStorage.removeItem('loggedIn');
+  showToast("Logged out of management terminal", "info");
+  
+  const loginScreen = document.getElementById('login-screen');
+  const appLayout = document.getElementById('app-layout');
+  
+  if (appLayout) appLayout.classList.add('hidden');
+  if (loginScreen) {
+    loginScreen.classList.remove('hidden');
+    document.getElementById('login-password').value = '';
+    document.getElementById('login-email').value = '';
+  }
+}
+
+/* ==========================================================================
+   === NAVIGATION & INTERFACE SWITCHING ===
+   ========================================================================== */
+let activeSection = 'dashboard';
+
+function showSection(sectionId) {
+  activeSection = sectionId;
+  
+  // Hide all sections, display target
+  document.querySelectorAll('main > section').forEach(sec => {
+    if (sec.id === sectionId) {
+      sec.classList.remove('hidden');
+    } else {
+      sec.classList.add('hidden');
+    }
+  });
+
+  // Update active links in sidebar
+  document.querySelectorAll('.sidebar-link').forEach(link => {
+    if (link.getAttribute('data-view') === sectionId) {
+      link.classList.add('active');
+    } else {
+      link.classList.remove('active');
+    }
+  });
+
+  // Update page heading title in header navbar
+  const currentLang = settings.language || 'en';
+  const headingText = dictionary[currentLang][sectionId] || sectionId.toUpperCase();
+  const pageHeaderTitle = document.getElementById('header-page-title');
+  if (pageHeaderTitle) pageHeaderTitle.innerText = headingText;
+
+  // Trigger page-specific loaders
+  if (sectionId === 'dashboard') {
+    animateDashboardCounters();
+    renderDashboardRecentAnnouncements();
+    renderDashboardMiniCalendar();
+    initCharts(); // Clean redraw of Chart.js widgets
+  } else if (sectionId === 'students') {
+    renderStudents();
+  } else if (sectionId === 'teachers') {
+    renderTeachers();
+  } else if (sectionId === 'classes') {
+    renderClasses();
+  } else if (sectionId === 'timetable') {
+    renderTimetable();
+  } else if (sectionId === 'exams') {
+    renderExams();
+    renderResults();
+  } else if (sectionId === 'fees') {
+    renderFees();
+  } else if (sectionId === 'announcements') {
+    renderAnnouncements();
+  } else if (sectionId === 'settings') {
+    loadSettingsInputs();
+  }
+}
+
+/* ==========================================================================
+   === SIDEBAR RESPONSIVE TRANSITIONS ===
+   ========================================================================== */
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  if (!sidebar) return;
+  
+  sidebar.classList.toggle('open');
+  if (sidebar.classList.contains('open')) {
+    if (overlay) {
+      overlay.classList.remove('opacity-0', 'pointer-events-none');
+      overlay.classList.add('opacity-100');
+    }
+  } else {
+    if (overlay) {
+      overlay.classList.add('opacity-0', 'pointer-events-none');
+      overlay.classList.remove('opacity-100');
+    }
+  }
+}
+
+function closeSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  if (sidebar) sidebar.classList.remove('open');
+  if (overlay) {
+    overlay.classList.add('opacity-0', 'pointer-events-none');
+    overlay.classList.remove('opacity-100');
+  }
+}
+
+/* ==========================================================================
+   === CHART.JS DASHBOARD METRICS INTEGRATION ===
+   ========================================================================== */
+let performanceChartInstance = null;
+let examStatusChartInstance = null;
+
+function initCharts() {
+  if (activeSection !== 'dashboard') return;
+  
+  const isLightTheme = document.documentElement.classList.contains('light');
+  const fontColor = isLightTheme ? '#1A1A1A' : 'rgba(255, 255, 255, 0.7)';
+  const gridColor = isLightTheme ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.05)';
+
+  // Destroy previous Chart instances to prevent canvas hover loop memory crash
+  if (performanceChartInstance) {
+    performanceChartInstance.destroy();
+    performanceChartInstance = null;
+  }
+  if (examStatusChartInstance) {
+    examStatusChartInstance.destroy();
+    examStatusChartInstance = null;
+  }
+
+  // 1. Line Performance Trend Chart (Grade Averages)
+  const lineCanvas = document.getElementById('performance-chart');
+  if (lineCanvas) {
+    const ctx = lineCanvas.getContext('2d');
+    
+    // Create modern glowing neon area fill gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+    gradient.addColorStop(0, 'rgba(0, 212, 255, 0.35)');
+    gradient.addColorStop(0.5, 'rgba(0, 212, 255, 0.1)');
+    gradient.addColorStop(1, 'rgba(0, 212, 255, 0)');
+
+    performanceChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May'],
+        datasets: [{
+          label: 'Student Grade average',
+          data: [79.2, 81.4, 80.1, 83.5, 82.6, 85.0, 84.3, 86.8, 87.2],
+          borderColor: '#00d4ff',
+          borderWidth: 3,
+          pointBackgroundColor: '#00d4ff',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 1.5,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          fill: true,
+          backgroundColor: gradient,
+          tension: 0.35
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            grid: { color: gridColor, drawTicks: false },
+            ticks: { color: fontColor, font: { family: 'Inter', size: 10 } }
+          },
+          y: {
+            min: 50,
+            max: 100,
+            grid: { color: gridColor, drawTicks: false },
+            ticks: { color: fontColor, font: { family: 'Inter', size: 10 } }
+          }
+        }
+      }
+    });
+  }
+
+  // 2. Passing Ratio Donut Chart (Passed/Failed/Pending Slices)
+  const donutCanvas = document.getElementById('exam-status-chart');
+  if (donutCanvas) {
+    const ctx = donutCanvas.getContext('2d');
+
+    // Calculate actual ratios from Results & Exams models
+    let passedCount = results.filter(r => r.score >= 60).length;
+    let failedCount = results.filter(r => r.score < 60).length;
+    let pendingCount = exams.length; // mock pending exams schedules
+
+    // Fallbacks if data empty
+    if (passedCount === 0 && failedCount === 0) {
+      passedCount = 6;
+      failedCount = 2;
+    }
+
+    examStatusChartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Passed', 'Failed', 'Pending'],
+        datasets: [{
+          data: [passedCount, failedCount, pendingCount],
+          backgroundColor: ['#00d4ff', '#C0392B', '#D4AF37'],
+          borderWidth: isLightTheme ? 2 : 0,
+          borderColor: isLightTheme ? '#ffffff' : 'transparent',
+          hoverOffset: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: fontColor,
+              font: { family: 'Inter', size: 11, weight: 'bold' },
+              padding: 15
+            }
+          }
+        },
+        cutout: '70%'
+      }
+    });
+  }
+}
+
+/* ==========================================================================
+   === DASHBOARD COUNTERS & TIMELINES ===
+   ========================================================================== */
+function animateDashboardCounters() {
+  const targets = {
+    'count-students': students.length + 120, // offset for visual premium density
+    'count-teachers': teachers.length,
+    'count-classes': classes.length,
+    'count-events': exams.length + 1
+  };
+
+  Object.keys(targets).forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const target = targets[id];
+    let current = 0;
+    const duration = 800; // ms
+    const increment = Math.ceil(target / (duration / 15)) || 1;
+    
+    const interval = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        el.innerText = target.toLocaleString();
+        clearInterval(interval);
+      } else {
+        el.innerText = current.toLocaleString();
+      }
+    }, 15);
+  });
+}
+
+function renderDashboardRecentAnnouncements() {
+  const container = document.getElementById('recent-announcements-list');
+  if (!container) return;
+  container.innerHTML = '';
+  
+  const list = announcements.slice(0, 3);
+  if (list.length === 0) {
+    container.innerHTML = `<p class="text-xs italic text-white/40">No notices posted.</p>`;
+    return;
+  }
+  
+  list.forEach(ann => {
+    let catClass = 'bg-white/5 text-white border border-white/10';
+    if (ann.category === 'Academic') catClass = 'bg-blue-950/40 text-blue-300 border border-blue-500/25';
+    if (ann.category === 'Event') catClass = 'bg-purple-950/40 text-purple-300 border border-purple-500/25';
+    
+    container.innerHTML += `
+      <div class="py-2.5 border-b last:border-b-0 border-white/5">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${catClass}">${ann.category}</span>
+          <span class="text-[9px] text-white/40 font-semibold">${ann.date}</span>
+        </div>
+        <h4 class="font-bold text-white text-xs mb-1">${ann.title}</h4>
+        <p class="text-[11px] text-white/60 line-clamp-2">${ann.message}</p>
+      </div>
+    `;
+  });
+}
+
+let miniCalDate = new Date();
+
+function renderDashboardMiniCalendar() {
+  const container = document.getElementById('mini-calendar-days');
+  const monthLabel = document.getElementById('mini-calendar-title');
+  if (!container || !monthLabel) return;
+  container.innerHTML = '';
+
+  const year = miniCalDate.getFullYear();
+  const month = miniCalDate.getMonth();
+  
+  const startDay = new Date(year, month, 1).getDay();
+  const totalDays = new Date(year, month + 1, 0).getDate();
+  
+  const monthsList = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  
+  monthLabel.innerText = `${monthsList[month]} ${year}`;
+  
+  const dayHeaders = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  dayHeaders.forEach(h => {
+    container.innerHTML += `<div class="text-[10px] font-bold text-center text-school-cyan py-1">${h}</div>`;
+  });
+  
+  for (let i = 0; i < startDay; i++) {
+    container.innerHTML += `<div></div>`;
+  }
+  
+  const today = new Date();
+  for (let d = 1; d <= totalDays; d++) {
+    const isToday = today.getDate() === d && today.getMonth() === month && today.getFullYear() === year;
+    const formatted = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const hasExam = exams.some(ex => ex.date === formatted);
+    
+    let cellClasses = 'text-[10px] text-center font-bold py-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors text-white/90';
+    if (isToday) cellClasses += ' bg-school-cyan text-gray-950 font-extrabold shadow-[0_0_10px_rgba(0,212,255,0.4)]';
+    if (hasExam && !isToday) cellClasses += ' border border-school-gold text-school-gold bg-school-gold/5';
+    
+    container.innerHTML += `
+      <div class="${cellClasses}" onclick="showCalendarInfo('${formatted}')">${d}</div>
+    `;
+  }
+}
+
+function prevCalendarMonth() {
+  miniCalDate.setMonth(miniCalDate.getMonth() - 1);
+  renderDashboardMiniCalendar();
+}
+
+function nextCalendarMonth() {
+  miniCalDate.setMonth(miniCalDate.getMonth() + 1);
+  renderDashboardMiniCalendar();
+}
+
+function showCalendarInfo(dateString) {
+  const matches = exams.filter(ex => ex.date === dateString);
+  if (matches.length > 0) {
+    const list = matches.map(m => `${m.subject} (${m.time} in ${m.room})`).join(', ');
+    showToast(`Exams today: ${list}`, 'info');
+  } else {
+    showToast(`No events scheduled for ${dateString}`, 'info');
+  }
+}
+
+/* ==========================================================================
+   === STUDENTS REGISTRY & CRUD ===
+   ========================================================================== */
+let studentPage = 1;
+const studentLimit = 10;
+const studentPageSize = 10;
+
+function renderStudents() {
+  const searchVal = document.getElementById('search-students').value.toLowerCase();
+  const filterClass = document.getElementById('filter-students-class').value;
+  const tbody = document.getElementById('students-table-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  // Seed dropdown lists in student filter & student modals
+  const filterSelect = document.getElementById('filter-students-class');
+  const modalClassSelect = document.getElementById('stud-class');
+  
+  let dropdownOptions = `<option value="">All Classes</option>`;
+  let modalOptions = '';
+  classes.forEach(c => {
+    dropdownOptions += `<option value="${c.name}">${c.name}</option>`;
+    modalOptions += `<option value="${c.name}">${c.name}</option>`;
+  });
+  
+  if (filterSelect && filterSelect.children.length <= 1) filterSelect.innerHTML = dropdownOptions;
+  if (modalClassSelect) modalClassSelect.innerHTML = modalOptions;
+  
+  if (filterSelect) filterSelect.value = filterClass;
+
+  const filtered = students.filter(s => {
+    const matchesSearch = s.name.toLowerCase().includes(searchVal) || s.id.toLowerCase().includes(searchVal);
+    const matchesClass = filterClass === '' || s.class === filterClass;
+    return matchesSearch && matchesClass;
+  });
+
+  const total = filtered.length;
+  const totalPages = Math.ceil(total / studentLimit) || 1;
+  
+  if (studentPage > totalPages) studentPage = totalPages;
+  if (studentPage < 1) studentPage = 1;
+
+  const start = (studentPage - 1) * studentLimit;
+  const end = Math.min(start + studentLimit, total);
+  const pageData = filtered.slice(start, end);
+
+  if (pageData.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center text-sm text-white/50 italic">No student records found.</td></tr>`;
+  } else {
+    pageData.forEach(s => {
+      tbody.innerHTML += `
+        <tr class="app-table-row border-b border-white/5 hover:bg-white/5 transition-colors duration-150">
+          <td class="px-6 py-4 text-xs font-bold text-school-cyan">${s.id}</td>
+          <td class="px-6 py-4 text-sm font-bold text-white">${s.name}</td>
+          <td class="px-6 py-4 text-xs text-white/80"><span class="px-2 py-0.5 rounded bg-white/5 text-school-gold border border-white/10 font-bold">${s.class}</span></td>
+          <td class="px-6 py-4 text-xs text-white/60">${s.gender}</td>
+          <td class="px-6 py-4 text-xs text-white/60">${s.age}</td>
+          <td class="px-6 py-4 text-xs"><span class="px-2 py-0.5 rounded-full font-bold bg-green-950/60 text-green-400 border border-green-500/20">Active</span></td>
+          <td class="px-6 py-4 text-xs text-white/60 no-print flex gap-2">
+            <button class="text-school-cyan hover:text-white transition-all text-xs font-bold" onclick="editStudent('${s.id}')"><i class="fa-solid fa-pen"></i></button>
+            <button class="text-red-400 hover:text-red-600 transition-all text-xs font-bold ml-2" onclick="deleteStudent('${s.id}')"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  // Update indicators
+  const pagInfo = document.getElementById('students-pagination-info');
+  if (pagInfo) pagInfo.innerText = `Showing ${total > 0 ? start + 1 : 0}-${end} of ${total} entries`;
+  
+  const btnPrev = document.getElementById('btn-students-prev');
+  const btnNext = document.getElementById('btn-students-next');
+  if (btnPrev) btnPrev.disabled = studentPage === 1;
+  if (btnNext) btnNext.disabled = studentPage === totalPages;
+}
+
+function prevStudentsPage() {
+  if (studentPage > 1) {
+    studentPage--;
+    renderStudents();
+  }
+}
+
+function nextStudentsPage() {
+  const filteredCount = students.filter(s => {
+    const searchVal = document.getElementById('search-students').value.toLowerCase();
+    const filterClass = document.getElementById('filter-students-class').value;
+    const matchesSearch = s.name.toLowerCase().includes(searchVal) || s.id.toLowerCase().includes(searchVal);
+    const matchesClass = filterClass === '' || s.class === filterClass;
+    return matchesSearch && matchesClass;
+  }).length;
+  
+  if (studentPage < Math.ceil(filteredCount / studentLimit)) {
+    studentPage++;
+    renderStudents();
+  }
+}
+
+function saveStudentForm(event) {
+  event.preventDefault();
+  const form = document.getElementById('student-form');
+  if (!validateForm(form)) return;
+
+  const id = document.getElementById('stud-edit-id').value;
+  const name = document.getElementById('stud-name').value.trim();
+  const age = parseInt(document.getElementById('stud-age').value);
+  const gender = document.getElementById('stud-gender').value;
+  const cls = document.getElementById('stud-class').value;
+  const parent = document.getElementById('stud-parent').value.trim();
+  const phone = document.getElementById('stud-phone').value.trim();
+  const address = document.getElementById('stud-address').value.trim();
+
+  if (id) {
+    // Edit action
+    const index = students.findIndex(s => s.id === id);
+    if (index > -1) {
+      students[index] = { id, name, age, gender, class: cls, parentName: parent, phone, address, status: 'Active' };
+      showToast("Student profile updated successfully", "success");
+    }
+  } else {
+    // Add action
+    const nextId = 'STU' + String(students.length + 1).padStart(3, '0');
+    students.push({ id: nextId, name, age, gender, class: cls, parentName: parent, phone, address, status: 'Active' });
+    
+    // Register initial blank balance inside accounts
+    fees.push({ studentId: nextId, amountDue: 1500, amountPaid: 0 });
+    showToast("Student enrolled successfully", "success");
+  }
+
+  saveAllToLocalStorage();
+  closeModal('modal-add-student');
+  renderStudents();
+}
+
+function editStudent(id) {
+  const s = students.find(stud => stud.id === id);
+  if (!s) return;
+
+  document.getElementById('stud-edit-id').value = s.id;
+  document.getElementById('stud-name').value = s.name;
+  document.getElementById('stud-age').value = s.age;
+  document.getElementById('stud-gender').value = s.gender;
+  document.getElementById('stud-class').value = s.class;
+  document.getElementById('stud-parent').value = s.parentName;
+  document.getElementById('stud-phone').value = s.phone;
+  document.getElementById('stud-address').value = s.address;
+
+  document.getElementById('student-modal-title').innerText = "Edit Student Profile";
+  openModal('modal-add-student');
+}
+
+function deleteStudent(id) {
+  if (confirm(`Are you sure you want to remove student ${id}? This will purge their ledger records.`)) {
+    students = students.filter(s => s.id !== id);
+    fees = fees.filter(f => f.studentId !== id);
+    results = results.filter(r => r.studentId !== id);
+    saveAllToLocalStorage();
+    renderStudents();
+    showToast("Student account deleted from database", "error");
+  }
+}
+
+/* ==========================================================================
+   === TEACHERS DIR MODULES ===
+   ========================================================================== */
+function renderTeachers() {
+  const searchVal = document.getElementById('search-teachers').value.toLowerCase();
+  const container = document.getElementById('teachers-grid');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const filtered = teachers.filter(t => {
+    return t.name.toLowerCase().includes(searchVal) || t.subject.toLowerCase().includes(searchVal);
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="col-span-full py-8 text-center text-sm text-white/50 italic">No teachers match search criteria.</div>`;
+    return;
+  }
+
+  filtered.forEach(t => {
+    const initials = t.name.split(' ').map(n => n[0]).join('');
+    const statusClass = t.status === 'Active' 
+      ? 'bg-green-950/60 text-green-400 border border-green-500/20' 
+      : 'bg-amber-950/60 text-amber-400 border border-amber-500/20';
+
+    container.innerHTML += `
+      <div class="glass flex flex-col justify-between overflow-hidden shadow-xl card-hover-lift">
+        <div class="p-5 flex flex-col items-center border-b border-white/5 bg-white/5">
+          <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-school-red to-school-accent text-white flex items-center justify-center font-bold text-xl mb-3 border-2 border-school-gold shadow-[0_0_15px_rgba(0,212,255,0.2)]">${initials}</div>
+          <h3 class="font-bold text-white text-base font-headings">${t.name}</h3>
+          <p class="text-xs text-school-cyan font-bold uppercase tracking-widest mt-1">${t.subject}</p>
+        </div>
+        <div class="p-5 text-xs space-y-2.5 flex-grow">
+          <div class="flex justify-between border-b border-white/5 pb-2"><span class="text-white/50 font-semibold">Qualification</span><span class="font-bold text-white/90">${t.qualification}</span></div>
+          <div class="flex justify-between border-b border-white/5 pb-2"><span class="text-white/50 font-semibold">Experience</span><span class="px-2 py-0.5 rounded bg-white/5 text-school-gold font-bold text-[10px]">${t.experience}</span></div>
+          <div class="flex justify-between border-b border-white/5 pb-2"><span class="text-white/50 font-semibold">Email</span><span class="font-bold text-white/80 select-all break-all">${t.email}</span></div>
+          <div class="flex justify-between border-b border-white/5 pb-2"><span class="text-white/50 font-semibold">Phone</span><span class="font-bold text-white/90">${t.phone}</span></div>
+          <div class="flex justify-between pb-1"><span class="text-white/50 font-semibold">Status</span><span class="px-2 py-0.5 rounded font-bold ${statusClass}">${t.status}</span></div>
+        </div>
+        <div class="p-4 bg-black/10 border-t border-white/5 flex justify-end gap-2 no-print">
+          <button class="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border border-white/10" onclick="editTeacher('${t.id}')">Edit Profile</button>
+          <button class="px-3 py-1.5 bg-red-950/20 hover:bg-school-red/40 text-red-300 hover:text-white rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border border-red-500/25" onclick="deleteTeacher('${t.id}')">Remove</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function saveTeacherForm(event) {
+  event.preventDefault();
+  const form = document.getElementById('teacher-form');
+  if (!validateForm(form)) return;
+
+  const id = document.getElementById('teach-edit-id').value;
+  const name = document.getElementById('teach-name').value.trim();
+  const subject = document.getElementById('teach-subject').value;
+  const qualification = document.getElementById('teach-qual').value.trim();
+  const experience = document.getElementById('teach-exp').value.trim();
+  const phone = document.getElementById('teach-phone').value.trim();
+  const email = document.getElementById('teach-email').value.trim();
+  const joiningDate = document.getElementById('teach-join').value;
+  const status = document.getElementById('teach-status').value;
+
+  if (id) {
+    const index = teachers.findIndex(t => t.id === id);
+    if (index > -1) {
+      teachers[index] = { id, name, subject, qualification, experience, phone, email, joiningDate, status };
+      showToast("Teacher profile updated", "success");
+    }
+  } else {
+    const nextId = 'TCH' + String(teachers.length + 1).padStart(3, '0');
+    teachers.push({ id: nextId, name, subject, qualification, experience, phone, email, joiningDate, status });
+    showToast("Teacher registered successfully", "success");
+  }
+
+  saveAllToLocalStorage();
+  closeModal('modal-add-teacher');
+  renderTeachers();
+}
+
+function editTeacher(id) {
+  const t = teachers.find(teach => teach.id === id);
+  if (!t) return;
+
+  document.getElementById('teach-edit-id').value = t.id;
+  document.getElementById('teach-name').value = t.name;
+  document.getElementById('teach-subject').value = t.subject;
+  document.getElementById('teach-qual').value = t.qualification;
+  document.getElementById('teach-exp').value = t.experience || '3 Years';
+  document.getElementById('teach-phone').value = t.phone;
+  document.getElementById('teach-email').value = t.email;
+  document.getElementById('teach-join').value = t.joiningDate;
+  document.getElementById('teach-status').value = t.status;
+
+  document.getElementById('teacher-modal-title').innerText = "Edit Teacher Profile";
+  openModal('modal-add-teacher');
+}
+
+function deleteTeacher(id) {
+  if (confirm(`Remove teacher ${id} from database register?`)) {
+    teachers = teachers.filter(t => t.id !== id);
+    saveAllToLocalStorage();
+    renderTeachers();
+    showToast("Teacher record purged", "error");
+  }
+}
+
+/* ==========================================================================
+   === CLASSES MANAGEMENT ===
+   ========================================================================== */
+function renderClasses() {
+  const container = document.getElementById('classes-grid');
+  if (!container) return;
+  container.innerHTML = '';
+
+  // Seed select drop selectors inside modals
+  const clsTutorSelect = document.getElementById('cls-teacher');
+  let tutorOptions = '';
+  teachers.forEach(t => {
+    tutorOptions += `<option value="${t.id}">${t.name} (${t.subject})</option>`;
+  });
+  if (clsTutorSelect) clsTutorSelect.innerHTML = tutorOptions;
+
+  classes.forEach(c => {
+    const tutor = teachers.find(t => t.id === c.teacherId) || { name: 'Unassigned Tutor' };
+    const studsInClass = students.filter(s => s.class === c.name).length;
+
+    container.innerHTML += `
+      <div class="glass p-6 card-hover-lift flex flex-col justify-between shadow-xl relative">
+        <div>
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-white text-lg font-headings">${c.name}</h3>
+            <span class="px-2.5 py-0.5 rounded bg-white/5 border border-white/10 text-school-gold font-bold text-xs">${c.room}</span>
+          </div>
+          <div class="space-y-2 mb-6 text-xs">
+            <div class="flex justify-between"><span class="text-white/50 font-semibold">Assigned Tutor</span><span class="font-bold text-white">${tutor.name}</span></div>
+            <div class="flex justify-between"><span class="text-white/50 font-semibold">Enrolled Students</span><span class="px-2 py-0.5 bg-school-cyan/20 border border-school-cyan/35 text-school-cyan rounded font-bold text-[10px]">${studsInClass} Students</span></div>
+          </div>
+        </div>
+        
+        <div class="border-t border-white/5 pt-4 flex justify-between items-center text-xs">
+          <button class="text-school-cyan hover:text-white font-bold uppercase transition-all hover:underline cursor-pointer" onclick="expandClass('${c.name}')">Expand Roster &rarr;</button>
+          <div class="flex gap-2.5 no-print">
+            <button class="text-white/50 hover:text-school-cyan transition-all cursor-pointer" onclick="editClass('${c.id}')"><i class="fa-solid fa-pen"></i></button>
+            <button class="text-white/50 hover:text-red-400 transition-all cursor-pointer" onclick="deleteClass('${c.id}')"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function saveClassForm(event) {
+  event.preventDefault();
+  const form = document.getElementById('class-form');
+  if (!validateForm(form)) return;
+
+  const id = document.getElementById('cls-edit-id').value;
+  const name = document.getElementById('cls-name').value.trim();
+  const teacherId = document.getElementById('cls-teacher').value;
+  const room = document.getElementById('cls-room').value.trim();
+
+  if (id) {
+    const index = classes.findIndex(c => c.id === id);
+    if (index > -1) {
+      classes[index] = { id, name, teacherId, room };
+      showToast("Class configurations updated", "success");
+    }
+  } else {
+    const nextId = 'CLS' + String(classes.length + 1).padStart(3, '0');
+    classes.push({ id: nextId, name, teacherId, room });
+    showToast("Class block registered successfully", "success");
+  }
+
+  saveAllToLocalStorage();
+  closeModal('modal-add-class');
+  renderClasses();
+}
+
+function editClass(id) {
+  const c = classes.find(cls => cls.id === id);
+  if (!c) return;
+
+  document.getElementById('cls-edit-id').value = c.id;
+  document.getElementById('cls-name').value = c.name;
+  document.getElementById('cls-teacher').value = c.teacherId;
+  document.getElementById('cls-room').value = c.room;
+
+  document.getElementById('class-modal-title').innerText = "Edit Class Profile";
+  openModal('modal-add-class');
+}
+
+function deleteClass(id) {
+  if (confirm("Confirm removal of this class block? Registered students will remain active but will need re-routing.")) {
+    classes = classes.filter(c => c.id !== id);
+    saveAllToLocalStorage();
+    renderClasses();
+    showToast("Class section deleted", "error");
+  }
+}
+
+function expandClass(className) {
+  const list = students.filter(s => s.class === className);
+  const title = document.getElementById('roster-modal-title');
+  if (title) title.innerText = `${className} - Enrolled Roster (${list.length} Students)`;
+  
+  const tbody = document.getElementById('roster-table-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-sm text-white/40 italic">No students registered in this class.</td></tr>`;
+  } else {
+    list.forEach(s => {
+      tbody.innerHTML += `
+        <tr class="border-b border-white/5">
+          <td class="px-6 py-4 text-xs font-bold text-school-cyan">${s.id}</td>
+          <td class="px-6 py-4 text-sm font-bold text-white">${s.name}</td>
+          <td class="px-6 py-4 text-xs text-white/70">${s.gender}</td>
+          <td class="px-6 py-4 text-xs text-white/60">${s.status}</td>
+        </tr>
+      `;
+    });
+  }
+  
+  openModal('modal-class-roster');
+}
+
+/* ==========================================================================
+   === WEEKLY TIMETABLE SESSIONS ===
+   ========================================================================== */
+const TIMETABLE_DAYS = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+
+function renderTimetable() {
+  const select = document.getElementById('timetable-class-select');
+  const tbody = document.getElementById('timetable-grid-body');
+  if (!tbody || !select) return;
+  tbody.innerHTML = '';
+  
+  // Seed Class selectors
+  let selectOptions = '';
+  classes.forEach(c => {
+    selectOptions += `<option value="${c.name}">${c.name}</option>`;
+  });
+  if (select.children.length === 0) {
+    select.innerHTML = selectOptions;
+  }
+  
+  const selectedClass = select.value;
+  if (!selectedClass) {
+    tbody.innerHTML = `<tr><td colspan="8" class="border border-white/10 p-6 text-center text-white/50 italic text-sm">Please register classes in the Classes panel first.</td></tr>`;
+    return;
+  }
+
+  // Seed teachers options in timetable edit modal
+  const cellTeacherSelect = document.getElementById('tt-teacher');
+  let teacherOptions = '<option value="Free">None (Free Study)</option>';
+  teachers.forEach(t => {
+    teacherOptions += `<option value="${t.id}">${t.name} (${t.subject})</option>`;
+  });
+  if (cellTeacherSelect) cellTeacherSelect.innerHTML = teacherOptions;
+
+  TIMETABLE_DAYS.forEach(day => {
+    let rowHtml = `<tr class="border-b border-white/5">
+      <td class="border border-white/5 p-4 font-bold text-school-gold bg-white/5 text-center select-none font-headings text-xs uppercase">${day}</td>`;
+      
+    for (let period = 1; period <= 7; period++) {
+      const cell = timetable[selectedClass] && timetable[selectedClass][day] && timetable[selectedClass][day][period];
+      
+      if (cell && cell.subject !== 'Free') {
+        const tObj = teachers.find(t => t.id === cell.teacherId) || { name: 'Free' };
+        rowHtml += `
+          <td class="border border-white/5 p-2 h-20 text-center align-top cursor-pointer hover:bg-white/5 transition-all duration-150" onclick="openTimetableCellEditor('${day}', ${period})">
+            <div class="h-full flex flex-col justify-center rounded-xl p-2 subject-${cell.subject}">
+              <div class="text-[11px] font-extrabold uppercase tracking-wide leading-tight">${cell.subject}</div>
+              <div class="text-[9px] opacity-75 font-semibold mt-1">${tObj.name.split(' ').slice(-1)[0]}</div>
+            </div>
+          </td>
+        `;
+      } else {
+        rowHtml += `
+          <td class="border border-white/5 p-2 h-20 text-center align-middle cursor-pointer hover:bg-white/5 transition-all duration-150" onclick="openTimetableCellEditor('${day}', ${period})">
+            <div class="text-[10px] text-white/30 italic font-semibold">+ Assign</div>
+          </td>
+        `;
+      }
+    }
+    
+    rowHtml += '</tr>';
+    tbody.innerHTML += rowHtml;
+  });
+}
+
+function openTimetableCellEditor(day, period) {
+  const selectedClass = document.getElementById('timetable-class-select').value;
+  
+  document.getElementById('tt-day').value = day;
+  document.getElementById('tt-period').value = period;
+  document.getElementById('tt-details-label').innerText = `${selectedClass} | ${day} | Period ${period}`;
+
+  const cell = timetable[selectedClass] && timetable[selectedClass][day] && timetable[selectedClass][day][period];
+  if (cell) {
+    document.getElementById('tt-subject').value = cell.subject;
+    document.getElementById('tt-teacher').value = cell.teacherId;
+  } else {
+    document.getElementById('tt-subject').value = 'Free';
+    document.getElementById('tt-teacher').value = 'Free';
+  }
+
+  openModal('modal-timetable-cell');
+}
+
+function saveTimetableCell(event) {
+  event.preventDefault();
+  const selectedClass = document.getElementById('timetable-class-select').value;
+  
+  const day = document.getElementById('tt-day').value;
+  const period = parseInt(document.getElementById('tt-period').value);
+  const subject = document.getElementById('tt-subject').value;
+  const teacherId = document.getElementById('tt-teacher').value;
+
+  if (!timetable[selectedClass]) timetable[selectedClass] = {};
+  if (!timetable[selectedClass][day]) timetable[selectedClass][day] = {};
+
+  timetable[selectedClass][day][period] = { subject, teacherId };
+  
+  saveAllToLocalStorage();
+  closeModal('modal-timetable-cell');
+  renderTimetable();
+  showToast("Academic timetable updated successfully", "success");
+}
+
+function printTimetable() {
+  window.print();
+}
+
+/* ==========================================================================
+   === EXAMS & RESULTS LEDGERS ===
+   ========================================================================== */
+let activeExamTab = 'schedules';
+
+function switchExamsTab(tabName) {
+  activeExamTab = tabName;
+  const tabSchedules = document.getElementById('tab-exam-schedules');
+  const tabResults = document.getElementById('tab-exam-results');
+  const paneSchedules = document.getElementById('pane-exam-schedules');
+  const paneResults = document.getElementById('pane-exam-results');
+
+  if (!tabSchedules || !tabResults || !paneSchedules || !paneResults) return;
+
+  if (tabName === 'schedules') {
+    tabSchedules.className = "py-3 border-b-2 border-school-cyan text-school-cyan hover:text-white transition-all focus:outline-none cursor-pointer font-headings text-base font-bold";
+    tabResults.className = "py-3 border-b-2 border-transparent text-white/50 hover:text-school-cyan transition-all focus:outline-none cursor-pointer font-headings text-base font-bold";
+    
+    paneSchedules.classList.remove('hidden');
+    paneResults.classList.add('hidden');
+    renderExams();
+  } else {
+    tabResults.className = "py-3 border-b-2 border-school-cyan text-school-cyan hover:text-white transition-all focus:outline-none cursor-pointer font-headings text-base font-bold";
+    tabSchedules.className = "py-3 border-b-2 border-transparent text-white/50 hover:text-school-cyan transition-all focus:outline-none cursor-pointer font-headings text-base font-bold";
+    
+    paneResults.classList.remove('hidden');
+    paneSchedules.classList.add('hidden');
+    renderResults();
+  }
+}
+
+function renderExams() {
+  const tbody = document.getElementById('exams-table-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  if (exams.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-sm text-white/40 italic">No exams schedules published.</td></tr>`;
+    return;
+  }
+
+  exams.forEach(ex => {
+    tbody.innerHTML += `
+      <tr class="app-table-row border-b border-white/5 hover:bg-white/5 transition-colors duration-150">
+        <td class="px-6 py-4 text-sm font-bold text-white font-headings">${ex.subject}</td>
+        <td class="px-6 py-4 text-xs text-white/70">${ex.date}</td>
+        <td class="px-6 py-4 text-xs text-white/70">${ex.time}</td>
+        <td class="px-6 py-4 text-xs text-white/80"><span class="px-2 py-0.5 bg-white/5 border border-white/10 rounded-md text-school-cyan font-bold">${ex.room}</span></td>
+        <td class="px-6 py-4 text-xs text-white/60 no-print flex gap-2">
+          <button class="text-school-cyan hover:text-white transition-all text-xs font-bold" onclick="editExam('${ex.id}')"><i class="fa-solid fa-pen"></i></button>
+          <button class="text-red-400 hover:text-red-600 transition-all text-xs font-bold" onclick="deleteExam('${ex.id}')"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function saveExamForm(event) {
+  event.preventDefault();
+  const form = document.getElementById('exam-form');
+  if (!validateForm(form)) return;
+
+  const id = document.getElementById('ex-edit-id').value;
+  const subject = document.getElementById('ex-subject').value;
+  const date = document.getElementById('ex-date').value;
+  const time = document.getElementById('ex-time').value.trim();
+  const room = document.getElementById('ex-room').value.trim();
+
+  if (id) {
+    const index = exams.findIndex(e => e.id === id);
+    if (index > -1) {
+      exams[index] = { id, subject, date, time, room };
+      showToast("Exam schedule corrected", "success");
+    }
+  } else {
+    const nextId = 'EX' + String(exams.length + 1).padStart(3, '0');
+    exams.push({ id: nextId, subject, date, time, room });
+    showToast("Exam scheduled successfully", "success");
+  }
+
+  saveAllToLocalStorage();
+  closeModal('modal-add-exam');
+  renderExams();
+}
+
+function editExam(id) {
+  const ex = exams.find(e => e.id === id);
+  if (!ex) return;
+
+  document.getElementById('ex-edit-id').value = ex.id;
+  document.getElementById('ex-subject').value = ex.subject;
+  document.getElementById('ex-date').value = ex.date;
+  document.getElementById('ex-time').value = ex.time;
+  document.getElementById('ex-room').value = ex.room;
+
+  document.getElementById('exam-modal-title').innerText = "Edit Exam Schedule";
+  openModal('modal-add-exam');
+}
+
+function deleteExam(id) {
+  if (confirm("Are you sure you want to cancel this scheduled exam session?")) {
+    exams = exams.filter(e => e.id !== id);
+    saveAllToLocalStorage();
+    renderExams();
+    showToast("Exam session cancelled", "error");
+  }
+}
+
+function renderResults() {
+  const tbody = document.getElementById('results-table-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  const classFilter = document.getElementById('filter-results-class');
+  const subjectFilter = document.getElementById('filter-results-subject');
+  if (!classFilter || !subjectFilter) return;
+  
+  // Seed selects inside options
+  let classDropdown = '<option value="">All Classes</option>';
+  classes.forEach(c => {
+    classDropdown += `<option value="${c.name}">${c.name}</option>`;
+  });
+  if (classFilter.children.length <= 1) classFilter.innerHTML = classDropdown;
+
+  // Seed dynamic student selectors inside score entries modal
+  const modalStudentSelect = document.getElementById('res-student');
+  let studentOptions = '';
+  students.forEach(s => {
+    studentOptions += `<option value="${s.id}">${s.name} (${s.class})</option>`;
+  });
+  if (modalStudentSelect) modalStudentSelect.innerHTML = studentOptions;
+
+  const fClass = classFilter.value;
+  const fSub = subjectFilter.value;
+
+  const filtered = results.filter(r => {
+    const stud = students.find(s => s.id === r.studentId) || { class: '', name: 'Purged Student' };
+    const matchesClass = fClass === '' || stud.class === fClass;
+    const matchesSub = fSub === '' || r.subject === fSub;
+    return matchesClass && matchesSub;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-sm text-white/40 italic">No academic results recorded yet.</td></tr>`;
+    return;
+  }
+
+  filtered.forEach(r => {
+    const stud = students.find(s => s.id === r.studentId) || { name: 'Purged Student', class: '--' };
+    const grade = autoCalculateGrade(r.score);
+    let gradeColor = 'bg-red-950/60 text-red-400 border border-red-500/20';
+    if (grade === 'A') gradeColor = 'bg-green-950/60 text-green-400 border border-green-500/20';
+    else if (grade === 'B' || grade === 'C') gradeColor = 'bg-blue-950/60 text-school-cyan border border-[#00d4ff]/20';
+    else if (grade === 'D') gradeColor = 'bg-amber-950/60 text-amber-400 border border-amber-500/20';
+
+    tbody.innerHTML += `
+      <tr class="app-table-row border-b border-white/5 hover:bg-white/5 transition-colors duration-150">
+        <td class="px-6 py-4 text-sm font-bold text-white">${stud.name}</td>
+        <td class="px-6 py-4 text-xs text-white/80"><span class="px-2 py-0.5 rounded bg-white/5 text-school-gold border border-white/10 font-bold">${stud.class}</span></td>
+        <td class="px-6 py-4 text-xs text-white/70">${r.subject}</td>
+        <td class="px-6 py-4 text-sm font-bold text-white">${r.score}%</td>
+        <td class="px-6 py-4 text-xs"><span class="px-2.5 py-0.5 rounded-full font-bold ${gradeColor}">${grade}</span></td>
+        <td class="px-6 py-4 text-xs text-white/60 no-print flex gap-2">
+          <button class="text-school-cyan hover:text-white transition-all text-xs font-bold" onclick="editResult('${r.id}')"><i class="fa-solid fa-pen"></i></button>
+          <button class="text-red-400 hover:text-red-600 transition-all text-xs font-bold" onclick="deleteResult('${r.id}')"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function autoCalculateGrade(score) {
+  if (score >= 90) return 'A';
+  if (score >= 80) return 'B';
+  if (score >= 70) return 'C';
+  if (score >= 60) return 'D';
+  return 'F';
+}
+
+function saveResultForm(event) {
+  event.preventDefault();
+  const form = document.getElementById('result-form');
+  if (!validateForm(form)) return;
+
+  const id = document.getElementById('res-edit-id').value;
+  const studentId = document.getElementById('res-student').value;
+  const subject = document.getElementById('res-subject').value;
+  const score = parseInt(document.getElementById('res-score').value);
+
+  if (id) {
+    const index = results.findIndex(r => r.id === id);
+    if (index > -1) {
+      results[index] = { id, studentId, subject, score };
+      showToast("Student score updated", "success");
+    }
+  } else {
+    const nextId = 'RES' + String(results.length + 1).padStart(3, '0');
+    results.push({ id: nextId, studentId, subject, score });
+    showToast("Academic scores recorded", "success");
+  }
+
+  saveAllToLocalStorage();
+  closeModal('modal-add-result');
+  renderResults();
+}
+
+function editResult(id) {
+  const r = results.find(res => res.id === id);
+  if (!r) return;
+
+  document.getElementById('res-edit-id').value = r.id;
+  document.getElementById('res-student').value = r.studentId;
+  document.getElementById('res-subject').value = r.subject;
+  document.getElementById('res-score').value = r.score;
+
+  document.getElementById('result-modal-title').innerText = "Edit Recorded Score";
+  openModal('modal-add-result');
+}
+
+function deleteResult(id) {
+  if (confirm("Permanently remove score record?")) {
+    results = results.filter(r => r.id !== id);
+    saveAllToLocalStorage();
+    renderResults();
+    showToast("Score record purged", "error");
+  }
+}
+
+function exportExamsResultsCSV() {
+  const headers = ['Student ID', 'Student Name', 'Class', 'Subject', 'Score', 'Grade'];
+  let content = "data:text/csv;charset=utf-8," + headers.join(",") + "\n";
+
+  results.forEach(r => {
+    const stud = students.find(s => s.id === r.studentId) || { name: 'Deleted Student', class: '--' };
+    const grade = autoCalculateGrade(r.score);
+    const row = [r.studentId, stud.name, stud.class, r.subject, `${r.score}%`, grade];
+    content += row.map(v => `"${v}"`).join(",") + "\n";
+  });
+
+  const uri = encodeURI(content);
+  const link = document.createElement("a");
+  link.setAttribute("href", uri);
+  link.setAttribute("download", `Abaarso_School_Exam_Ledger_${new Date().toISOString().slice(0,10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast("CSV report generated and downloaded", "success");
+}
+
+/* ==========================================================================
+   === FEES BALANCES & TRANSACTIONS ===
+   ========================================================================== */
+function renderFees() {
+  const tbody = document.getElementById('fees-table-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  let colSum = 0;
+  let pendSum = 0;
+  let overSum = 0;
+
+  // Sync options in payment record selectors
+  const modalPaySelect = document.getElementById('pay-student');
+  let payOptions = '';
+  students.forEach(s => {
+    payOptions += `<option value="${s.id}">${s.name} (${s.class})</option>`;
+  });
+  if (modalPaySelect) modalPaySelect.innerHTML = payOptions;
+
+  students.forEach(s => {
+    const feeObj = fees.find(f => f.studentId === s.id) || { amountDue: 1500, amountPaid: 0 };
+    const due = feeObj.amountDue;
+    const paid = feeObj.amountPaid;
+    const balance = due - paid;
+
+    let badgeClass = 'bg-red-950/60 text-red-400 border border-red-500/20';
+    let label = 'Overdue';
+    
+    if (balance <= 0) {
+      badgeClass = 'bg-green-950/60 text-green-400 border border-green-500/20';
+      label = 'Paid';
+      colSum += due;
+    } else if (paid > 0) {
+      badgeClass = 'bg-amber-950/60 text-amber-400 border border-amber-500/20';
+      label = 'Pending';
+      colSum += paid;
+      pendSum += balance;
+    } else {
+      overSum += balance;
+    }
+
+    tbody.innerHTML += `
+      <tr class="app-table-row border-b border-white/5 hover:bg-white/5 transition-colors duration-150">
+        <td class="px-6 py-4 text-sm font-bold text-white">${s.name}</td>
+        <td class="px-6 py-4 text-xs text-white/80"><span class="px-2 py-0.5 rounded bg-white/5 text-school-gold border border-white/10 font-bold">${s.class}</span></td>
+        <td class="px-6 py-4 text-sm font-semibold text-white/80">$${due.toLocaleString()}</td>
+        <td class="px-6 py-4 text-sm font-semibold text-green-400">$${paid.toLocaleString()}</td>
+        <td class="px-6 py-4 text-sm font-bold text-red-400">$${balance.toLocaleString()}</td>
+        <td class="px-6 py-4 text-xs"><span class="px-2.5 py-0.5 rounded-full font-bold ${badgeClass}">${label}</span></td>
+        <td class="px-6 py-4 text-xs text-white/60 no-print">
+          <button class="px-3 py-1 bg-school-red hover:bg-school-accent text-white hover:text-white border border-red-500/20 hover:border-red-500/50 rounded-lg text-[10px] font-bold tracking-widest uppercase transition-all duration-150" onclick="triggerFeesRecord('${s.id}')">PAY BALANCE</button>
+        </td>
+      </tr>
+    `;
+  });
+
+  // Load accounting card metrics
+  const totalCollEl = document.getElementById('fees-total-collected');
+  const totalPendEl = document.getElementById('fees-total-pending');
+  const totalOverEl = document.getElementById('fees-total-overdue');
+  if (totalCollEl) totalCollEl.innerText = `$${colSum.toLocaleString()}`;
+  if (totalPendEl) totalPendEl.innerText = `$${pendSum.toLocaleString()}`;
+  if (totalOverEl) totalOverEl.innerText = `$${overSum.toLocaleString()}`;
+}
+
+function triggerFeesRecord(studId) {
+  const payStudentEl = document.getElementById('pay-student');
+  if (payStudentEl) payStudentEl.value = studId;
+  openModal('modal-add-payment');
+}
+
+function savePaymentForm(event) {
+  event.preventDefault();
+  const form = document.getElementById('payment-form');
+  if (!validateForm(form)) return;
+
+  const studId = document.getElementById('pay-student').value;
+  const payAmt = parseInt(document.getElementById('pay-amount').value) || 0;
+
+  const index = fees.findIndex(f => f.studentId === studId);
+  if (index > -1) {
+    const baseDue = fees[index].amountDue;
+    const prePaid = fees[index].amountPaid;
+    const capped = Math.min(baseDue, prePaid + payAmt);
+    fees[index].amountPaid = capped;
+    showToast(`Transaction of $${payAmt.toLocaleString()} logged in ledger`, "success");
+  } else {
+    fees.push({ studentId: studId, amountDue: 1500, amountPaid: Math.min(1500, payAmt) });
+    showToast("Fees balance account registered", "success");
+  }
+
+  saveAllToLocalStorage();
+  closeModal('modal-add-payment');
+  renderFees();
+}
+
+/* ==========================================================================
+   === ANNOUNCEMENTStimeline LOGS ===
+   ========================================================================== */
+function renderAnnouncements() {
+  const container = document.getElementById('announcements-timeline');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const sorted = [...announcements].sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    return new Date(b.date) - new Date(a.date);
+  });
+
+  if (sorted.length === 0) {
+    container.innerHTML = `<div class="p-8 text-center text-sm text-white/40 italic bg-white/5 border border-white/10 rounded-xl">No announcements drafted.</div>`;
+    return;
+  }
+
+  sorted.forEach(ann => {
+    let pinClass = '';
+    let pinIconColor = 'text-white/40 hover:text-school-gold';
+    if (ann.pinned) {
+      pinClass = 'border-l-4 border-l-school-gold bg-school-gold/5';
+      pinIconColor = 'text-school-gold shadow-[0_0_10px_rgba(212,175,55,0.4)]';
+    }
+
+    let badgeClass = 'bg-white/5 text-white border border-white/10';
+    if (ann.category === 'Academic') badgeClass = 'bg-blue-950/60 text-blue-300 border border-blue-500/20';
+    else if (ann.category === 'Event') badgeClass = 'bg-purple-950/60 text-purple-300 border border-purple-500/20';
+
+    container.innerHTML += `
+      <div class="glass p-6 shadow-2xl transition-all ${pinClass} relative group">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${badgeClass}">${ann.category}</span>
+            <span class="text-[10px] text-white/40 font-semibold"><i class="fa-regular fa-clock"></i> ${ann.date}</span>
+          </div>
+          <div class="flex gap-2.5 no-print opacity-40 group-hover:opacity-100 transition-opacity">
+            <button class="${pinIconColor} text-xs transition-colors cursor-pointer" onclick="togglePinNotice('${ann.id}')"><i class="fa-solid fa-thumbtack"></i></button>
+            <button class="text-red-400 hover:text-red-600 text-xs transition-colors cursor-pointer" onclick="deleteNotice('${ann.id}')"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>
+        <h3 class="font-bold text-white text-base font-headings mb-2">${ann.title}</h3>
+        <p class="text-xs text-white/70 leading-relaxed">${ann.message}</p>
+      </div>
+    `;
+  });
+}
+
+function saveAnnouncementForm(event) {
+  event.preventDefault();
+  const form = document.getElementById('announcement-form');
+  if (!validateForm(form)) return;
+
+  const title = document.getElementById('ann-title').value.trim();
+  const date = document.getElementById('ann-date').value;
+  const category = document.getElementById('ann-category').value;
+  const message = document.getElementById('ann-message').value.trim();
+
+  const nextId = 'ANN' + String(announcements.length + 1).padStart(3, '0');
+  announcements.unshift({ id: nextId, title, date, category, message, pinned: false });
+
+  saveAllToLocalStorage();
+  form.reset();
+  renderAnnouncements();
+  showToast("New notice published", "success");
+}
+
+function togglePinNotice(id) {
+  const idx = announcements.findIndex(ann => ann.id === id);
+  if (idx > -1) {
+    announcements[idx].pinned = !announcements[idx].pinned;
+    saveAllToLocalStorage();
+    renderAnnouncements();
+    showToast(announcements[idx].pinned ? "Notice pinned to top" : "Notice unpinned", "info");
+  }
+}
+
+function deleteNotice(id) {
+  if (confirm("Are you sure you want to delete this notice?")) {
+    announcements = announcements.filter(ann => ann.id !== id);
+    saveAllToLocalStorage();
+    renderAnnouncements();
+    showToast("Announcement notice deleted", "error");
+  }
+}
+
+/* ==========================================================================
+   === CONFIGURATIONS SETTINGS ===
+   ========================================================================== */
+function loadSettingsInputs() {
+  document.getElementById('set-name').value = settings.name;
+  document.getElementById('set-tagline').value = settings.tagline;
+  document.getElementById('set-location').value = settings.location;
+  document.getElementById('set-phone').value = settings.phone;
+  document.getElementById('set-email').value = settings.email;
+  document.getElementById('set-color').value = settings.primaryColor;
+  document.getElementById('color-hex-label').innerText = settings.primaryColor.toUpperCase();
+
+  const lang = settings.language || 'en';
+  toggleLanguageButtonStyles(lang);
+
+  // Sync dark mode checkbox state
+  const isDark = document.documentElement.classList.contains('dark');
+  const checkbox = document.getElementById('dark-theme-mode-check');
+  if (checkbox) checkbox.checked = !isDark; // Checkbox unchecked means Dark Mode enabled (as it toggles the Light theme class overlay override)
+}
+
+function saveSettingsForm(event) {
+  event.preventDefault();
+  
+  settings.name = document.getElementById('set-name').value.trim();
+  settings.tagline = document.getElementById('set-tagline').value.trim();
+  settings.location = document.getElementById('set-location').value.trim();
+  settings.phone = document.getElementById('set-phone').value.trim();
+  settings.email = document.getElementById('set-email').value.trim();
+
+  saveAllToLocalStorage();
+  applySettingsAesthetics();
+  showToast("School configuration profiles updated", "success");
+}
+
+function applySettingsAesthetics() {
+  document.querySelectorAll('.school-name-text').forEach(el => el.innerText = settings.name);
+  document.querySelectorAll('.school-tagline-text').forEach(el => el.innerText = settings.tagline);
+  
+  const navTagline = document.getElementById('school-nav-tagline');
+  if (navTagline) navTagline.innerText = settings.tagline.split(' · ').slice(0, 2).join(' · ');
+
+  // Update theme colors dynamically
+  document.documentElement.style.setProperty('--crimson', settings.primaryColor);
+  
+  // Set language properties
+  translateNavigationMenu(settings.language || 'en');
+}
+
+function updatePrimaryAccentColor(hexValue) {
+  settings.primaryColor = hexValue;
+  document.getElementById('color-hex-label').innerText = hexValue.toUpperCase();
+  document.documentElement.style.setProperty('--crimson', hexValue);
+  saveAllToLocalStorage();
+  showToast("Primary theme accent midab updated", "info");
+}
+
+function changeLanguage(lang) {
+  settings.language = lang;
+  saveAllToLocalStorage();
+  toggleLanguageButtonStyles(lang);
+  applySettingsAesthetics();
+  showToast(lang === 'so' ? "Nidaamka waxaa loo beddelay Somali" : "Language switched to English", "info");
+}
+
+function toggleLanguageButtonStyles(lang) {
+  const btnEn = document.getElementById('lang-btn-en');
+  const btnSo = document.getElementById('lang-btn-so');
+  if (!btnEn || !btnSo) return;
+
+  if (lang === 'so') {
+    btnSo.className = "px-4 py-2 border border-school-gold rounded-lg text-xs font-bold text-school-gold bg-school-gold/10 transition-all uppercase tracking-wider cursor-pointer shadow-[0_0_10px_rgba(212,175,55,0.25)]";
+    btnEn.className = "px-4 py-2 border border-white/10 rounded-lg text-xs font-bold text-white/70 hover:bg-white/5 hover:text-white transition-all uppercase tracking-wider cursor-pointer";
+  } else {
+    btnEn.className = "px-4 py-2 border border-school-cyan rounded-lg text-xs font-bold text-school-cyan bg-school-cyan/10 transition-all uppercase tracking-wider cursor-pointer shadow-[0_0_10px_rgba(0,212,255,0.25)]";
+    btnSo.className = "px-4 py-2 border border-white/10 rounded-lg text-xs font-bold text-white/70 hover:bg-white/5 hover:text-white transition-all uppercase tracking-wider cursor-pointer";
+  }
+}
+
+function translateNavigationMenu(lang) {
+  document.querySelectorAll('[data-lang]').forEach(el => {
+    const key = el.getAttribute('data-lang');
+    if (dictionary[lang] && dictionary[lang][key]) {
+      el.innerText = dictionary[lang][key];
+    }
+  });
+
+  // Re-adjust input placeholders dynamically
+  const sStud = document.getElementById('search-students');
+  if (sStud) sStud.placeholder = lang === 'so' ? 'Raadi arday...' : 'Search student by name or code...';
+
+  const sTeach = document.getElementById('search-teachers');
+  if (sTeach) sTeach.placeholder = lang === 'so' ? 'Raadi macallimiin...' : 'Search teacher by name or subject...';
+
+  // Redraw views on settings toggle
+  showSection(activeSection);
+}
+
+/* ==========================================================================
+   === MODALS CORE SYSTEM ===
+   ========================================================================== */
+function openModal(modalId) {
+  const overlay = document.getElementById(modalId);
+  if (!overlay) return;
+  overlay.classList.add('active');
+  
+  const box = overlay.querySelector('.modal-box');
+  if (box) box.focus();
+}
+
+function closeModal(modalId) {
+  const overlay = document.getElementById(modalId);
+  if (!overlay) return;
+  overlay.classList.remove('active');
+  
+  // Clear forms and highlights if present
+  const form = overlay.querySelector('form');
+  if (form) {
+    form.reset();
+    form.querySelectorAll('input, select, textarea').forEach(el => el.classList.remove('border-red-500'));
+    form.querySelectorAll('.form-error-msg').forEach(el => el.classList.add('hidden'));
+    
+    const editId = form.querySelector('[id*="-edit-id"]');
+    if (editId) editId.value = '';
+  }
+}
+
+// Keyboard ESC dismissal
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+      closeModal(modal.id);
+    });
+  }
+});
+
+/* ==========================================================================
+   === TOAST ALERTS NOTIFICATIONS ===
+   ========================================================================== */
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type} p-4 flex items-center gap-3 rounded-xl border border-white/10 shadow-2xl`;
+  
+  let icon = 'fa-circle-check text-green-400';
+  if (type === 'error') icon = 'fa-circle-exclamation text-red-400';
+  if (type === 'info') icon = 'fa-circle-info text-school-cyan';
+
+  toast.innerHTML = `
+    <i class="fa-solid ${icon} text-lg shrink-0"></i>
+    <div class="text-xs font-bold text-white/90 leading-tight">${message}</div>
+  `;
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.transform = 'translateX(120%)';
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+/* ==========================================================================
+   === FORM VALIDATION ENGINE ===
+   ========================================================================== */
+function validateForm(formElement) {
+  let valid = true;
+  formElement.querySelectorAll('[required]').forEach(input => {
+    const errorEl = input.nextElementSibling;
+    if (!input.value.trim()) {
+      input.classList.add('border-red-500');
+      if (errorEl && errorEl.classList.contains('form-error-msg')) {
+        errorEl.classList.remove('hidden');
+      }
+      valid = false;
+    } else {
+      input.classList.remove('border-red-500');
+      if (errorEl && errorEl.classList.contains('form-error-msg')) {
+        errorEl.classList.add('hidden');
+      }
+    }
+  });
+  return valid;
+}
+
+/* ==========================================================================
+   === LIGHT / DARK MODE SYSTEM TRANSITIONS ===
+   ========================================================================== */
+function initTheme() {
+  const saved = localStorage.getItem('theme') || 'dark'; // default to cyber dark
+  if (saved === 'light') {
+    document.documentElement.classList.add('light');
+    updateThemeToggleIcon('light');
+    const checkbox = document.getElementById('dark-theme-mode-check');
+    if (checkbox) checkbox.checked = true;
+  } else {
+    document.documentElement.classList.remove('light');
+    updateThemeToggleIcon('dark');
+    const checkbox = document.getElementById('dark-theme-mode-check');
+    if (checkbox) checkbox.checked = false;
+  }
+}
+
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle('light');
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  updateThemeToggleIcon(isLight ? 'light' : 'dark');
+  
+  // Sync the settings mode checkbox
+  const checkbox = document.getElementById('dark-theme-mode-check');
+  if (checkbox) checkbox.checked = isLight;
+  
+  // Dynamic Chart redraw
+  initCharts();
+  
+  showToast(isLight ? "Light theme overlays active" : "Futuristic cyber dark space theme active", "info");
+}
+
+function updateThemeToggleIcon(mode) {
+  const btn = document.getElementById('theme-toggle');
+  if (btn) {
+    btn.innerHTML = mode === 'light' 
+      ? '<i class="fas fa-sun text-yellow-400 text-base"></i>' 
+      : '<i class="fas fa-moon text-school-cyan text-base"></i>';
+  }
+}
+
+/* ==========================================================================
+   === DYNAMIC BACKGROUND CANVAS PARTICLES DRIFT ===
+   ========================================================================== */
+function initBackgroundParticles() {
+  const canvas = document.getElementById('particles-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  
+  let particles = [];
+  const particleCount = 45;
+  
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+  
+  // Seed drift coordinates
+  for (let i = 0; i < particleCount; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      radius: Math.random() * 2 + 1,
+      color: getRandomParticleColor()
+    });
+  }
+  
+  function getRandomParticleColor() {
+    const r = Math.random();
+    if (r < 0.4) return 'rgba(0, 212, 255, 0.15)'; // Cyan
+    if (r < 0.7) return 'rgba(139, 0, 0, 0.1)';   // Crimson
+    return 'rgba(255, 255, 255, 0.1)';            // White
+  }
+  
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    particles.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      
+      // Wrapping screen borders
+      if (p.x < 0) p.x = canvas.width;
+      if (p.x > canvas.width) p.x = 0;
+      if (p.y < 0) p.y = canvas.height;
+      if (p.y > canvas.height) p.y = 0;
+      
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.fill();
+    });
+    
+    requestAnimationFrame(animate);
+  }
+  
+  animate();
+}
+
+/* ==========================================================================
+   === APPLICATION INITIALIZER SEQUENCE ===
+   ========================================================================== */
+document.addEventListener("DOMContentLoaded", () => {
+  // 1. Particle Canvas Initialization
+  initBackgroundParticles();
+  
+  // 2. Sync visual customizer colors and languages
+  initTheme();
+  applySettingsAesthetics();
+
+  // 3. Trigger session guard immediately
+  checkSessionGuard();
+
+  // 4. Time Update (Africa/Mogadishu zone matches Hargeisa time zone GMT+3)
+  setInterval(() => {
+    const clockEl = document.getElementById('live-clock');
+    if (!clockEl) return;
+    const timeStr = new Date().toLocaleString("en-US", {
+      timeZone: "Africa/Mogadishu",
+      hour12: true,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    });
+    const label = settings.language === 'so' ? 'Hargeysa: ' : 'Hargeisa: ';
+    clockEl.innerText = `${label}${timeStr}`;
+  }, 1000);
+
+  // 5. Connect modal click overlay dismissal bounds
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        closeModal(overlay.id);
+      }
+    });
+  });
+});
