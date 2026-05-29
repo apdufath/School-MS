@@ -60,8 +60,8 @@
 
   <!-- 2. LOGIN GATE (Session Guard Screen) -->
   <div id="login-screen" class="fixed inset-0 z-[999] flex items-center justify-center bg-[#060b16] select-none transition-all duration-500">
-    <div class="glass p-8 w-full max-w-[420px] mx-4 relative flex flex-col items-center shadow-[0_0_50px_rgba(0,212,255,0.15)] text-center animate-fade">
-      <!-- Brand Initials avatar with cyan neon outline -->
+    <div class="glass p-12 w-full max-w-[420px] mx-4 relative flex flex-col items-center shadow-[0_0_50px_rgba(0,212,255,0.15)] text-center animate-fade">
+      <!-- Circular initials brand badge in gold and crimson with cyan glow ring -->
       <div class="w-20 h-20 bg-gradient-to-tr from-school-red to-school-accent border-2 border-school-gold rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(0,212,255,0.3)] mb-4">
         <span class="font-serif font-bold text-school-gold text-3xl tracking-widest">AS</span>
       </div>
@@ -80,11 +80,16 @@
           <input type="password" id="login-password" class="glass-input w-full pl-10 pr-4 py-2.5 rounded text-sm placeholder-white/20" placeholder="••••••••" required>
         </div>
         
-        <button type="submit" class="w-full py-3 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(139,0,0,0.4)] transition-all duration-300 transform hover:scale-[1.02] active:scale-95 cursor-pointer mt-6">
-          Authorize Access
+        <button type="submit" class="w-full py-3 btn-primary text-white font-bold rounded text-xs uppercase tracking-widest cursor-pointer mt-6">
+          Sign In
         </button>
       </form>
-      <p class="text-[10px] text-white/30 mt-6 tracking-wide">Secure Academic Management Portal</p>
+      <div class="mt-4 flex flex-col items-center gap-2">
+        <a href="#" onclick="event.preventDefault(); showToast('Demo credentials shown below', 'info')" class="text-[10px] text-school-cyan hover:underline transition-all font-semibold">Forgot Password?</a>
+        <div class="p-2.5 rounded-lg border border-white/5 bg-white/5 text-[9px] text-white/40 max-w-full font-mono">
+          Demo: <span class="text-white/80 font-bold select-all">admin@abaarso.edu</span> / <span class="text-white/80 font-bold select-all">admin123</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -94,8 +99,8 @@
     <!-- Mobile sidebar overlay closer -->
     <div id="overlay" class="fixed inset-0 bg-black/60 opacity-0 pointer-events-none z-40 md:hidden transition-all duration-300" onclick="closeSidebar()"></div>
 
-    <!-- FIXED LEFT SIDEBAR (Width: 260px) - Transparent Glass Style -->
-    <aside id="sidebar" class="w-[260px] h-screen fixed left-0 top-0 z-50 flex flex-col shrink-0 text-white overflow-y-auto">
+    <!-- FIXED LEFT SIDEBAR (Width: 240px) - Transparent Glass Style -->
+    <aside id="sidebar" class="w-[240px] h-screen fixed left-0 top-0 z-50 flex flex-col shrink-0 text-white overflow-y-auto">
       
       <!-- Brand Logo Header with gold initials & waffles icon -->
       <div class="p-6 border-b border-white/10 flex items-center justify-between gap-2">
@@ -108,8 +113,9 @@
             <p class="text-[9px] text-school-gold uppercase font-bold tracking-wider">Imagine · Innovate</p>
           </div>
         </div>
-        <button class="text-school-cyan hover:text-white transition-all pointer-events-auto" title="System Dashboard Grid">
-          <i class="fa-solid fa-border-all text-sm"></i>
+        <button class="text-school-cyan hover:text-white transition-all pointer-events-auto flex items-center justify-center w-7 h-7" title="System Dashboard Grid">
+          <!-- Waffle/grid icon (⠿) next to logo like reference -->
+          <span class="text-lg font-bold leading-none">⠿</span>
         </button>
       </div>
 
@@ -189,42 +195,42 @@
 
       <!-- Sidebar Footer / Logout Anchor -->
       <div class="p-4 border-t border-white/10">
-        <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-3 py-2.5 bg-red-950/40 hover:bg-school-red/40 border border-red-500/20 hover:border-red-500/50 rounded-lg text-xs font-bold text-red-300 hover:text-white uppercase transition-all duration-300">
+        <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-3 py-2.5 bg-red-955/40 hover:bg-school-red/40 border border-red-500/20 hover:border-red-500/50 rounded-lg text-xs font-bold text-red-300 hover:text-white uppercase transition-all duration-300">
           <i class="fa-solid fa-right-from-bracket"></i>
           <span>Logout Portal</span>
         </button>
       </div>
     </aside>
 
-    <!-- RIGHT SCROLLABLE WORKSPACE (Offset by 260px on Desktop) -->
-    <div id="main-content" class="md:ml-[260px] flex-grow flex flex-col justify-between min-w-0 transition-all duration-300">
+    <!-- RIGHT SCROLLABLE WORKSPACE (Offset by 240px on Desktop) -->
+    <div id="main-content" class="md:ml-[240px] flex-grow flex flex-col justify-between min-w-0 transition-all duration-300">
       
       <!-- TOP NAVIGATION NAVBAR -->
       <header class="h-[70px] bg-white/5 border-b border-white/10 flex items-center justify-between px-6 sticky top-0 z-30 shadow-md no-print backdrop-blur-md">
         <div class="flex items-center gap-4">
           <!-- Waffle responsive menu toggle button -->
           <button id="sidebar-hamburger" onclick="toggleSidebar()" class="md:hidden text-2xl text-school-gold hover:text-white focus:outline-none transition-all">
-            <i class="fa-solid fa-grip"></i>
+            <span class="text-xl">⠿</span>
           </button>
           <h1 id="header-page-title" class="text-xl md:text-2xl font-bold tracking-wide text-white font-headings">Dashboard</h1>
         </div>
 
         <div class="flex items-center gap-4 md:gap-6">
-          <!-- Hargeisa time dynamic clock -->
+          <!-- Hargeisa time zone clock -->
           <div id="live-clock" class="hidden sm:flex text-xs md:text-sm font-semibold text-white/70 flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
             <i class="fa-regular fa-clock text-school-cyan"></i>
             <span>Hargeisa: --:--:--</span>
           </div>
           
-          <!-- Sun/Moon synchronization switch -->
+          <!-- Theme toggle (moon 🌙 / sun ☀️) -->
           <button id="theme-toggle" class="rounded-full p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-school-cyan transition-all text-white/80 hover:text-white cursor-pointer flex items-center justify-center" onclick="toggleTheme()" title="Toggle Visual System Theme">
             <i class="fas fa-moon text-base text-school-cyan"></i>
           </button>
 
-          <!-- Alarm Bell Trigger -->
+          <!-- Alarm Bell Trigger with crimson notification dot badge -->
           <div id="notif-trigger" class="relative cursor-pointer text-white/70 hover:text-white transition-colors bg-white/5 p-2.5 rounded-full border border-white/10">
             <i class="fa-regular fa-bell text-base"></i>
-            <div class="absolute top-0 right-0 bg-school-accent text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-[#0a0f1e]">2</div>
+            <div class="absolute top-1 right-1 bg-school-accent w-2.5 h-2.5 rounded-full border border-[#0a0f1e]"></div>
           </div>
         </div>
       </header>
@@ -238,59 +244,73 @@
         <section id="dashboard" class="hidden space-y-8 animate-fade">
           
           <!-- Notices moving marquee banner -->
-          <div class="glass p-3 flex items-center gap-4 overflow-hidden select-none border-l-4 border-l-school-cyan">
+          <div class="glass p-3 flex items-center gap-4 overflow-hidden select-none border-l-4 border-l-school-cyan shadow-lg">
             <span class="bg-school-red text-white text-[9px] font-bold px-2 py-0.5 rounded tracking-widest shrink-0 uppercase" data-lang="notice_bar_lbl">Notice</span>
             <div class="flex-grow whitespace-nowrap overflow-hidden">
               <span class="inline-block animate-[marquee_20s_linear_infinite] hover:paused text-sm text-school-gold font-semibold tracking-wider">
-                Abaarso School End of Term examinations schedules are finalized and published in the Exams section. Term starts Sunday.
+                Abaarso School End of Term examinations schedules are finalized and published in the Central Registry portal. Testing begins June 15th.
               </span>
             </div>
           </div>
 
-          <!-- Counter Cards (Dashboard Stats) -->
+          <!-- Counter Cards (4 cards grid layout) -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 select-none">
-            <div class="glass p-6 border-l-4 border-l-school-red flex items-center justify-between card-hover-lift">
-              <div>
-                <h3 class="text-3xl font-bold text-white font-headings" id="count-students">0</h3>
-                <p class="text-[10px] text-white/50 font-bold uppercase tracking-wider mt-1" data-lang="students_lbl">Students</p>
-              </div>
-              <div class="w-12 h-12 bg-white/5 text-school-gold rounded-xl flex items-center justify-center text-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] border border-white/10">
-                <i class="fa-solid fa-graduation-cap text-school-cyan"></i>
-              </div>
-            </div>
-
-            <div class="glass p-6 border-l-4 border-l-school-gold flex items-center justify-between card-hover-lift">
-              <div>
-                <h3 class="text-3xl font-bold text-white font-headings" id="count-teachers">0</h3>
-                <p class="text-[10px] text-white/50 font-bold uppercase tracking-wider mt-1" data-lang="teachers_lbl">Teachers</p>
-              </div>
-              <div class="w-12 h-12 bg-white/5 text-school-gold rounded-xl flex items-center justify-center text-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] border border-white/10">
-                <i class="fa-solid fa-chalkboard-user text-school-gold"></i>
+            
+            <!-- Card 1: Students -->
+            <div class="glass p-5 border-b-2 border-school-cyan flex flex-col justify-between h-32 card-hover-lift">
+              <div class="flex justify-between items-start w-full">
+                <div>
+                  <span class="text-3xl font-extrabold tracking-wide text-glow font-headings" id="count-students">0</span>
+                  <p class="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1.5" data-lang="students_lbl">Students</p>
+                </div>
+                <div class="w-10 h-10 bg-school-cyan/15 rounded-full flex items-center justify-center border border-school-cyan/35 shadow-[0_0_15px_rgba(0,212,255,0.25)] animate-pulse">
+                  <i class="fa-solid fa-graduation-cap text-school-cyan text-sm"></i>
+                </div>
               </div>
             </div>
 
-            <div class="glass p-6 border-l-4 border-l-green-500 flex items-center justify-between card-hover-lift">
-              <div>
-                <h3 class="text-3xl font-bold text-white font-headings" id="count-classes">0</h3>
-                <p class="text-[10px] text-white/50 font-bold uppercase tracking-wider mt-1" data-lang="classes_lbl">Classes</p>
-              </div>
-              <div class="w-12 h-12 bg-white/5 text-green-400 rounded-xl flex items-center justify-center text-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] border border-white/10">
-                <i class="fa-solid fa-school text-green-400"></i>
+            <!-- Card 2: Teachers -->
+            <div class="glass p-5 border-b-2 border-school-red flex flex-col justify-between h-32 card-hover-lift">
+              <div class="flex justify-between items-start w-full">
+                <div>
+                  <span class="text-3xl font-extrabold tracking-wide text-glow font-headings" id="count-teachers">0</span>
+                  <p class="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1.5" data-lang="teachers_lbl">Teachers</p>
+                </div>
+                <div class="w-10 h-10 bg-school-cyan/15 rounded-full flex items-center justify-center border border-school-cyan/35 shadow-[0_0_15px_rgba(0,212,255,0.25)]">
+                  <i class="fa-solid fa-chalkboard-user text-school-cyan text-sm"></i>
+                </div>
               </div>
             </div>
 
-            <div class="glass p-6 border-l-4 border-l-school-cyan flex items-center justify-between card-hover-lift">
-              <div>
-                <h3 class="text-3xl font-bold text-white font-headings" id="count-events">0</h3>
-                <p class="text-[10px] text-white/50 font-bold uppercase tracking-wider mt-1" data-lang="events_lbl">Upcoming Events</p>
-              </div>
-              <div class="w-12 h-12 bg-white/5 text-school-cyan rounded-xl flex items-center justify-center text-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] border border-white/10">
-                <i class="fa-solid fa-calendar-check text-school-cyan"></i>
+            <!-- Card 3: Classes -->
+            <div class="glass p-5 border-b-2 border-school-cyan flex flex-col justify-between h-32 card-hover-lift">
+              <div class="flex justify-between items-start w-full">
+                <div>
+                  <span class="text-3xl font-extrabold tracking-wide text-glow font-headings" id="count-classes">0</span>
+                  <p class="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1.5" data-lang="classes_lbl">Classes</p>
+                </div>
+                <div class="w-10 h-10 bg-school-cyan/15 rounded-full flex items-center justify-center border border-school-cyan/35 shadow-[0_0_15px_rgba(0,212,255,0.25)]">
+                  <i class="fa-solid fa-school text-school-cyan text-sm"></i>
+                </div>
               </div>
             </div>
+
+            <!-- Card 4: Upcoming Events -->
+            <div class="glass p-5 border-b-2 border-school-red flex flex-col justify-between h-32 card-hover-lift">
+              <div class="flex justify-between items-start w-full">
+                <div>
+                  <span class="text-3xl font-extrabold tracking-wide text-glow font-headings" id="count-events">0</span>
+                  <p class="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1.5" data-lang="events_lbl">Upcoming Events</p>
+                </div>
+                <div class="w-10 h-10 bg-school-cyan/15 rounded-full flex items-center justify-center border border-school-cyan/35 shadow-[0_0_15px_rgba(0,212,255,0.25)]">
+                  <i class="fa-solid fa-calendar-check text-school-cyan text-sm"></i>
+                </div>
+              </div>
+            </div>
+
           </div>
 
-          <!-- Chart.js Graphs Row -->
+          <!-- Chart.js Graphics Row -->
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Line graph for Average Student GPA progress -->
             <div class="glass p-6 lg:col-span-2 flex flex-col justify-between shadow-2xl relative overflow-hidden">
@@ -301,8 +321,25 @@
                 </h3>
                 <span class="text-[10px] bg-school-cyan/20 text-school-cyan border border-school-cyan/35 px-2 py-0.5 rounded uppercase font-semibold">Active Registrar</span>
               </div>
-              <div class="relative h-[280px] w-full">
+              
+              <div class="relative h-[220px] w-full mb-4">
                 <canvas id="performance-chart"></canvas>
+              </div>
+
+              <!-- 3 metric badges below the chart as requested -->
+              <div class="grid grid-cols-3 gap-4 pt-4 border-t border-white/5 text-center">
+                <div class="bg-white/5 border border-white/10 rounded-xl p-2.5">
+                  <span class="text-[9px] text-white/50 uppercase font-bold tracking-widest block mb-1">Total Fees</span>
+                  <span class="text-sm font-extrabold text-glow" id="badge-total-fees">$12,400</span>
+                </div>
+                <div class="bg-white/5 border border-white/10 rounded-xl p-2.5">
+                  <span class="text-[9px] text-white/50 uppercase font-bold tracking-widest block mb-1">Attendance</span>
+                  <span class="text-sm font-extrabold text-green-400">96.8%</span>
+                </div>
+                <div class="bg-white/5 border border-white/10 rounded-xl p-2.5">
+                  <span class="text-[9px] text-white/50 uppercase font-bold tracking-widest block mb-1">Active Classes</span>
+                  <span class="text-sm font-extrabold text-school-gold" id="badge-active-classes">5 Classes</span>
+                </div>
               </div>
             </div>
 
@@ -311,41 +348,80 @@
               <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-3">
                 <h3 class="text-lg font-bold text-white font-headings flex items-center gap-2">
                   <i class="fa-solid fa-chart-pie text-school-gold"></i>
-                  <span data-lang="exam_stats">Exam Passing Ratios</span>
+                  <span data-lang="exam_stats">Exam Status</span>
                 </h3>
                 <span class="text-[10px] bg-school-gold/20 text-school-gold border border-school-gold/35 px-2 py-0.5 rounded uppercase font-semibold">Term A</span>
               </div>
               <div class="relative h-[250px] w-full flex items-center justify-center">
                 <canvas id="exam-status-chart"></canvas>
               </div>
+              <!-- Legend below standard donut chart -->
+              <div class="flex justify-center gap-4 text-[10px] font-bold text-white/60 pt-4 border-t border-white/5 mt-2 uppercase tracking-wider">
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#00d4ff]"></span> Passed</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#8B0000]"></span> Failed</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#D4AF37]"></span> Pending</span>
+              </div>
             </div>
           </div>
 
-          <!-- Dashboard bottom details columns -->
+          <!-- Middle Row: Active Classes (Progress List) & Recent Activity Timeline -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Active Classes progress list -->
+            <div class="glass p-6 lg:col-span-2 shadow-2xl flex flex-col justify-between">
+              <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+                <h3 class="text-base font-bold text-white font-headings flex items-center gap-2">
+                  <i class="fa-solid fa-list-check text-school-cyan"></i>
+                  <span>Active Classes</span>
+                </h3>
+                <span class="text-xs text-white/50">Syllabus Completion</span>
+              </div>
+              <div class="space-y-4 py-2" id="active-classes-progress-list">
+                <!-- Seeded dynamically by app.js with gradient progress bars -->
+              </div>
+            </div>
+
+            <!-- Recent Activity scrollable card log -->
+            <div class="glass p-6 shadow-2xl flex flex-col justify-between">
+              <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+                <h3 class="text-base font-bold text-white font-headings flex items-center gap-2">
+                  <i class="fa-solid fa-bolt text-school-gold"></i>
+                  <span>Recent Activity</span>
+                </h3>
+                <span class="text-xs text-white/50">System Logs</span>
+              </div>
+              <div class="h-[215px] overflow-y-auto pr-1 space-y-4" id="recent-activity-list">
+                <!-- Activity list items injected by app.js -->
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Columns: Welcome Actions & Calendars -->
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             <!-- Left Info Block & Quick Actions -->
             <div class="glass p-6 lg:col-span-2 card-hover-lift flex flex-col justify-between">
               <div>
-                <h3 class="text-xl font-bold text-school-gold border-b border-white/10 pb-3 mb-4 font-serif school-name-text" data-lang="welcome_title">Welcome to Abaarso School Management System</h3>
-                <p class="text-sm text-white/80 leading-relaxed school-tagline-text" data-lang="welcome_body">
+                <h3 class="text-base font-bold text-school-gold border-b border-white/10 pb-3 mb-4 font-serif school-name-text" data-lang="welcome_title">Welcome to Abaarso School Management System</h3>
+                <p class="text-xs text-white/80 leading-relaxed school-tagline-text" data-lang="welcome_body">
                   Abaarso School is a leader in progressive academic excellence. This single page platform enables educators and administrators to maintain student profiles, structure academic timetables, record exams performance, regulate fee collection registers, and manage institutional publications efficiently.
                 </p>
               </div>
               
-              <div class="mt-8">
+              <div class="mt-6">
                 <h4 class="text-xs font-bold text-school-cyan tracking-wider uppercase mb-3" data-lang="quick_act_title">Quick Actions</h4>
                 <div class="grid grid-cols-3 gap-3 text-center">
-                  <div class="p-4 bg-white/5 border border-white/10 hover:border-school-cyan hover:bg-white/10 rounded-xl cursor-pointer transition-all group" onclick="openModal('modal-add-student')">
-                    <i class="fa-solid fa-user-plus text-school-cyan text-lg mb-2 group-hover:scale-110 transition-transform"></i>
+                  <div class="p-3 bg-white/5 border border-white/10 hover:border-school-cyan hover:bg-white/10 rounded-xl cursor-pointer transition-all group" onclick="openModal('modal-add-student')">
+                    <i class="fa-solid fa-user-plus text-school-cyan text-base mb-1.5 group-hover:scale-110 transition-transform"></i>
                     <p class="text-[9px] font-bold uppercase tracking-wider text-white/70 group-hover:text-white" data-lang="add_stud_btn">Add Student</p>
                   </div>
-                  <div class="p-4 bg-white/5 border border-white/10 hover:border-school-cyan hover:bg-white/10 rounded-xl cursor-pointer transition-all group" onclick="openModal('modal-add-teacher')">
-                    <i class="fa-solid fa-user-tie text-school-gold text-lg mb-2 group-hover:scale-110 transition-transform"></i>
+                  <div class="p-3 bg-white/5 border border-white/10 hover:border-school-cyan hover:bg-white/10 rounded-xl cursor-pointer transition-all group" onclick="openModal('modal-add-teacher')">
+                    <i class="fa-solid fa-user-tie text-school-gold text-base mb-1.5 group-hover:scale-110 transition-transform"></i>
                     <p class="text-[9px] font-bold uppercase tracking-wider text-white/70 group-hover:text-white" data-lang="add_teach_btn">Add Teacher</p>
                   </div>
-                  <div class="p-4 bg-white/5 border border-white/10 hover:border-school-cyan hover:bg-white/10 rounded-xl cursor-pointer transition-all group" onclick="showSection('exams')">
-                    <i class="fa-solid fa-chart-line text-green-400 text-lg mb-2 group-hover:scale-110 transition-transform"></i>
+                  <div class="p-3 bg-white/5 border border-white/10 hover:border-school-cyan hover:bg-white/10 rounded-xl cursor-pointer transition-all group" onclick="showSection('exams')">
+                    <i class="fa-solid fa-chart-line text-green-400 text-base mb-1.5 group-hover:scale-110 transition-transform"></i>
                     <p class="text-[9px] font-bold uppercase tracking-wider text-white/70 group-hover:text-white" data-lang="enter_score_btn">Enter Score</p>
                   </div>
                 </div>
@@ -357,7 +433,7 @@
               <!-- Calendar Card -->
               <div class="glass p-6 card-hover-lift">
                 <div class="flex justify-between items-center mb-4">
-                  <h4 class="font-bold text-white text-sm" id="mini-calendar-title">May 2026</h4>
+                  <h4 class="font-bold text-white text-xs" id="mini-calendar-title">May 2026</h4>
                   <div class="flex gap-2">
                     <button class="w-6 h-6 border border-white/15 rounded flex items-center justify-center text-xs hover:bg-white/10 cursor-pointer text-white" onclick="prevCalendarMonth()">&larr;</button>
                     <button class="w-6 h-6 border border-white/15 rounded flex items-center justify-center text-xs hover:bg-white/10 cursor-pointer text-white" onclick="nextCalendarMonth()">&rarr;</button>
@@ -370,7 +446,7 @@
               
               <!-- Recent Notices Box -->
               <div class="glass p-6 card-hover-lift">
-                <h4 class="font-bold text-school-gold text-sm border-b border-white/10 pb-2 mb-4 uppercase tracking-wider" data-lang="recent_ann_title">Recent Announcements</h4>
+                <h4 class="font-bold text-school-gold text-xs border-b border-white/10 pb-2 mb-4 uppercase tracking-wider" data-lang="recent_ann_title">Recent Announcements</h4>
                 <div class="space-y-4 shadow-sm" id="recent-announcements-list">
                   <!-- Injected by app.js -->
                 </div>
@@ -387,7 +463,7 @@
           <div class="glass overflow-hidden shadow-xl">
             <div class="p-6 border-b border-white/10 flex flex-wrap justify-between items-center gap-4">
               <h3 class="text-xl font-bold text-school-gold font-serif" data-lang="student_ledger">Student Registry</h3>
-              <button class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-student')">
+              <button class="px-4 py-2 btn-primary text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-student')">
                 <i class="fa-solid fa-plus mr-1"></i> <span data-lang="add_stud_btn">Add Student</span>
               </button>
             </div>
@@ -447,7 +523,7 @@
               <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 text-sm"></i>
               <input type="text" id="search-teachers" class="glass-input w-full pl-10 pr-4 py-2.5 rounded-lg text-sm placeholder-white/20 focus:outline-none" placeholder="Search teacher by name or subject..." oninput="renderTeachers()">
             </div>
-            <button class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-teacher')">
+            <button class="px-4 py-2 btn-primary text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-teacher')">
               <i class="fa-solid fa-plus mr-1"></i> <span data-lang="add_teach_btn">Add Teacher</span>
             </button>
           </div>
@@ -462,7 +538,7 @@
         <!-- ======================================== -->
         <section id="classes" class="hidden space-y-6 animate-fade">
           <div class="flex justify-end">
-            <button class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-class')">
+            <button class="px-4 py-2 btn-primary text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-class')">
               <i class="fa-solid fa-plus mr-1"></i> <span data-lang="add_class_btn">Add Class</span>
             </button>
           </div>
@@ -531,7 +607,7 @@
             <div class="glass overflow-hidden shadow-xl">
               <div class="p-6 border-b border-white/10 flex justify-between items-center">
                 <h3 class="text-xl font-bold text-school-gold font-serif" data-lang="exam_schedule">Exam Schedule</h3>
-                <button class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-exam')">
+                <button class="px-4 py-2 btn-primary text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-exam')">
                   <i class="fa-solid fa-plus mr-1"></i> <span data-lang="add_exam_btn">Add Exam</span>
                 </button>
               </div>
@@ -566,7 +642,7 @@
                   <button class="px-4 py-2 bg-gradient-to-r from-school-gold to-amber-500 text-gray-950 font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="exportExamsResultsCSV()">
                     <i class="fa-solid fa-file-csv mr-1"></i> <span data-lang="export_csv_btn">Export CSV</span>
                   </button>
-                  <button class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-result')">
+                  <button class="px-4 py-2 btn-primary text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-result')">
                     <i class="fa-solid fa-plus mr-1"></i> <span data-lang="enter_score_btn">Enter Score</span>
                   </button>
                 </div>
@@ -653,7 +729,7 @@
           <div class="glass overflow-hidden shadow-xl">
             <div class="p-6 border-b border-white/10 flex justify-between items-center">
               <h3 class="text-xl font-bold text-school-gold font-serif" data-lang="fees_summary">Fees Management Accounts</h3>
-              <button class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-payment')">
+              <button class="px-4 py-2 btn-primary text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-payment')">
                 <i class="fa-solid fa-plus mr-1"></i> <span data-lang="record_pay_btn">Record Payment</span>
               </button>
             </div>
@@ -721,7 +797,7 @@
                   <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Fariinta details are required.</div>
                 </div>
 
-                <button type="submit" class="w-full py-3 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs uppercase tracking-wider transition-all shadow-lg cursor-pointer">
+                <button type="submit" class="w-full py-3 btn-primary text-white font-bold rounded text-xs uppercase tracking-wider transition-all shadow-lg cursor-pointer">
                   <i class="fa-solid fa-paper-plane mr-1"></i> Publish Notice
                 </button>
               </form>
@@ -762,7 +838,7 @@
                   </div>
                 </div>
                 
-                <button type="submit" class="w-full py-3 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs uppercase tracking-wider transition-all shadow-lg cursor-pointer">
+                <button type="submit" class="w-full py-3 btn-primary text-white font-bold rounded text-xs uppercase tracking-wider transition-all shadow-lg cursor-pointer">
                   <i class="fa-solid fa-save mr-1"></i> <span data-lang="save_btn">Save Settings</span>
                 </button>
               </form>
@@ -787,8 +863,8 @@
                   <div>
                     <label class="block text-xs font-bold text-white/50 uppercase mb-2 font-headings" data-lang="lang_toggle">System Language</label>
                     <div class="flex gap-3">
-                      <button id="lang-btn-en" onclick="changeLanguage('en')" class="px-4 py-2 border rounded-lg text-xs font-bold transition-all uppercase tracking-wider cursor-pointer">English</button>
-                      <button id="lang-btn-so" onclick="changeLanguage('so')" class="px-4 py-2 border rounded-lg text-xs font-bold transition-all uppercase tracking-wider cursor-pointer">Somali (Soomaali)</button>
+                      <button id="lang-btn-en" onclick="changeLanguage('en')" class="px-4 py-2 border rounded-lg text-xs font-bold transition-all uppercase tracking-wider cursor-pointer font-headings">English</button>
+                      <button id="lang-btn-so" onclick="changeLanguage('so')" class="px-4 py-2 border rounded-lg text-xs font-bold transition-all uppercase tracking-wider cursor-pointer font-headings">Somali (Soomaali)</button>
                     </div>
                   </div>
 
@@ -885,7 +961,7 @@
         </div>
         <div class="px-6 py-4 border-t border-white/10 flex justify-end gap-2 bg-black/10">
           <button type="button" class="px-4 py-2 border border-white/15 rounded text-xs font-bold text-white/80 hover:bg-white/5 transition-all cursor-pointer" onclick="closeModal('modal-add-student')">CANCEL</button>
-          <button type="submit" class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs transition-colors cursor-pointer">SAVE STUDENT</button>
+          <button type="submit" class="px-4 py-2 btn-primary text-white font-bold rounded text-xs transition-colors cursor-pointer">SAVE STUDENT</button>
         </div>
       </form>
     </div>
@@ -960,7 +1036,7 @@
         </div>
         <div class="px-6 py-4 border-t border-white/10 flex justify-end gap-2 bg-black/10">
           <button type="button" class="px-4 py-2 border border-white/15 rounded text-xs font-bold text-white/80 hover:bg-white/5 transition-all cursor-pointer" onclick="closeModal('modal-add-teacher')">CANCEL</button>
-          <button type="submit" class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs transition-colors cursor-pointer">SAVE TEACHER</button>
+          <button type="submit" class="px-4 py-2 btn-primary text-white font-bold rounded text-xs transition-colors cursor-pointer">SAVE TEACHER</button>
         </div>
       </form>
     </div>
@@ -995,7 +1071,7 @@
         </div>
         <div class="px-6 py-4 border-t border-white/10 flex justify-end gap-2 bg-black/10">
           <button type="button" class="px-4 py-2 border border-white/15 rounded text-xs font-bold text-white/80 hover:bg-white/5 transition-all cursor-pointer" onclick="closeModal('modal-add-class')">CANCEL</button>
-          <button type="submit" class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs transition-colors cursor-pointer">SAVE CLASS</button>
+          <button type="submit" class="px-4 py-2 btn-primary text-white font-bold rounded text-xs transition-colors cursor-pointer">SAVE CLASS</button>
         </div>
       </form>
     </div>
@@ -1040,7 +1116,7 @@
         </div>
         <div class="px-6 py-4 border-t border-white/10 flex justify-end gap-2 bg-black/10">
           <button type="button" class="px-4 py-2 border border-white/15 rounded text-xs font-bold text-white/80 hover:bg-white/5 transition-all cursor-pointer" onclick="closeModal('modal-add-exam')">CANCEL</button>
-          <button type="submit" class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs transition-colors cursor-pointer">SAVE EXAM</button>
+          <button type="submit" class="px-4 py-2 btn-primary text-white font-bold rounded text-xs transition-colors cursor-pointer">SAVE EXAM</button>
         </div>
       </form>
     </div>
@@ -1081,7 +1157,7 @@
         </div>
         <div class="px-6 py-4 border-t border-white/10 flex justify-end gap-2 bg-black/10">
           <button type="button" class="px-4 py-2 border border-white/15 rounded text-xs font-bold text-white/80 hover:bg-white/5 transition-all cursor-pointer" onclick="closeModal('modal-add-result')">CANCEL</button>
-          <button type="submit" class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs transition-colors cursor-pointer">SAVE SCORE</button>
+          <button type="submit" class="px-4 py-2 btn-primary text-white font-bold rounded text-xs transition-colors cursor-pointer">SAVE SCORE</button>
         </div>
       </form>
     </div>
@@ -1110,7 +1186,7 @@
         </div>
         <div class="px-6 py-4 border-t border-white/10 flex justify-end gap-2 bg-black/10">
           <button type="button" class="px-4 py-2 border border-white/15 rounded text-xs font-bold text-white/80 hover:bg-white/5 transition-all cursor-pointer" onclick="closeModal('modal-add-payment')">CANCEL</button>
-          <button type="submit" class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs transition-colors cursor-pointer">LOG TRANSACTION</button>
+          <button type="submit" class="px-4 py-2 btn-primary text-white font-bold rounded text-xs transition-colors cursor-pointer">LOG TRANSACTION</button>
         </div>
       </form>
     </div>
@@ -1127,7 +1203,7 @@
         <input type="hidden" id="tt-day">
         <input type="hidden" id="tt-period">
         <div class="p-6 space-y-4">
-          <div id="tt-details-label" class="text-xs font-bold text-school-gold uppercase tracking-wider bg-white/5 p-2.5 rounded-xl border border-white/10 text-center">
+          <div id="tt-details-label" class="text-xs font-bold text-school-gold uppercase tracking-wider bg-white/5 p-2.5 rounded-xl border border-white/10 text-center font-mono">
             Day: -- | Period: --
           </div>
           <div>
@@ -1151,7 +1227,7 @@
         </div>
         <div class="px-6 py-4 border-t border-white/10 flex justify-end gap-2 bg-black/10">
           <button type="button" class="px-4 py-2 border border-white/15 rounded text-xs font-bold text-white/80 hover:bg-white/5 transition-all cursor-pointer" onclick="closeModal('modal-timetable-cell')">CANCEL</button>
-          <button type="submit" class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs transition-colors cursor-pointer">ALLOCATE</button>
+          <button type="submit" class="px-4 py-2 btn-primary text-white font-bold rounded text-xs transition-colors cursor-pointer">ALLOCATE</button>
         </div>
       </form>
     </div>
@@ -1182,7 +1258,7 @@
         </div>
       </div>
       <div class="px-6 py-4 border-t border-white/10 flex justify-end bg-black/10">
-        <button class="px-4 py-2 bg-gradient-to-r from-school-red to-school-accent hover:from-school-accent hover:to-school-cyan text-white font-bold rounded text-xs transition-colors cursor-pointer" onclick="closeModal('modal-class-roster')">CLOSE ROSTER</button>
+        <button class="px-4 py-2 btn-primary text-white font-bold rounded text-xs transition-colors cursor-pointer" onclick="closeModal('modal-class-roster')">CLOSE ROSTER</button>
       </div>
     </div>
   </div>

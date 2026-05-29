@@ -126,7 +126,7 @@ const dictionary = {
     theme_cust: "Theme & Language", color_pick: "Primary Theme Accent", lang_toggle: "System Language",
     save_btn: "Save Settings", total_col_card: "Total Collected", total_pend_card: "Total Pending",
     total_over_card: "Total Overdue", footer_text: "© 2026 Abaarso School · Hargiesa, Somaliland",
-    performance_graph: "Performance GPA Trend", exam_stats: "Exam Passing Ratios"
+    performance_graph: "Performance GPA Trend", exam_stats: "Exam Status"
   },
   so: {
     dashboard: "Dashboard-ka", students: "Ardayda", teachers: "Macallimiinta", classes: "Fasallada",
@@ -144,7 +144,7 @@ const dictionary = {
     theme_cust: "Midabada & Luuqadda", color_pick: "Midabka Nidaamka", lang_toggle: "Luuqadda Interface-ka",
     save_btn: "Keydi Habeeynta", total_col_card: "Wadarta la Ururiyey", total_pend_card: "Wadarta Sugan",
     total_over_card: "Wadarta Daahday", footer_text: "© 2026 Dugsiga Abaarso · Hargeysa, Somaliland",
-    performance_graph: "GPA-da & Natiijooyinka", exam_stats: "Heerka Gudubka Imtixaanka"
+    performance_graph: "GPA-da & Natiijooyinka", exam_stats: "Heerka Imtixaannada"
   }
 };
 
@@ -168,8 +168,7 @@ function checkSessionGuard() {
       }, 1000);
     }
     
-    // Initialize Dashboard Charts
-    initCharts();
+    // Initialize Dashboard Elements and Charts
     showSection(activeSection);
   } else {
     if (loginScreen) loginScreen.classList.remove('hidden');
@@ -200,11 +199,10 @@ function handleLogin(event) {
       }
       if (appLayout) appLayout.classList.remove('hidden');
       
-      initCharts();
       showSection('dashboard');
     }, 400);
   } else {
-    showToast("Unauthorized entry. Invalid administrator credentials", "error");
+    showToast("Unauthorized entry. Invalid credentials", "error");
     document.getElementById('login-password').value = '';
     document.getElementById('login-password').focus();
   }
@@ -262,6 +260,8 @@ function showSection(sectionId) {
     animateDashboardCounters();
     renderDashboardRecentAnnouncements();
     renderDashboardMiniCalendar();
+    renderDashboardActiveClasses();
+    renderDashboardRecentActivity();
     initCharts(); // Clean redraw of Chart.js widgets
   } else if (sectionId === 'students') {
     renderStudents();
@@ -344,9 +344,9 @@ function initCharts() {
     const ctx = lineCanvas.getContext('2d');
     
     // Create modern glowing neon area fill gradient
-    const gradient = ctx.createLinearGradient(0, 0, 0, 260);
-    gradient.addColorStop(0, 'rgba(0, 212, 255, 0.35)');
-    gradient.addColorStop(0.5, 'rgba(0, 212, 255, 0.1)');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+    gradient.addColorStop(0, 'rgba(0, 212, 255, 0.45)');
+    gradient.addColorStop(0.5, 'rgba(0, 212, 255, 0.15)');
     gradient.addColorStop(1, 'rgba(0, 212, 255, 0)');
 
     performanceChartInstance = new Chart(ctx, {
@@ -412,7 +412,7 @@ function initCharts() {
         labels: ['Passed', 'Failed', 'Pending'],
         datasets: [{
           data: [passedCount, failedCount, pendingCount],
-          backgroundColor: ['#00d4ff', '#C0392B', '#D4AF37'],
+          backgroundColor: ['#00d4ff', '#8B0000', '#D4AF37'],
           borderWidth: isLightTheme ? 2 : 0,
           borderColor: isLightTheme ? '#ffffff' : 'transparent',
           hoverOffset: 4
@@ -423,26 +423,21 @@ function initCharts() {
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            position: 'bottom',
-            labels: {
-              color: fontColor,
-              font: { family: 'Inter', size: 11, weight: 'bold' },
-              padding: 15
-            }
+            display: false // We use our custom legend below the chart in HTML
           }
         },
-        cutout: '70%'
+        cutout: '72%'
       }
     });
   }
 }
 
 /* ==========================================================================
-   === DASHBOARD COUNTERS & TIMELINES ===
+   === DASHBOARD COUNTERS & METRICS ===
    ========================================================================== */
 function animateDashboardCounters() {
   const targets = {
-    'count-students': students.length + 120, // offset for visual premium density
+    'count-students': students.length + 120, // offset for visual density
     'count-teachers': teachers.length,
     'count-classes': classes.length,
     'count-events': exams.length + 1
@@ -453,7 +448,7 @@ function animateDashboardCounters() {
     if (!el) return;
     const target = targets[id];
     let current = 0;
-    const duration = 800; // ms
+    const duration = 1000; // ms
     const increment = Math.ceil(target / (duration / 15)) || 1;
     
     const interval = setInterval(() => {
@@ -466,6 +461,14 @@ function animateDashboardCounters() {
       }
     }, 15);
   });
+
+  // Load accounting card metrics below line chart dynamically
+  const activeClassesBadge = document.getElementById('badge-active-classes');
+  if (activeClassesBadge) activeClassesBadge.innerText = `${classes.length} Classes`;
+  
+  let totalCollectedSum = fees.reduce((sum, f) => sum + f.amountPaid, 0);
+  const totalFeesBadge = document.getElementById('badge-total-fees');
+  if (totalFeesBadge) totalFeesBadge.innerText = `$${totalCollectedSum.toLocaleString()}`;
 }
 
 function renderDashboardRecentAnnouncements() {
@@ -481,17 +484,73 @@ function renderDashboardRecentAnnouncements() {
   
   list.forEach(ann => {
     let catClass = 'bg-white/5 text-white border border-white/10';
-    if (ann.category === 'Academic') catClass = 'bg-blue-950/40 text-blue-300 border border-blue-500/25';
-    if (ann.category === 'Event') catClass = 'bg-purple-950/40 text-purple-300 border border-purple-500/25';
+    if (ann.category === 'Academic') catClass = 'bg-blue-955/40 text-blue-300 border border-blue-500/25';
+    if (ann.category === 'Event') catClass = 'bg-purple-955/40 text-purple-300 border border-purple-500/25';
     
     container.innerHTML += `
-      <div class="py-2.5 border-b last:border-b-0 border-white/5">
-        <div class="flex items-center justify-between mb-1">
+      <div class="py-2 border-b last:border-b-0 border-white/5">
+        <div class="flex items-center justify-between mb-0.5">
           <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${catClass}">${ann.category}</span>
           <span class="text-[9px] text-white/40 font-semibold">${ann.date}</span>
         </div>
-        <h4 class="font-bold text-white text-xs mb-1">${ann.title}</h4>
-        <p class="text-[11px] text-white/60 line-clamp-2">${ann.message}</p>
+        <h4 class="font-bold text-white text-xs mb-0.5">${ann.title}</h4>
+        <p class="text-[11px] text-white/60 line-clamp-1">${ann.message}</p>
+      </div>
+    `;
+  });
+}
+
+function renderDashboardActiveClasses() {
+  const list = document.getElementById('active-classes-progress-list');
+  if (!list) return;
+  list.innerHTML = '';
+  
+  const activeClasses = [
+    { name: 'Grade 10-A (Mathematics)', percent: 84 },
+    { name: 'Grade 10-B (English)', percent: 76 },
+    { name: 'Grade 11-A (Science)', percent: 92 },
+    { name: 'Grade 11-B (Somali)', percent: 68 },
+    { name: 'Grade 12-A (History)', percent: 95 }
+  ];
+  
+  activeClasses.forEach(c => {
+    list.innerHTML += `
+      <div class="space-y-1">
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-white/80 font-bold">${c.name}</span>
+          <span class="text-school-cyan font-bold">${c.percent}%</span>
+        </div>
+        <div class="w-full bg-white/5 border border-white/10 rounded-full h-2.5 overflow-hidden">
+          <div class="progress-bar-fill h-full rounded-full animate-[progressBar_1s_ease-out]" style="width: ${c.percent}%"></div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function renderDashboardRecentActivity() {
+  const list = document.getElementById('recent-activity-list');
+  if (!list) return;
+  list.innerHTML = '';
+  
+  const logs = [
+    { initials: 'AA', text: 'Abdiwahab Ahmed paid $500 balance due', time: '10 mins ago', color: 'from-green-500 to-green-700' },
+    { initials: 'JH', text: 'Dr. John Harrison rescheduled Math Exam', time: '1 hour ago', color: 'from-[#00d4ff] to-blue-700' },
+    { initials: 'FO', text: 'Faduma Omer enrolled in Grade 10-A roster', time: '4 hours ago', color: 'from-[#D4AF37] to-amber-700' },
+    { initials: 'AS', text: 'Sarah Jenkins announced History notices', time: 'Yesterday', color: 'from-[#C0392B] to-red-950' },
+    { initials: 'MD', text: 'Mohamed Duale entered Physics test results', time: '2 days ago', color: 'from-[#8B0000] to-[#6B0000]' }
+  ];
+  
+  logs.forEach(l => {
+    list.innerHTML += `
+      <div class="flex items-center gap-3.5 pb-2 border-b border-white/5 last:border-b-0">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-tr ${l.color} text-white font-bold text-xs flex items-center justify-center shadow-lg shrink-0">
+          ${l.initials}
+        </div>
+        <div class="flex-grow flex justify-between items-start min-w-0">
+          <p class="text-[11px] text-white/90 leading-snug truncate pr-2">${l.text}</p>
+          <span class="text-[9px] text-white/40 font-semibold whitespace-nowrap bg-white/5 border border-white/10 rounded px-1.5 py-0.5">${l.time}</span>
+        </div>
       </div>
     `;
   });
@@ -557,7 +616,7 @@ function showCalendarInfo(dateString) {
   const matches = exams.filter(ex => ex.date === dateString);
   if (matches.length > 0) {
     const list = matches.map(m => `${m.subject} (${m.time} in ${m.room})`).join(', ');
-    showToast(`Exams today: ${list}`, 'info');
+    showToast(`Exams scheduled: ${list}`, 'info');
   } else {
     showToast(`No events scheduled for ${dateString}`, 'info');
   }
@@ -568,7 +627,6 @@ function showCalendarInfo(dateString) {
    ========================================================================== */
 let studentPage = 1;
 const studentLimit = 10;
-const studentPageSize = 10;
 
 function renderStudents() {
   const searchVal = document.getElementById('search-students').value.toLowerCase();
@@ -620,7 +678,7 @@ function renderStudents() {
           <td class="px-6 py-4 text-xs text-white/80"><span class="px-2 py-0.5 rounded bg-white/5 text-school-gold border border-white/10 font-bold">${s.class}</span></td>
           <td class="px-6 py-4 text-xs text-white/60">${s.gender}</td>
           <td class="px-6 py-4 text-xs text-white/60">${s.age}</td>
-          <td class="px-6 py-4 text-xs"><span class="px-2 py-0.5 rounded-full font-bold bg-green-950/60 text-green-400 border border-green-500/20">Active</span></td>
+          <td class="px-6 py-4 text-xs"><span class="px-2 py-0.5 rounded-full font-bold bg-green-955/60 text-green-400 border border-green-500/20">Active</span></td>
           <td class="px-6 py-4 text-xs text-white/60 no-print flex gap-2">
             <button class="text-school-cyan hover:text-white transition-all text-xs font-bold" onclick="editStudent('${s.id}')"><i class="fa-solid fa-pen"></i></button>
             <button class="text-red-400 hover:text-red-600 transition-all text-xs font-bold ml-2" onclick="deleteStudent('${s.id}')"><i class="fa-solid fa-trash"></i></button>
@@ -715,17 +773,6 @@ function editStudent(id) {
   openModal('modal-add-student');
 }
 
-function deleteStudent(id) {
-  if (confirm(`Are you sure you want to remove student ${id}? This will purge their ledger records.`)) {
-    students = students.filter(s => s.id !== id);
-    fees = fees.filter(f => f.studentId !== id);
-    results = results.filter(r => r.studentId !== id);
-    saveAllToLocalStorage();
-    renderStudents();
-    showToast("Student account deleted from database", "error");
-  }
-}
-
 /* ==========================================================================
    === TEACHERS DIR MODULES ===
    ========================================================================== */
@@ -747,8 +794,8 @@ function renderTeachers() {
   filtered.forEach(t => {
     const initials = t.name.split(' ').map(n => n[0]).join('');
     const statusClass = t.status === 'Active' 
-      ? 'bg-green-950/60 text-green-400 border border-green-500/20' 
-      : 'bg-amber-950/60 text-amber-400 border border-amber-500/20';
+      ? 'bg-green-955/60 text-green-400 border border-green-500/20' 
+      : 'bg-amber-955/60 text-amber-400 border border-amber-500/20';
 
     container.innerHTML += `
       <div class="glass flex flex-col justify-between overflow-hidden shadow-xl card-hover-lift">
@@ -764,13 +811,24 @@ function renderTeachers() {
           <div class="flex justify-between border-b border-white/5 pb-2"><span class="text-white/50 font-semibold">Phone</span><span class="font-bold text-white/90">${t.phone}</span></div>
           <div class="flex justify-between pb-1"><span class="text-white/50 font-semibold">Status</span><span class="px-2 py-0.5 rounded font-bold ${statusClass}">${t.status}</span></div>
         </div>
-        <div class="p-4 bg-black/10 border-t border-white/5 flex justify-end gap-2 no-print">
-          <button class="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border border-white/10" onclick="editTeacher('${t.id}')">Edit Profile</button>
-          <button class="px-3 py-1.5 bg-red-950/20 hover:bg-school-red/40 text-red-300 hover:text-white rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border border-red-500/25" onclick="deleteTeacher('${t.id}')">Remove</button>
+        <div class="p-4 bg-black/10 border-t border-white/5 flex justify-end gap-2 no-print font-semibold text-[10px]">
+          <button class="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white/75 hover:text-white rounded-lg uppercase tracking-wider transition-all border border-white/10" onclick="editTeacher('${t.id}')">Edit Profile</button>
+          <button class="px-3 py-1.5 bg-red-955/20 hover:bg-school-red/40 text-red-300 hover:text-white rounded-lg uppercase tracking-wider transition-all border border-red-500/25" onclick="deleteTeacher('${t.id}')">Remove</button>
         </div>
       </div>
     `;
   });
+}
+
+function deleteStudent(id) {
+  if (confirm(`Are you sure you want to remove student ${id}? This will purge their ledger records.`)) {
+    students = students.filter(s => s.id !== id);
+    fees = fees.filter(f => f.studentId !== id);
+    results = results.filter(r => r.studentId !== id);
+    saveAllToLocalStorage();
+    renderStudents();
+    showToast("Student account deleted from database", "error");
+  }
 }
 
 function saveTeacherForm(event) {
@@ -1211,10 +1269,10 @@ function renderResults() {
   filtered.forEach(r => {
     const stud = students.find(s => s.id === r.studentId) || { name: 'Purged Student', class: '--' };
     const grade = autoCalculateGrade(r.score);
-    let gradeColor = 'bg-red-950/60 text-red-400 border border-red-500/20';
-    if (grade === 'A') gradeColor = 'bg-green-950/60 text-green-400 border border-green-500/20';
-    else if (grade === 'B' || grade === 'C') gradeColor = 'bg-blue-950/60 text-school-cyan border border-[#00d4ff]/20';
-    else if (grade === 'D') gradeColor = 'bg-amber-950/60 text-amber-400 border border-amber-500/20';
+    let gradeColor = 'bg-red-955/60 text-red-400 border border-red-500/20';
+    if (grade === 'A') gradeColor = 'bg-green-955/60 text-green-400 border border-green-500/20';
+    else if (grade === 'B' || grade === 'C') gradeColor = 'bg-blue-955/60 text-school-cyan border border-[#00d4ff]/20';
+    else if (grade === 'D') gradeColor = 'bg-amber-955/60 text-amber-400 border border-amber-500/20';
 
     tbody.innerHTML += `
       <tr class="app-table-row border-b border-white/5 hover:bg-white/5 transition-colors duration-150">
@@ -1336,15 +1394,15 @@ function renderFees() {
     const paid = feeObj.amountPaid;
     const balance = due - paid;
 
-    let badgeClass = 'bg-red-950/60 text-red-400 border border-red-500/20';
+    let badgeClass = 'bg-red-955/60 text-red-400 border border-red-500/20';
     let label = 'Overdue';
     
     if (balance <= 0) {
-      badgeClass = 'bg-green-950/60 text-green-400 border border-green-500/20';
+      badgeClass = 'bg-green-955/60 text-green-400 border border-green-500/20';
       label = 'Paid';
       colSum += due;
     } else if (paid > 0) {
-      badgeClass = 'bg-amber-950/60 text-amber-400 border border-amber-500/20';
+      badgeClass = 'bg-amber-955/60 text-amber-400 border border-amber-500/20';
       label = 'Pending';
       colSum += paid;
       pendSum += balance;
@@ -1408,7 +1466,7 @@ function savePaymentForm(event) {
 }
 
 /* ==========================================================================
-   === ANNOUNCEMENTStimeline LOGS ===
+   === ANNOUNCEMENTS TIMELINE LOGS ===
    ========================================================================== */
 function renderAnnouncements() {
   const container = document.getElementById('announcements-timeline');
@@ -1435,8 +1493,8 @@ function renderAnnouncements() {
     }
 
     let badgeClass = 'bg-white/5 text-white border border-white/10';
-    if (ann.category === 'Academic') badgeClass = 'bg-blue-950/60 text-blue-300 border border-blue-500/20';
-    else if (ann.category === 'Event') badgeClass = 'bg-purple-950/60 text-purple-300 border border-purple-500/20';
+    if (ann.category === 'Academic') badgeClass = 'bg-blue-955/60 text-blue-300 border border-blue-500/20';
+    else if (ann.category === 'Event') badgeClass = 'bg-purple-955/60 text-purple-300 border border-purple-500/20';
 
     container.innerHTML += `
       <div class="glass p-6 shadow-2xl transition-all ${pinClass} relative group">
@@ -1511,9 +1569,9 @@ function loadSettingsInputs() {
   toggleLanguageButtonStyles(lang);
 
   // Sync dark mode checkbox state
-  const isDark = document.documentElement.classList.contains('dark');
+  const isDark = document.documentElement.classList.contains('light');
   const checkbox = document.getElementById('dark-theme-mode-check');
-  if (checkbox) checkbox.checked = !isDark; // Checkbox unchecked means Dark Mode enabled (as it toggles the Light theme class overlay override)
+  if (checkbox) checkbox.checked = !isDark;
 }
 
 function saveSettingsForm(event) {
@@ -1566,11 +1624,11 @@ function toggleLanguageButtonStyles(lang) {
   if (!btnEn || !btnSo) return;
 
   if (lang === 'so') {
-    btnSo.className = "px-4 py-2 border border-school-gold rounded-lg text-xs font-bold text-school-gold bg-school-gold/10 transition-all uppercase tracking-wider cursor-pointer shadow-[0_0_10px_rgba(212,175,55,0.25)]";
-    btnEn.className = "px-4 py-2 border border-white/10 rounded-lg text-xs font-bold text-white/70 hover:bg-white/5 hover:text-white transition-all uppercase tracking-wider cursor-pointer";
+    btnSo.className = "px-4 py-2 border border-school-gold rounded-lg text-xs font-bold text-school-gold bg-school-gold/10 transition-all uppercase tracking-wider cursor-pointer shadow-[0_0_10px_rgba(212,175,55,0.25)] font-headings";
+    btnEn.className = "px-4 py-2 border border-white/10 rounded-lg text-xs font-bold text-white/70 hover:bg-white/5 hover:text-white transition-all uppercase tracking-wider cursor-pointer font-headings";
   } else {
-    btnEn.className = "px-4 py-2 border border-school-cyan rounded-lg text-xs font-bold text-school-cyan bg-school-cyan/10 transition-all uppercase tracking-wider cursor-pointer shadow-[0_0_10px_rgba(0,212,255,0.25)]";
-    btnSo.className = "px-4 py-2 border border-white/10 rounded-lg text-xs font-bold text-white/70 hover:bg-white/5 hover:text-white transition-all uppercase tracking-wider cursor-pointer";
+    btnEn.className = "px-4 py-2 border border-school-cyan rounded-lg text-xs font-bold text-school-cyan bg-school-cyan/10 transition-all uppercase tracking-wider cursor-pointer shadow-[0_0_10px_rgba(0,212,255,0.25)] font-headings";
+    btnSo.className = "px-4 py-2 border border-white/10 rounded-lg text-xs font-bold text-white/70 hover:bg-white/5 hover:text-white transition-all uppercase tracking-wider cursor-pointer font-headings";
   }
 }
 
@@ -1824,4 +1882,21 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
+  
+  // 6. Connect sidebar hamburger clicks
+  const toggleBtn = document.getElementById('sidebar-hamburger');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleSidebar();
+    });
+  }
+  
+  // 7. Connect mobile overlay backdrops
+  const overlay = document.getElementById('overlay');
+  if (overlay) {
+    overlay.addEventListener('click', () => {
+      closeSidebar();
+    });
+  }
 });
