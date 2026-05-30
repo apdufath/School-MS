@@ -94,6 +94,67 @@ let announcements = JSON.parse(localStorage.getItem('announcements')) || [...SEE
 let timetable = JSON.parse(localStorage.getItem('timetable')) || {...SEEDS.timetable};
 let settings = JSON.parse(localStorage.getItem('settings')) || {...SEEDS.settings};
 
+/* Seeding historical data generator for 30 school days back (skipping Fridays) */
+function generateMockAttendance() {
+  let mockList = [];
+  const today = new Date("2026-05-30");
+  
+  for (let i = 30; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - i);
+    
+    // Skip Fridays (day index 5)
+    if (date.getDay() === 5) continue;
+    
+    const dateStr = date.toISOString().slice(0, 10);
+    
+    students.forEach((s, idx) => {
+      const subjectsList = ['Mathematics', 'English', 'Science', 'History', 'Somali', 'Art'];
+      const subject = subjectsList[(idx + date.getDate()) % subjectsList.length];
+      
+      const rand = Math.random();
+      let status = 'present';
+      let note = '';
+      
+      if (rand < 0.84) {
+        status = 'present';
+      } else if (rand < 0.89) {
+        status = 'absent';
+        const absentNotes = ['Fever flu', 'Family travel', 'Doctor appointment', 'Severe headache'];
+        note = absentNotes[Math.floor(Math.random() * absentNotes.length)];
+      } else if (rand < 0.96) {
+        status = 'late';
+        const lateNotes = ['Transport breakdown', 'Heavy rain delay', 'Overslept', 'Traffic congestion'];
+        note = lateNotes[Math.floor(Math.random() * lateNotes.length)];
+      } else {
+        status = 'excused';
+        const excusedNotes = ['Official sports event', 'Visa application interview', 'Family emergency'];
+        note = excusedNotes[Math.floor(Math.random() * excusedNotes.length)];
+      }
+      
+      mockList.push({
+        id: Date.now() - (i * 86400000) + idx,
+        date: dateStr,
+        studentId: s.id,
+        studentName: s.name,
+        class: s.class,
+        subject: subject,
+        status: status,
+        note: note,
+        markedBy: 'Admin Registrar',
+        markedAt: new Date(date).toISOString()
+      });
+    });
+  }
+  return mockList;
+}
+
+let attendance = JSON.parse(localStorage.getItem('attendance')) || [];
+if (attendance.length === 0) {
+  attendance = generateMockAttendance();
+  localStorage.setItem('attendance', JSON.stringify(attendance));
+}
+
 function saveAllToLocalStorage() {
   localStorage.setItem('teachers', JSON.stringify(teachers));
   localStorage.setItem('classes', JSON.stringify(classes));
@@ -104,6 +165,7 @@ function saveAllToLocalStorage() {
   localStorage.setItem('announcements', JSON.stringify(announcements));
   localStorage.setItem('timetable', JSON.stringify(timetable));
   localStorage.setItem('settings', JSON.stringify(settings));
+  localStorage.setItem('attendance', JSON.stringify(attendance));
 }
 
 /* ==========================================================================
@@ -126,7 +188,8 @@ const dictionary = {
     theme_cust: "Theme & Language", color_pick: "Primary Theme Accent", lang_toggle: "System Language",
     save_btn: "Save Settings", total_col_card: "Total Collected", total_pend_card: "Total Pending",
     total_over_card: "Total Overdue", footer_text: "© 2026 Abaarso School · Hargiesa, Somaliland",
-    performance_graph: "Performance GPA Trend", exam_stats: "Exam Status"
+    performance_graph: "Performance GPA Trend", exam_stats: "Exam Status",
+    attendance: "Attendance", todays_rate: "Today's Attendance"
   },
   so: {
     dashboard: "Dashboard-ka", students: "Ardayda", teachers: "Macallimiinta", classes: "Fasallada",
@@ -144,7 +207,8 @@ const dictionary = {
     theme_cust: "Midabada & Luuqadda", color_pick: "Midabka Nidaamka", lang_toggle: "Luuqadda Interface-ka",
     save_btn: "Keydi Habeeynta", total_col_card: "Wadarta la Ururiyey", total_pend_card: "Wadarta Sugan",
     total_over_card: "Wadarta Daahday", footer_text: "© 2026 Dugsiga Abaarso · Hargeysa, Somaliland",
-    performance_graph: "GPA-da & Natiijooyinka", exam_stats: "Heerka Imtixaannada"
+    performance_graph: "GPA-da & Natiijooyinka", exam_stats: "Heerka Imtixaannada",
+    attendance: "Joogitaanka", todays_rate: "Joogitaanka Maanta"
   }
 };
 
@@ -280,6 +344,8 @@ function showSection(sectionId) {
     renderAnnouncements();
   } else if (sectionId === 'settings') {
     loadSettingsInputs();
+  } else if (sectionId === 'attendance') {
+    initAttendanceSection();
   }
 }
 
@@ -430,6 +496,9 @@ function initCharts() {
       }
     });
   }
+  
+  // Redraw the Today's Attendance mini donut widget
+  initDashboardAttendanceWidget();
 }
 
 /* ==========================================================================
@@ -1846,6 +1915,763 @@ function initBackgroundParticles() {
 }
 
 /* ==========================================================================
+   === DYNAMIC JOOGITAANKA ATTENDANCE SECTION LOGIC ===
+   ========================================================================== */
+let activeAttendanceTab = 'mark';
+
+function initAttendanceSection() {
+  switchAttendanceTab(activeAttendanceTab);
+  
+  const markClassSelect = document.getElementById('att-mark-class');
+  const recClassSelect = document.getElementById('att-rec-class');
+  
+  let classOpts = '';
+  classes.forEach(c => {
+    classOpts += `<option value="${c.name}">${c.name}</option>`;
+  });
+  if (markClassSelect) markClassSelect.innerHTML = classOpts;
+  
+  let recOpts = `<option value="">All Classes</option>`;
+  classes.forEach(c => {
+    recOpts += `<option value="${c.name}">${c.name}</option>`;
+  });
+  if (recClassSelect) recClassSelect.innerHTML = recOpts;
+}
+
+function switchAttendanceTab(tabName) {
+  activeAttendanceTab = tabName;
+  
+  document.querySelectorAll('.att-tab').forEach(btn => {
+    if (btn.id === `att-tab-${tabName}`) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+  
+  const paneMark = document.getElementById('pane-att-mark');
+  const paneRecords = document.getElementById('pane-att-records');
+  const paneReports = document.getElementById('pane-att-reports');
+  
+  if (paneMark) paneMark.classList.add('hidden');
+  if (paneRecords) paneRecords.classList.add('hidden');
+  if (paneReports) paneReports.classList.add('hidden');
+  
+  if (tabName === 'mark') {
+    if (paneMark) paneMark.classList.remove('hidden');
+    const selectedClass = document.getElementById('att-mark-class').value;
+    const selectedDate = document.getElementById('att-mark-date').value;
+    if (selectedClass && selectedDate && !document.getElementById('att-mark-container').classList.contains('hidden')) {
+      loadMarkAttendanceStudents();
+    }
+  } else if (tabName === 'records') {
+    if (paneRecords) paneRecords.classList.remove('hidden');
+    renderAttendanceRecords();
+  } else if (tabName === 'reports') {
+    if (paneReports) paneReports.classList.remove('hidden');
+    renderAttendanceReports();
+  }
+}
+
+let currentlyMarkingClass = '';
+let currentlyMarkingDate = '';
+
+function loadMarkAttendanceStudents() {
+  const dateInput = document.getElementById('att-mark-date');
+  const classSelect = document.getElementById('att-mark-class');
+  const subjectSelect = document.getElementById('att-mark-subject');
+  
+  if (!dateInput || !classSelect || !subjectSelect) return;
+  
+  currentlyMarkingDate = dateInput.value;
+  currentlyMarkingClass = classSelect.value;
+  const subject = subjectSelect.value;
+  
+  if (!currentlyMarkingDate) {
+    showToast("Please specify a marking date", "error");
+    return;
+  }
+  
+  const list = students.filter(s => s.class === currentlyMarkingClass);
+  const tbody = document.getElementById('att-mark-table-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-xs text-white/50 italic font-medium">No students enrolled in class section ${currentlyMarkingClass}.</td></tr>`;
+    document.getElementById('att-mark-container').classList.remove('hidden');
+    document.getElementById('att-mark-fallback').classList.add('hidden');
+    updateAttendanceSummaryBar();
+    return;
+  }
+  
+  const existing = attendance.filter(r => r.date === currentlyMarkingDate && r.class === currentlyMarkingClass && r.subject === subject);
+  
+  list.forEach((s, idx) => {
+    const initial = s.name.charAt(0);
+    const extRecord = existing.find(r => r.studentId === s.id);
+    const status = extRecord ? extRecord.status : 'present';
+    const note = extRecord ? extRecord.note : '';
+    
+    tbody.innerHTML += `
+      <tr class="app-table-row border-b border-white/5" data-student-id="${s.id}" data-student-name="${s.name}">
+        <td class="px-6 py-4 text-xs text-white/50 font-bold">${idx + 1}</td>
+        <td class="px-6 py-4">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-school-red to-school-accent border border-school-gold text-school-gold flex items-center justify-center font-bold text-xs shadow-md shrink-0 select-none">
+            ${initial}
+          </div>
+        </td>
+        <td class="px-6 py-4 text-sm font-bold text-white">${s.name}</td>
+        <td class="px-6 py-4 text-xs font-bold text-school-cyan">${s.id}</td>
+        <td class="px-6 py-4">
+          <div class="flex gap-1.5 no-print">
+            <button type="button" class="status-btn present ${status === 'present' ? 'active' : ''}" onclick="toggleRowStatus(this, 'present')">✅ Present</button>
+            <button type="button" class="status-btn absent ${status === 'absent' ? 'active' : ''}" onclick="toggleRowStatus(this, 'absent')">❌ Absent</button>
+            <button type="button" class="status-btn late ${status === 'late' ? 'active' : ''}" onclick="toggleRowStatus(this, 'late')">🕐 Late</button>
+            <button type="button" class="status-btn excused ${status === 'excused' ? 'active' : ''}" onclick="toggleRowStatus(this, 'excused')">🏥 Excused</button>
+          </div>
+        </td>
+        <td class="px-6 py-4">
+          <input type="text" class="glass-input px-3 py-1.5 rounded-lg text-xs w-full focus:outline-none placeholder-white/10" value="${note}" placeholder="Reason/Note...">
+        </td>
+      </tr>
+    `;
+  });
+  
+  document.getElementById('att-mark-container').classList.remove('hidden');
+  document.getElementById('att-mark-fallback').classList.add('hidden');
+  updateAttendanceSummaryBar();
+  showToast(`Roster loaded successfully for ${currentlyMarkingClass}`, "info");
+}
+
+function toggleRowStatus(btn, status) {
+  const parentDiv = btn.parentNode;
+  parentDiv.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateAttendanceSummaryBar();
+}
+
+function markAllStatus(status) {
+  const tbody = document.getElementById('att-mark-table-body');
+  if (!tbody) return;
+  
+  tbody.querySelectorAll('tr[data-student-id]').forEach(row => {
+    row.querySelectorAll('.status-btn').forEach(b => {
+      if (b.classList.contains(status)) {
+        b.classList.add('active');
+      } else {
+        b.classList.remove('active');
+      }
+    });
+  });
+  updateAttendanceSummaryBar();
+  showToast(`Marked all student lines as ${status.toUpperCase()}`, "info");
+}
+
+function updateAttendanceSummaryBar() {
+  const tbody = document.getElementById('att-mark-table-body');
+  if (!tbody) return;
+  
+  const rows = tbody.querySelectorAll('tr[data-student-id]');
+  const total = rows.length;
+  
+  let present = 0;
+  let absent = 0;
+  let late = 0;
+  let excused = 0;
+  
+  rows.forEach(row => {
+    const activeBtn = row.querySelector('.status-btn.active');
+    if (activeBtn) {
+      if (activeBtn.classList.contains('present')) present++;
+      else if (activeBtn.classList.contains('absent')) absent++;
+      else if (activeBtn.classList.contains('late')) late++;
+      else if (activeBtn.classList.contains('excused')) excused++;
+    }
+  });
+  
+  document.getElementById('att-mark-total').innerText = total;
+  document.getElementById('att-mark-present').innerText = present;
+  document.getElementById('att-mark-absent').innerText = absent;
+  document.getElementById('att-mark-late').innerText = late;
+  document.getElementById('att-mark-excused').innerText = excused;
+  
+  let rate = 0;
+  if (total > 0) {
+    rate = ((present + late) / total) * 100;
+  }
+  
+  document.getElementById('att-mark-rate-percent').innerText = `${rate.toFixed(1)}%`;
+  
+  const bar = document.getElementById('att-mark-progress-bar');
+  if (bar) bar.style.width = `${rate}%`;
+}
+
+function resetMarkAttendance() {
+  if (confirm("Reset current marked selections? Unsaved modifications will be lost.")) {
+    loadMarkAttendanceStudents();
+  }
+}
+
+function submitMarkedAttendance() {
+  const tbody = document.getElementById('att-mark-table-body');
+  if (!tbody) return;
+  
+  const rows = tbody.querySelectorAll('tr[data-student-id]');
+  if (rows.length === 0) {
+    showToast("Roster table contains no entries to record", "error");
+    return;
+  }
+  
+  const subject = document.getElementById('att-mark-subject').value;
+  let collected = [];
+  
+  rows.forEach(row => {
+    const studentId = row.getAttribute('data-student-id');
+    const studentName = row.getAttribute('data-student-name');
+    const activeBtn = row.querySelector('.status-btn.active');
+    const noteInput = row.querySelector('input[type="text"]');
+    
+    let status = 'present';
+    if (activeBtn) {
+      if (activeBtn.classList.contains('present')) status = 'present';
+      else if (activeBtn.classList.contains('absent')) status = 'absent';
+      else if (activeBtn.classList.contains('late')) status = 'late';
+      else if (activeBtn.classList.contains('excused')) status = 'excused';
+    }
+    
+    collected.push({
+      id: Date.now() + Math.random(),
+      date: currentlyMarkingDate,
+      studentId: studentId,
+      studentName: studentName,
+      class: currentlyMarkingClass,
+      subject: subject,
+      status: status,
+      note: noteInput ? noteInput.value.trim() : '',
+      markedBy: 'Admin Registrar',
+      markedAt: new Date().toISOString()
+    });
+  });
+  
+  // Clean records for class+date+subject
+  attendance = attendance.filter(r => !(r.date === currentlyMarkingDate && r.class === currentlyMarkingClass && r.subject === subject));
+  
+  attendance.push(...collected);
+  
+  saveAllToLocalStorage();
+  showToast(`Attendance recorded successfully for ${currentlyMarkingClass}!`, "success");
+  
+  loadMarkAttendanceStudents();
+  initDashboardAttendanceWidget();
+}
+
+let attendanceRecordsPage = 1;
+const attendanceRecordsLimit = 10;
+
+function renderAttendanceRecords() {
+  const search = document.getElementById('att-rec-search').value.toLowerCase();
+  const cls = document.getElementById('att-rec-class').value;
+  const status = document.getElementById('att-rec-status').value;
+  const from = document.getElementById('att-rec-from').value;
+  const to = document.getElementById('att-rec-to').value;
+  
+  const tbody = document.getElementById('att-rec-table-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  const filtered = attendance.filter(r => {
+    const matchesSearch = r.studentName.toLowerCase().includes(search) || r.studentId.toLowerCase().includes(search);
+    const matchesClass = cls === '' || r.class === cls;
+    const matchesStatus = status === '' || r.status === status;
+    
+    let matchesFrom = true;
+    if (from) matchesFrom = r.date >= from;
+    
+    let matchesTo = true;
+    if (to) matchesTo = r.date <= to;
+    
+    return matchesSearch && matchesClass && matchesStatus && matchesFrom && matchesTo;
+  });
+  
+  filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  const total = filtered.length;
+  const totalPages = Math.ceil(total / attendanceRecordsLimit) || 1;
+  
+  if (attendanceRecordsPage > totalPages) attendanceRecordsPage = totalPages;
+  if (attendanceRecordsPage < 1) attendanceRecordsPage = 1;
+  
+  const start = (attendanceRecordsPage - 1) * attendanceRecordsLimit;
+  const end = Math.min(start + attendanceRecordsLimit, total);
+  
+  const pageData = filtered.slice(start, end);
+  
+  if (pageData.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-6 text-center text-xs text-white/50 italic">No attendance log history found matching filters.</td></tr>`;
+  } else {
+    pageData.forEach(r => {
+      let pillClass = 'bg-white/5 text-white border border-white/10';
+      let statusLabel = 'Present';
+      
+      if (r.status === 'present') {
+        pillClass = 'bg-green-955/60 text-green-400 border border-green-500/20';
+        statusLabel = 'Present';
+      } else if (r.status === 'absent') {
+        pillClass = 'bg-red-955/60 text-red-400 border border-red-500/20';
+        statusLabel = 'Absent';
+      } else if (r.status === 'late') {
+        pillClass = 'bg-amber-955/60 text-school-gold border border-school-gold/25';
+        statusLabel = 'Late';
+      } else if (r.status === 'excused') {
+        pillClass = 'bg-purple-955/60 text-purple-400 border border-purple-500/20';
+        statusLabel = 'Excused';
+      }
+      
+      tbody.innerHTML += `
+        <tr class="app-table-row border-b border-white/5 hover:bg-white/5 transition-colors duration-150">
+          <td class="px-6 py-4 text-xs font-bold text-white font-mono">${r.date}</td>
+          <td class="px-6 py-4 text-sm font-bold text-white">${r.studentName} (${r.studentId})</td>
+          <td class="px-6 py-4 text-xs text-white/80"><span class="px-2 py-0.5 rounded bg-white/5 text-school-gold border border-white/10 font-bold">${r.class}</span></td>
+          <td class="px-6 py-4 text-xs text-white/70">${r.subject}</td>
+          <td class="px-6 py-4 text-xs"><span class="px-2.5 py-0.5 rounded-full font-bold ${pillClass}">${statusLabel}</span></td>
+          <td class="px-6 py-4 text-xs text-white/60">${r.note || '--'}</td>
+          <td class="px-6 py-4 text-xs text-white/50 font-semibold">${r.markedBy}</td>
+        </tr>
+      `;
+    });
+  }
+  
+  document.getElementById('att-rec-pagination-info').innerText = `Showing ${total > 0 ? start + 1 : 0}-${end} of ${total} entries`;
+  
+  const btnPrev = document.getElementById('btn-att-rec-prev');
+  const btnNext = document.getElementById('btn-att-rec-next');
+  
+  if (btnPrev) btnPrev.disabled = attendanceRecordsPage === 1;
+  if (btnNext) btnNext.disabled = attendanceRecordsPage === totalPages;
+}
+
+function prevAttendanceRecordsPage() {
+  if (attendanceRecordsPage > 1) {
+    attendanceRecordsPage--;
+    renderAttendanceRecords();
+  }
+}
+
+function nextAttendanceRecordsPage() {
+  attendanceRecordsPage++;
+  renderAttendanceRecords();
+}
+
+function exportAttendanceCSV() {
+  const headers = ['Date', 'Student ID', 'Student Name', 'Class', 'Subject', 'Status', 'Note', 'Marked By', 'Marked At'];
+  let csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n";
+  
+  attendance.forEach(r => {
+    const row = [r.date, r.studentId, r.studentName, r.class, r.subject, r.status, r.note || '', r.markedBy, r.markedAt];
+    csvContent += row.map(v => `"${v}"`).join(",") + "\n";
+  });
+  
+  const uri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", uri);
+  link.setAttribute("download", `Abaarso_School_Attendance_Roster_${new Date().toISOString().slice(0,10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast("CSV Attendance report exported successfully", "success");
+}
+
+let trendChartInstance = null;
+let comparisonChartInstance = null;
+let overviewChartInstance = null;
+let summaryTableSortField = 'name';
+let summaryTableSortAsc = true;
+
+function renderAttendanceReports() {
+  if (attendance.length === 0) return;
+  
+  const totalCount = attendance.length;
+  const presentOrLate = attendance.filter(r => r.status === 'present' || r.status === 'late').length;
+  const overallRate = totalCount > 0 ? (presentOrLate / totalCount) * 100 : 0;
+  document.getElementById('att-rep-stat-overall').innerText = `${overallRate.toFixed(1)}%`;
+  
+  let studAttendanceCounts = {};
+  attendance.forEach(r => {
+    if (!studAttendanceCounts[r.studentId]) {
+      studAttendanceCounts[r.studentId] = { name: r.studentName, present: 0, total: 0 };
+    }
+    studAttendanceCounts[r.studentId].total++;
+    if (r.status === 'present' || r.status === 'late') {
+      studAttendanceCounts[r.studentId].present++;
+    }
+  });
+  
+  let mostPresentStud = '--';
+  let highestPresentDays = 0;
+  let mostAbsentStud = '--';
+  let highestAbsentDays = 0;
+  
+  Object.keys(studAttendanceCounts).forEach(id => {
+    const info = studAttendanceCounts[id];
+    if (info.present > highestPresentDays) {
+      highestPresentDays = info.present;
+      mostPresentStud = `${info.name} (${highestPresentDays} days)`;
+    }
+    const absentDays = info.total - info.present;
+    if (absentDays > highestAbsentDays) {
+      highestAbsentDays = absentDays;
+      mostAbsentStud = `${info.name} (${highestAbsentDays} days)`;
+    }
+  });
+  
+  document.getElementById('att-rep-stat-present').innerText = mostPresentStud;
+  document.getElementById('att-rep-stat-absent').innerText = mostAbsentStud;
+  
+  const todayStr = "2026-05-30";
+  const todayRecords = attendance.filter(r => r.date === todayStr);
+  const todayTotal = todayRecords.length;
+  const todayPresentOrLate = todayRecords.filter(r => r.status === 'present' || r.status === 'late').length;
+  const todayRate = todayTotal > 0 ? (todayPresentOrLate / todayTotal) * 100 : 0;
+  
+  document.getElementById('att-rep-stat-today').innerText = `${todayRate.toFixed(1)}%`;
+  const todayBar = document.getElementById('att-rep-stat-today-bar');
+  if (todayBar) todayBar.style.width = `${todayRate}%`;
+  
+  renderAttendanceSummaryTable();
+  initAttendanceCharts();
+}
+
+function renderAttendanceSummaryTable() {
+  const tbody = document.getElementById('att-summary-table-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  let summaryData = [];
+  students.forEach(s => {
+    const records = attendance.filter(r => r.studentId === s.id);
+    const total = records.length;
+    const present = records.filter(r => r.status === 'present').length;
+    const absent = records.filter(r => r.status === 'absent').length;
+    const late = records.filter(r => r.status === 'late').length;
+    const excused = records.filter(r => r.status === 'excused').length;
+    
+    let rate = 0;
+    if (total > 0) {
+      rate = ((present + late) / total) * 100;
+    }
+    
+    summaryData.push({
+      id: s.id,
+      name: s.name,
+      class: s.class,
+      total: total,
+      present: present,
+      absent: absent,
+      late: late,
+      excused: excused,
+      rate: rate
+    });
+  });
+  
+  summaryData.sort((a, b) => {
+    let valA = a[summaryTableSortField];
+    let valB = b[summaryTableSortField];
+    
+    if (typeof valA === 'string') {
+      valA = valA.toLowerCase();
+      valB = valB.toLowerCase();
+    }
+    
+    if (valA < valB) return summaryTableSortAsc ? -1 : 1;
+    if (valA > valB) return summaryTableSortAsc ? 1 : -1;
+    return 0;
+  });
+  
+  summaryData.forEach(row => {
+    const ratePct = row.rate.toFixed(1);
+    let rateClass = 'rate-poor';
+    let warnIcon = ' <i class="fa-solid fa-triangle-exclamation text-xs text-red-500 animate-pulse" title="Warning: Low attendance"></i> ⚠️';
+    
+    if (row.rate >= 90) {
+      rateClass = 'rate-excellent';
+      warnIcon = '';
+    } else if (row.rate >= 75) {
+      rateClass = 'rate-good';
+      warnIcon = '';
+    } else if (row.rate >= 60) {
+      rateClass = 'rate-average';
+      warnIcon = '';
+    }
+    
+    tbody.innerHTML += `
+      <tr class="app-table-row border-b border-white/5 hover:bg-white/5 transition-colors duration-150">
+        <td class="px-6 py-4 text-sm font-bold text-white">${row.name} (${row.id})</td>
+        <td class="px-6 py-4 text-xs"><span class="px-2 py-0.5 rounded bg-white/5 text-school-gold border border-white/10 font-bold">${row.class}</span></td>
+        <td class="px-6 py-4 text-xs font-semibold text-center text-white/80 font-mono">${row.total}</td>
+        <td class="px-6 py-4 text-xs font-semibold text-center text-green-400 font-mono">${row.present}</td>
+        <td class="px-6 py-4 text-xs font-semibold text-center text-red-400 font-mono">${row.absent}</td>
+        <td class="px-6 py-4 text-xs font-semibold text-center text-school-gold font-mono">${row.late}</td>
+        <td class="px-6 py-4 text-xs font-semibold text-center text-purple-400 font-mono">${row.excused}</td>
+        <td class="px-6 py-4 text-sm font-extrabold text-center ${rateClass} font-mono">${ratePct}%${warnIcon}</td>
+      </tr>
+    `;
+  });
+}
+
+function sortAttendanceSummaryTable(field) {
+  if (summaryTableSortField === field) {
+    summaryTableSortAsc = !summaryTableSortAsc;
+  } else {
+    summaryTableSortField = field;
+    summaryTableSortAsc = true;
+  }
+  renderAttendanceSummaryTable();
+}
+
+function initAttendanceCharts() {
+  if (activeSection !== 'attendance' || activeAttendanceTab !== 'reports') return;
+  
+  const isLightTheme = document.documentElement.classList.contains('light');
+  const fontColor = isLightTheme ? '#1A1A1A' : 'rgba(255, 255, 255, 0.7)';
+  const gridColor = isLightTheme ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.05)';
+  
+  if (trendChartInstance) trendChartInstance.destroy();
+  if (comparisonChartInstance) comparisonChartInstance.destroy();
+  if (overviewChartInstance) overviewChartInstance.destroy();
+  
+  // Weekly Trend Line Chart
+  const trendCanvas = document.getElementById('attendance-trend-chart');
+  if (trendCanvas) {
+    const labelDates = ['May 23 (Sat)', 'May 24 (Sun)', 'May 25 (Mon)', 'May 26 (Tue)', 'May 27 (Wed)', 'May 28 (Thu)', 'May 30 (Sat)'];
+    const datesFilter = ['2026-05-23', '2026-05-24', '2026-05-25', '2026-05-26', '2026-05-27', '2026-05-28', '2026-05-30'];
+    
+    let presentData = [];
+    let absentData = [];
+    let lateData = [];
+    
+    datesFilter.forEach(dStr => {
+      const dayRecs = attendance.filter(r => r.date === dStr);
+      const total = dayRecs.length;
+      if (total > 0) {
+        presentData.push(((dayRecs.filter(r => r.status === 'present').length) / total * 100).toFixed(0));
+        absentData.push(((dayRecs.filter(r => r.status === 'absent').length) / total * 100).toFixed(0));
+        lateData.push(((dayRecs.filter(r => r.status === 'late').length) / total * 100).toFixed(0));
+      } else {
+        presentData.push(90);
+        absentData.push(5);
+        lateData.push(5);
+      }
+    });
+    
+    trendChartInstance = new Chart(trendCanvas.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: labelDates,
+        datasets: [
+          { label: 'Present', data: presentData, borderColor: '#00d4ff', backgroundColor: 'transparent', borderWidth: 2.5, pointRadius: 3, tension: 0.3 },
+          { label: 'Absent', data: absentData, borderColor: '#8B0000', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, tension: 0.3 },
+          { label: 'Late', data: lateData, borderColor: '#D4AF37', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, tension: 0.3 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: gridColor }, ticks: { color: fontColor, font: { size: 9 } } },
+          y: { min: 0, max: 100, grid: { color: gridColor }, ticks: { color: fontColor, font: { size: 9 } } }
+        }
+      }
+    });
+  }
+  
+  // Class Comparison Horizontal Bar Chart
+  const comparisonCanvas = document.getElementById('attendance-class-chart');
+  if (comparisonCanvas) {
+    const classNames = classes.map(c => c.name);
+    let presentRates = [];
+    let absentRates = [];
+    
+    classNames.forEach(cName => {
+      const classRecs = attendance.filter(r => r.class === cName);
+      const total = classRecs.length;
+      if (total > 0) {
+        const presCount = classRecs.filter(r => r.status === 'present' || r.status === 'late').length;
+        const absCount = classRecs.filter(r => r.status === 'absent').length;
+        presentRates.push((presCount / total * 100).toFixed(0));
+        absentRates.push((absCount / total * 100).toFixed(0));
+      } else {
+        presentRates.push(85);
+        absentRates.push(10);
+      }
+    });
+    
+    comparisonChartInstance = new Chart(comparisonCanvas.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: classNames,
+        datasets: [
+          { label: 'Present %', data: presentRates, backgroundColor: '#00d4ff', borderRadius: 4 },
+          { label: 'Absent %', data: absentRates, backgroundColor: '#8B0000', borderRadius: 4 }
+        ]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { min: 0, max: 100, grid: { color: gridColor }, ticks: { color: fontColor, font: { size: 9 } } },
+          y: { grid: { display: false }, ticks: { color: fontColor, font: { size: 9 } } }
+        }
+      }
+    });
+  }
+  
+  // Monthly Overview Donut
+  const overviewCanvas = document.getElementById('attendance-monthly-chart');
+  if (overviewCanvas) {
+    const total = attendance.length;
+    let presPct = 85;
+    let absPct = 5;
+    let latePct = 7;
+    let excPct = 3;
+    
+    if (total > 0) {
+      presPct = ((attendance.filter(r => r.status === 'present').length) / total * 100).toFixed(0);
+      absPct = ((attendance.filter(r => r.status === 'absent').length) / total * 100).toFixed(0);
+      latePct = ((attendance.filter(r => r.status === 'late').length) / total * 100).toFixed(0);
+      excPct = ((attendance.filter(r => r.status === 'excused').length) / total * 100).toFixed(0);
+    }
+    
+    const centerTextPlugin = {
+      id: 'centerText',
+      afterDraw(chart) {
+        const { ctx, chartArea: { top, bottom, left, right } } = chart;
+        ctx.save();
+        ctx.font = 'bold 15px Exo 2';
+        ctx.fillStyle = fontColor;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        const presentOrLateRatio = parseFloat(presPct) + parseFloat(latePct);
+        ctx.fillText(`${presentOrLateRatio.toFixed(0)}%`, (left + right) / 2, (top + bottom) / 2);
+        ctx.restore();
+      }
+    };
+    
+    overviewChartInstance = new Chart(overviewCanvas.getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Present', 'Absent', 'Late', 'Excused'],
+        datasets: [{
+          data: [presPct, absPct, latePct, excPct],
+          backgroundColor: ['#00d4ff', '#8B0000', '#D4AF37', '#7B2FBE'],
+          borderWidth: isLightTheme ? 1.5 : 0,
+          borderColor: isLightTheme ? '#ffffff' : 'transparent',
+          hoverOffset: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        cutout: '72%'
+      },
+      plugins: [centerTextPlugin]
+    });
+  }
+}
+
+let dashAttendanceChartInstance = null;
+
+function initDashboardAttendanceWidget() {
+  const donutCanvas = document.getElementById('dash-attendance-donut-canvas');
+  if (!donutCanvas) return;
+  
+  const isLightTheme = document.documentElement.classList.contains('light');
+  
+  if (dashAttendanceChartInstance) {
+    dashAttendanceChartInstance.destroy();
+    dashAttendanceChartInstance = null;
+  }
+  
+  const todayStr = "2026-05-30";
+  const todayRecords = attendance.filter(r => r.date === todayStr);
+  const total = todayRecords.length;
+  
+  let present = 0;
+  let absent = 0;
+  let late = 0;
+  let excused = 0;
+  
+  if (total > 0) {
+    present = todayRecords.filter(r => r.status === 'present').length;
+    absent = todayRecords.filter(r => r.status === 'absent').length;
+    late = todayRecords.filter(r => r.status === 'late').length;
+    excused = todayRecords.filter(r => r.status === 'excused').length;
+  } else {
+    present = 10;
+    absent = 1;
+    late = 1;
+    excused = 0;
+  }
+  
+  const rate = total > 0 ? (((present + late) / total) * 100).toFixed(0) : 91;
+  
+  document.getElementById('dash-att-present-val').innerText = present;
+  document.getElementById('dash-att-absent-val').innerText = absent;
+  document.getElementById('dash-att-late-val').innerText = late;
+  
+  dashAttendanceChartInstance = new Chart(donutCanvas.getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Present', 'Absent', 'Late', 'Excused'],
+      datasets: [{
+        data: [present, absent, late, excused],
+        backgroundColor: ['#00d4ff', '#8B0000', '#D4AF37', '#7B2FBE'],
+        borderWidth: isLightTheme ? 1 : 0,
+        borderColor: isLightTheme ? '#ffffff' : 'transparent',
+        hoverOffset: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      cutout: '72%'
+    },
+    plugins: [{
+      id: 'dashCenterText',
+      afterDraw(chart) {
+        const { ctx, chartArea: { top, bottom, left, right } } = chart;
+        ctx.save();
+        ctx.font = 'bold 12px Exo 2';
+        ctx.fillStyle = isLightTheme ? '#1A1A1A' : 'rgba(255,255,255,0.85)';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`${rate}%`, (left + right) / 2, (top + bottom) / 2);
+        ctx.restore();
+      }
+    }]
+  });
+}
+
+function initAttendanceSectionSelectors() {
+  const markDate = document.getElementById('att-mark-date');
+  const recFrom = document.getElementById('att-rec-from');
+  const recTo = document.getElementById('att-rec-to');
+  
+  const todayStr = "2026-05-30";
+  if (markDate) markDate.value = todayStr;
+  
+  const pastStr = "2026-05-01";
+  if (recFrom) recFrom.value = pastStr;
+  if (recTo) recTo.value = todayStr;
+}
+
+/* ==========================================================================
    === APPLICATION INITIALIZER SEQUENCE ===
    ========================================================================== */
 document.addEventListener("DOMContentLoaded", () => {
@@ -1858,6 +2684,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 3. Trigger session guard immediately
   checkSessionGuard();
+
+  // Initialize Attendance Selectors and dashboard widget on load
+  initAttendanceSectionSelectors();
+  initDashboardAttendanceWidget();
 
   // 4. Time Update (Africa/Mogadishu zone matches Hargeisa time zone GMT+3)
   setInterval(() => {

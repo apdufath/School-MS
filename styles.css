@@ -388,3 +388,116 @@ html.light .bg-black\/10 { background-color: rgba(0, 0, 0, 0.03) !important; }
   box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
 }
 
+/* ==========================================================================
+   === DYNAMIC JOOGITAANKA ATTENDANCE STYLES ===
+   ========================================================================== */
+
+/* Status toggle buttons */
+.status-btn {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.status-btn.present.active {
+  background: rgba(0, 212, 255, 0.2) !important;
+  border-color: #00d4ff !important;
+  color: #00d4ff !important;
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.35) !important;
+}
+.status-btn.absent.active {
+  background: rgba(139, 0, 0, 0.3) !important;
+  border-color: #C0392B !important;
+  color: #ff6b6b !important;
+  box-shadow: 0 0 10px rgba(192, 57, 43, 0.4) !important;
+}
+.status-btn.late.active {
+  background: rgba(212, 175, 55, 0.2) !important;
+  border-color: #D4AF37 !important;
+  color: #D4AF37 !important;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.35) !important;
+}
+.status-btn.excused.active {
+  background: rgba(123, 47, 190, 0.2) !important;
+  border-color: #9B59B6 !important;
+  color: #c084fc !important;
+  box-shadow: 0 0 10px rgba(123, 47, 190, 0.35) !important;
+}
+
+/* Light Theme Overrides for unselected status buttons */
+html.light .status-btn {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: rgba(0, 0, 0, 0.55);
+}
+html.light .status-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* Attendance rate color classes */
+.rate-excellent { 
+  color: #00d4ff !important; 
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.4); 
+}
+.rate-good { 
+  color: #D4AF37 !important; 
+}
+.rate-average { 
+  color: #FF8C00 !important; 
+}
+.rate-poor { 
+  color: #ff5252 !important; 
+  text-shadow: 0 0 8px rgba(192, 57, 43, 0.4); 
+}
+
+/* Attendance tab underline style and transition */
+.att-tab {
+  border-bottom: 2px solid transparent;
+  color: rgba(255, 255, 255, 0.4);
+  transition: all 0.25s ease;
+}
+.att-tab:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+.att-tab.active {
+  color: #00d4ff !important;
+  border-bottom: 2px solid #00d4ff !important;
+  text-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+}
+html.light .att-tab {
+  color: rgba(0, 0, 0, 0.45);
+}
+html.light .att-tab:hover {
+  color: rgba(0, 0, 0, 0.8);
+}
+html.light .att-tab.active {
+  color: #0284C7 !important;
+  border-bottom: 2px solid #0284C7 !important;
+  text-shadow: 0 0 8px rgba(2, 132, 199, 0.25);
+}
+
+/* Progress bar attendance structures */
+.att-progress {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  width: 100%;
+}
+html.light .att-progress {
+  background: rgba(0, 0, 0, 0.08);
+}
+.att-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--crimson), var(--cyan)) !important;
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+  transition: width 0.6s ease;
+}
+
+
