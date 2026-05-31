@@ -84,23 +84,34 @@
           Sign In
         </button>
       </form>
-      <div class="mt-4 flex flex-col items-center gap-2">
-        <a href="#" onclick="event.preventDefault(); showToast('Demo credentials shown below', 'info')" class="text-[10px] text-school-cyan hover:underline transition-all font-semibold">Forgot Password?</a>
-        <div class="p-2.5 rounded-lg border border-white/5 bg-white/5 text-[9px] text-white/40 max-w-full font-mono">
-          Demo: <span class="text-white/80 font-bold select-all">admin@abaarso.edu</span> / <span class="text-white/80 font-bold select-all">admin123</span>
+      <div class="mt-6 w-full flex flex-col items-center gap-4">
+        <div class="text-[10px] font-bold text-white/40 uppercase tracking-widest">Select Demo Account to Autocheck</div>
+        <div class="grid grid-cols-3 gap-2.5 w-full">
+          <div class="glass p-2.5 rounded-xl border border-[#C0392B]/30 hover:border-[#C0392B] hover:shadow-[0_0_15px_rgba(192,57,43,0.3)] transition-all cursor-pointer text-center group select-none" onclick="autofillDemo('admin')">
+            <i class="fa-solid fa-user-shield text-[#C0392B] text-base group-hover:scale-110 transition-transform mb-1 block"></i>
+            <span class="text-[9px] font-bold uppercase tracking-wider text-white/70 group-hover:text-white block leading-none">Admin</span>
+          </div>
+          <div class="glass p-2.5 rounded-xl border border-[#00d4ff]/30 hover:border-[#00d4ff] hover:shadow-[0_0_15px_rgba(0,212,255,0.3)] transition-all cursor-pointer text-center group select-none" onclick="autofillDemo('teacher')">
+            <i class="fa-solid fa-chalkboard-user text-[#00d4ff] text-base group-hover:scale-110 transition-transform mb-1 block"></i>
+            <span class="text-[9px] font-bold uppercase tracking-wider text-white/70 group-hover:text-white block leading-none">Teacher</span>
+          </div>
+          <div class="glass p-2.5 rounded-xl border border-[#D4AF37]/30 hover:border-[#D4AF37] hover:shadow-[0_0_15px_rgba(212,175,55,0.3)] transition-all cursor-pointer text-center group select-none" onclick="autofillDemo('student')">
+            <i class="fa-solid fa-graduation-cap text-[#D4AF37] text-base group-hover:scale-110 transition-transform mb-1 block"></i>
+            <span class="text-[9px] font-bold uppercase tracking-wider text-white/70 group-hover:text-white block leading-none">Student</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- 3. MAIN APP WORKSPACE -->
-  <div id="app-layout" class="hidden min-h-screen flex relative">
+  <!-- 3. MAIN ADMIN APP WORKSPACE -->
+  <div id="admin-app" style="display:none" class="min-h-screen flex relative">
     
     <!-- Mobile sidebar overlay closer -->
-    <div id="overlay" class="fixed inset-0 bg-black/60 opacity-0 pointer-events-none z-40 md:hidden transition-all duration-300" onclick="closeSidebar()"></div>
+    <div id="admin-overlay" class="fixed inset-0 bg-black/60 opacity-0 pointer-events-none z-40 md:hidden transition-all duration-300" onclick="closeSidebar()"></div>
 
     <!-- FIXED LEFT SIDEBAR (Width: 240px) - Transparent Glass Style -->
-    <aside id="sidebar" class="w-[240px] h-screen fixed left-0 top-0 z-50 flex flex-col shrink-0 text-white overflow-y-auto">
+    <aside id="admin-sidebar" class="w-[240px] h-screen fixed left-0 top-0 z-50 flex flex-col shrink-0 text-white overflow-y-auto">
       
       <!-- Brand Logo Header with gold initials & waffles icon -->
       <div class="p-6 border-b border-white/10 flex items-center justify-between gap-2">
@@ -191,6 +202,12 @@
             </a>
           </li>
           <li>
+            <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="users" onclick="event.preventDefault(); showSection('users')">
+              <i class="fa-solid fa-users w-5 text-school-cyan text-sm"></i>
+              <span data-lang="users">User Management</span>
+            </a>
+          </li>
+          <li>
             <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="settings" onclick="event.preventDefault(); showSection('settings')">
               <i class="fa-solid fa-sliders w-5 text-school-cyan text-sm"></i>
               <span data-lang="settings">Settings</span>
@@ -209,19 +226,24 @@
     </aside>
 
     <!-- RIGHT SCROLLABLE WORKSPACE (Offset by 240px on Desktop) -->
-    <div id="main-content" class="md:ml-[240px] flex-grow flex flex-col justify-between min-w-0 transition-all duration-300">
+    <div id="admin-content" class="md:ml-[240px] flex-grow flex flex-col justify-between min-w-0 transition-all duration-300">
       
       <!-- TOP NAVIGATION NAVBAR -->
-      <header class="h-[70px] bg-white/5 border-b border-white/10 flex items-center justify-between px-6 sticky top-0 z-30 shadow-md no-print backdrop-blur-md">
+      <header id="admin-header" class="h-[70px] bg-white/5 border-b border-white/10 flex items-center justify-between px-6 sticky top-0 z-30 shadow-md no-print backdrop-blur-md">
         <div class="flex items-center gap-4">
           <!-- Waffle responsive menu toggle button -->
-          <button id="sidebar-hamburger" onclick="toggleSidebar()" class="md:hidden text-2xl text-school-gold hover:text-white focus:outline-none transition-all">
+          <button id="admin-sidebar-hamburger" onclick="toggleSidebar()" class="md:hidden text-2xl text-school-gold hover:text-white focus:outline-none transition-all">
             <span class="text-xl">⠿</span>
           </button>
-          <h1 id="header-page-title" class="text-xl md:text-2xl font-bold tracking-wide text-white font-headings">Dashboard</h1>
+          <h1 id="admin-header-page-title" class="text-xl md:text-2xl font-bold tracking-wide text-white font-headings">Dashboard</h1>
         </div>
 
         <div class="flex items-center gap-4 md:gap-6">
+          <!-- Role badge in top-right of navbar -->
+          <div class="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-[#C0392B] shadow-[0_0_10px_rgba(192,57,43,0.3)] rounded-full text-[10px] font-bold text-white leading-none">
+            <i class="fa-solid fa-user-shield text-[#C0392B] text-sm animate-pulse"></i>
+            <span class="uppercase tracking-widest text-[#C0392B]">Admin</span>
+          </div>
           <!-- Hargeisa time zone clock -->
           <div id="live-clock" class="hidden sm:flex text-xs md:text-sm font-semibold text-white/70 flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
             <i class="fa-regular fa-clock text-school-cyan"></i>
@@ -242,12 +264,12 @@
       </header>
 
       <!-- VIEWS REGISTRY CONTAINER -->
-      <main class="p-6 md:p-8 flex-grow space-y-8 z-10 relative">
+      <main id="admin-main" class="p-6 md:p-8 flex-grow space-y-8 z-10 relative">
         
         <!-- ======================================== -->
         <!-- VIEW 1: DASHBOARD -->
         <!-- ======================================== -->
-        <section id="dashboard" class="hidden space-y-8 animate-fade">
+        <section id="admin-dashboard" class="hidden space-y-8 animate-fade">
           
           <!-- Notices moving marquee banner -->
           <div class="glass p-3 flex items-center gap-4 overflow-hidden select-none border-l-4 border-l-school-cyan shadow-lg">
@@ -496,7 +518,7 @@
         <!-- ======================================== -->
         <!-- VIEW 2: STUDENTS -->
         <!-- ======================================== -->
-        <section id="students" class="hidden space-y-6 animate-fade">
+        <section id="admin-students" class="hidden space-y-6 animate-fade">
           <div class="glass overflow-hidden shadow-xl">
             <div class="p-6 border-b border-white/10 flex flex-wrap justify-between items-center gap-4">
               <h3 class="text-xl font-bold text-school-gold font-serif" data-lang="student_ledger">Student Registry</h3>
@@ -554,7 +576,7 @@
         <!-- ======================================== -->
         <!-- VIEW 3: TEACHERS -->
         <!-- ======================================== -->
-        <section id="teachers" class="hidden space-y-6 animate-fade">
+        <section id="admin-teachers" class="hidden space-y-6 animate-fade">
           <div class="flex flex-wrap items-center justify-between gap-4">
             <div class="relative w-full max-w-sm">
               <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 text-sm"></i>
@@ -573,7 +595,7 @@
         <!-- ======================================== -->
         <!-- VIEW 4: CLASSES -->
         <!-- ======================================== -->
-        <section id="classes" class="hidden space-y-6 animate-fade">
+        <section id="admin-classes" class="hidden space-y-6 animate-fade">
           <div class="flex justify-end">
             <button class="px-4 py-2 btn-primary text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-class')">
               <i class="fa-solid fa-plus mr-1"></i> <span data-lang="add_class_btn">Add Class</span>
@@ -588,7 +610,7 @@
         <!-- ======================================== -->
         <!-- VIEW 5: ATTENDANCE -->
         <!-- ======================================== -->
-        <section id="attendance" class="hidden space-y-6 animate-fade">
+        <section id="admin-attendance" class="hidden space-y-6 animate-fade">
           <!-- Glass Sub-Tabs Header Bar -->
           <div class="border-b border-white/10 no-print">
             <nav class="flex gap-6 text-sm font-semibold select-none">
@@ -886,7 +908,7 @@
         <!-- ======================================== -->
         <!-- VIEW 5: TIMETABLE -->
         <!-- ======================================== -->
-        <section id="timetable" class="hidden space-y-6 animate-fade">
+        <section id="admin-timetable" class="hidden space-y-6 animate-fade">
           <div class="glass overflow-hidden shadow-xl">
             <div class="p-6 border-b border-white/10 flex justify-between items-center">
               <h3 class="text-xl font-bold text-school-gold font-serif" data-lang="weekly_grid">Weekly Grid Schedule</h3>
@@ -929,7 +951,7 @@
         <!-- ======================================== -->
         <!-- VIEW 6: EXAMS & RESULTS -->
         <!-- ======================================== -->
-        <section id="exams" class="hidden space-y-6 animate-fade">
+        <section id="admin-exams" class="hidden space-y-6 animate-fade">
           <div class="border-b border-white/10">
             <nav class="flex gap-6 text-sm font-semibold select-none">
               <button id="tab-exam-schedules" class="py-3 border-b-2 border-school-cyan text-school-cyan hover:text-white transition-all focus:outline-none cursor-pointer font-headings text-base font-bold" onclick="switchExamsTab('schedules')">Exam Schedules</button>
@@ -1032,7 +1054,7 @@
         <!-- ======================================== -->
         <!-- VIEW 7: FEES -->
         <!-- ======================================== -->
-        <section id="fees" class="hidden space-y-6 animate-fade">
+        <section id="admin-fees" class="hidden space-y-6 animate-fade">
           
           <!-- Summary card logs -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6 select-none">
@@ -1095,7 +1117,7 @@
         <!-- ======================================== -->
         <!-- VIEW 8: ANNOUNCEMENTS -->
         <!-- ======================================== -->
-        <section id="announcements" class="hidden space-y-6 animate-fade">
+        <section id="admin-announcements" class="hidden space-y-6 animate-fade">
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             <!-- Left timeline announcments log -->
@@ -1141,9 +1163,44 @@
         </section>
 
         <!-- ======================================== -->
+        <!-- VIEW 9.5: USER MANAGEMENT (Admin Only) -->
+        <!-- ======================================== -->
+        <section id="admin-users" class="hidden space-y-6 animate-fade">
+          <div class="glass overflow-hidden shadow-xl border border-white/10">
+            <div class="p-6 border-b border-white/10 flex justify-between items-center">
+              <h3 class="text-xl font-bold text-school-gold font-serif">User Management Accounts</h3>
+              <button class="px-4 py-2 btn-primary text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase font-headings" onclick="openModal('modal-add-user')">
+                <i class="fa-solid fa-user-plus mr-1"></i> Add User
+              </button>
+            </div>
+            
+            <div class="p-6">
+              <!-- Users Table -->
+              <div class="overflow-x-auto border border-white/10 rounded-xl bg-black/10">
+                <table class="w-full text-left text-sm border-collapse text-white/95">
+                  <thead>
+                    <tr class="bg-white/5 border-b border-white/10 text-school-cyan text-xs font-bold uppercase tracking-wider select-none">
+                      <th class="px-6 py-4">Name</th>
+                      <th class="px-6 py-4">Email</th>
+                      <th class="px-6 py-4 text-center">Role</th>
+                      <th class="px-6 py-4 text-center">Status</th>
+                      <th class="px-6 py-4">Last Login</th>
+                      <th class="px-6 py-4 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="users-table-body">
+                    <!-- Injected via app.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======================================== -->
         <!-- VIEW 9: SETTINGS -->
         <!-- ======================================== -->
-        <section id="settings" class="hidden space-y-6 animate-fade">
+        <section id="admin-settings" class="hidden space-y-6 animate-fade">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             <!-- Academic properties config -->
@@ -1232,6 +1289,240 @@
         <span data-lang="footer_text">© 2026 Abaarso School · Hargiesa, Somaliland</span>
       </footer>
 
+    </div>
+  </div>
+
+  <!-- TEACHER APP -->
+  <div id="teacher-app" style="display:none" class="min-h-screen flex relative">
+    <!-- Mobile sidebar overlay closer -->
+    <div id="teacher-overlay" class="fixed inset-0 bg-black/60 opacity-0 pointer-events-none z-40 md:hidden transition-all duration-300" onclick="closeSidebar()"></div>
+
+    <!-- FIXED LEFT SIDEBAR (Width: 240px) - Transparent Glass Style -->
+    <aside id="teacher-sidebar" class="w-[240px] h-screen fixed left-0 top-0 z-50 flex flex-col shrink-0 text-white overflow-y-auto">
+      <div class="p-6 border-b border-white/10 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-school-red border-2 border-school-gold rounded-full flex items-center justify-center shrink-0 shadow-lg">
+            <span class="font-serif font-bold text-school-gold text-base">AS</span>
+          </div>
+          <div>
+            <h2 class="font-serif font-bold text-sm leading-tight text-white">Abaarso School</h2>
+            <p class="text-[9px] text-school-gold uppercase font-bold tracking-wider">Imagine · Innovate</p>
+          </div>
+        </div>
+        <div class="text-[#00d4ff] text-lg font-bold">⠿</div>
+      </div>
+
+      <!-- Logged-in user badge -->
+      <div class="px-6 py-4 flex items-center gap-3 border-b border-white/10 bg-white/5">
+        <div class="relative">
+          <div id="teacher-sidebar-avatar" class="w-10 h-10 bg-gradient-to-tr from-school-cyan to-blue-600 text-white rounded-full flex items-center justify-center font-bold border border-school-cyan shadow-[0_0_10px_rgba(0,212,255,0.3)]">
+            HA
+          </div>
+          <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-[#0a0f1e]"></div>
+        </div>
+        <div>
+          <h3 id="teacher-sidebar-name" class="text-xs font-semibold text-white">Mr. Hassan Ahmed</h3>
+          <p class="text-[9px] text-school-cyan font-bold uppercase tracking-wider">TEACHER</p>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="flex-grow py-4 text-xs font-medium uppercase tracking-wider">
+        <ul class="space-y-1">
+          <li>
+            <a href="#" class="sidebar-link active flex items-center gap-4 px-6 py-3" data-view="dashboard" onclick="event.preventDefault(); showSection('dashboard')">
+              <i class="fa-solid fa-chart-line w-5 text-school-cyan text-sm"></i>
+              <span>My Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="classes" onclick="event.preventDefault(); showSection('classes')">
+              <i class="fa-solid fa-school w-5 text-school-cyan text-sm"></i>
+              <span>My Classes</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="attendance" onclick="event.preventDefault(); showSection('attendance')">
+              <i class="fa-solid fa-calendar-check w-5 text-school-cyan text-sm"></i>
+              <span>Attendance</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="exams" onclick="event.preventDefault(); showSection('exams')">
+              <i class="fa-solid fa-file-signature w-5 text-school-cyan text-sm"></i>
+              <span>Exams & Grades</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="announcements" onclick="event.preventDefault(); showSection('announcements')">
+              <i class="fa-solid fa-bullhorn w-5 text-school-cyan text-sm"></i>
+              <span>Announcements</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="profile" onclick="event.preventDefault(); showSection('profile')">
+              <i class="fa-solid fa-sliders w-5 text-school-cyan text-sm"></i>
+              <span>My Profile</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="p-4 border-t border-white/10">
+        <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-3 py-2.5 bg-red-955/40 hover:bg-school-red/40 border border-red-500/20 hover:border-red-500/50 rounded-lg text-xs font-bold text-red-300 hover:text-white uppercase transition-all duration-300">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>Logout Portal</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- RIGHT WORKSPACE -->
+    <div id="teacher-content" class="md:ml-[240px] flex-grow flex flex-col justify-between min-w-0 transition-all duration-300">
+      <header id="teacher-header" class="h-[70px] bg-white/5 border-b border-white/10 flex items-center justify-between px-6 sticky top-0 z-30 shadow-md no-print backdrop-blur-md">
+        <div class="flex items-center gap-4">
+          <button id="teacher-sidebar-hamburger" onclick="toggleSidebar()" class="md:hidden text-2xl text-school-gold hover:text-white focus:outline-none transition-all">
+            <span class="text-xl">⠿</span>
+          </button>
+          <h1 id="teacher-header-page-title" class="text-xl md:text-2xl font-bold tracking-wide text-white font-headings">My Dashboard</h1>
+        </div>
+
+        <div class="flex items-center gap-4 md:gap-6">
+          <div class="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-school-cyan shadow-[0_0_10px_rgba(0,212,255,0.3)] rounded-full text-[10px] font-bold text-white leading-none">
+            <i class="fa-solid fa-chalkboard-user text-school-cyan text-sm animate-pulse"></i>
+            <span class="uppercase tracking-widest text-school-cyan">Teacher</span>
+          </div>
+          <!-- Clock -->
+          <div class="hidden sm:flex text-xs md:text-sm font-semibold text-white/70 flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
+            <i class="fa-regular fa-clock text-school-cyan"></i>
+            <span>Hargeisa Clock</span>
+          </div>
+        </div>
+      </header>
+
+      <main id="teacher-main" class="p-6 md:p-8 flex-grow space-y-8 z-10 relative">
+        <!-- TEACHER SECTIONS INJECTED DYNAMICALLY BY JS -->
+      </main>
+
+      <footer class="p-6 border-t border-white/10 text-center text-xs text-white/40 font-semibold tracking-wider bg-black/10 no-print select-none">
+        <span>© 2026 Abaarso School · Hargiesa, Somaliland</span>
+      </footer>
+    </div>
+  </div>
+
+  <!-- STUDENT APP -->
+  <div id="student-app" style="display:none" class="min-h-screen flex relative">
+    <!-- Mobile sidebar overlay closer -->
+    <div id="student-overlay" class="fixed inset-0 bg-black/60 opacity-0 pointer-events-none z-40 md:hidden transition-all duration-300" onclick="closeSidebar()"></div>
+
+    <!-- FIXED LEFT SIDEBAR -->
+    <aside id="student-sidebar" class="w-[240px] h-screen fixed left-0 top-0 z-50 flex flex-col shrink-0 text-white overflow-y-auto">
+      <div class="p-6 border-b border-white/10 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-school-red border-2 border-school-gold rounded-full flex items-center justify-center shrink-0 shadow-lg">
+            <span class="font-serif font-bold text-school-gold text-base">AS</span>
+          </div>
+          <div>
+            <h2 class="font-serif font-bold text-sm leading-tight text-white">Abaarso School</h2>
+            <p class="text-[9px] text-school-gold uppercase font-bold tracking-wider">Imagine · Innovate</p>
+          </div>
+        </div>
+        <div class="text-[#D4AF37] text-lg font-bold">⠿</div>
+      </div>
+
+      <!-- Logged-in user badge -->
+      <div class="px-6 py-4 flex items-center gap-3 border-b border-white/10 bg-white/5">
+        <div class="relative">
+          <div id="student-sidebar-avatar" class="w-10 h-10 bg-gradient-to-tr from-school-gold to-yellow-600 text-gray-950 rounded-full flex items-center justify-center font-bold border border-school-gold shadow-[0_0_10px_rgba(212,175,55,0.3)]">
+            MA
+          </div>
+          <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-[#0a0f1e]"></div>
+        </div>
+        <div>
+          <h3 id="student-sidebar-name" class="text-xs font-semibold text-white">Mohamed Ali</h3>
+          <p class="text-[9px] text-school-gold font-bold uppercase tracking-wider">STUDENT</p>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="flex-grow py-4 text-xs font-medium uppercase tracking-wider">
+        <ul class="space-y-1">
+          <li>
+            <a href="#" class="sidebar-link active flex items-center gap-4 px-6 py-3" data-view="dashboard" onclick="event.preventDefault(); showSection('dashboard')">
+              <i class="fa-solid fa-chart-line w-5 text-school-gold text-sm"></i>
+              <span>My Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="attendance" onclick="event.preventDefault(); showSection('attendance')">
+              <i class="fa-solid fa-calendar-check w-5 text-school-gold text-sm"></i>
+              <span>My Attendance</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="results" onclick="event.preventDefault(); showSection('results')">
+              <i class="fa-solid fa-file-signature w-5 text-school-gold text-sm"></i>
+              <span>My Results</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="fees" onclick="event.preventDefault(); showSection('fees')">
+              <i class="fa-solid fa-wallet w-5 text-school-gold text-sm"></i>
+              <span>My Fees</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="announcements" onclick="event.preventDefault(); showSection('announcements')">
+              <i class="fa-solid fa-bullhorn w-5 text-school-gold text-sm"></i>
+              <span>Announcements</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="sidebar-link flex items-center gap-4 px-6 py-3" data-view="profile" onclick="event.preventDefault(); showSection('profile')">
+              <i class="fa-solid fa-sliders w-5 text-school-gold text-sm"></i>
+              <span>My Profile</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="p-4 border-t border-white/10">
+        <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-3 py-2.5 bg-red-955/40 hover:bg-school-red/40 border border-red-500/20 hover:border-red-500/50 rounded-lg text-xs font-bold text-red-300 hover:text-white uppercase transition-all duration-300">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          <span>Logout Portal</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- RIGHT WORKSPACE -->
+    <div id="student-content" class="md:ml-[240px] flex-grow flex flex-col justify-between min-w-0 transition-all duration-300">
+      <header id="student-header" class="h-[70px] bg-white/5 border-b border-white/10 flex items-center justify-between px-6 sticky top-0 z-30 shadow-md no-print backdrop-blur-md">
+        <div class="flex items-center gap-4">
+          <button id="student-sidebar-hamburger" onclick="toggleSidebar()" class="md:hidden text-2xl text-school-gold hover:text-white focus:outline-none transition-all">
+            <span class="text-xl">⠿</span>
+          </button>
+          <h1 id="student-header-page-title" class="text-xl md:text-2xl font-bold tracking-wide text-white font-headings">My Dashboard</h1>
+        </div>
+
+        <div class="flex items-center gap-4 md:gap-6">
+          <div class="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-school-gold shadow-[0_0_10px_rgba(212,175,55,0.3)] rounded-full text-[10px] font-bold text-white leading-none">
+            <i class="fa-solid fa-graduation-cap text-school-gold text-sm animate-pulse"></i>
+            <span class="uppercase tracking-widest text-school-gold">Student</span>
+          </div>
+          <!-- Clock -->
+          <div class="hidden sm:flex text-xs md:text-sm font-semibold text-white/70 flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
+            <i class="fa-regular fa-clock text-school-cyan"></i>
+            <span>Hargeisa Clock</span>
+          </div>
+        </div>
+      </header>
+
+      <main id="student-main" class="p-6 md:p-8 flex-grow space-y-8 z-10 relative">
+        <!-- STUDENT SECTIONS INJECTED DYNAMICALLY BY JS -->
+      </main>
+
+      <footer class="p-6 border-t border-white/10 text-center text-xs text-white/40 font-semibold tracking-wider bg-black/10 no-print select-none">
+        <span>© 2026 Abaarso School · Hargiesa, Somaliland</span>
+      </footer>
     </div>
   </div>
 
@@ -1493,6 +1784,70 @@
         <div class="px-6 py-4 border-t border-white/10 flex justify-end gap-2 bg-black/10">
           <button type="button" class="px-4 py-2 border border-white/15 rounded text-xs font-bold text-white/80 hover:bg-white/5 transition-all cursor-pointer" onclick="closeModal('modal-add-result')">CANCEL</button>
           <button type="submit" class="px-4 py-2 btn-primary text-white font-bold rounded text-xs transition-colors cursor-pointer">SAVE SCORE</button>
+        </div>
+      </form>
+    </div>
+  <!-- USER ACCOUNTS MANAGER ADD/EDIT MODAL -->
+  <div id="modal-add-user" class="modal-overlay">
+    <div class="glass modal-box w-full max-w-md overflow-hidden relative shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/15 animate-fade" tabindex="-1">
+      <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center">
+        <h3 id="user-modal-title" class="font-bold text-white text-lg font-headings">Create User Account</h3>
+        <button class="text-white/45 hover:text-red-500 text-2xl font-bold cursor-pointer" onclick="closeModal('modal-add-user')">&times;</button>
+      </div>
+      <form id="user-form" onsubmit="saveUserForm(event)" novalidate class="space-y-4">
+        <input type="hidden" id="user-edit-id">
+        <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Full Name</label>
+            <input type="text" id="user-name" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" placeholder="e.g. Jama Hassan" required>
+            <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Name is required.</div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Email Address</label>
+            <input type="email" id="user-email" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" placeholder="e.g. jama@abaarso.edu" required>
+            <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Valid Email is required.</div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-1">Password</label>
+              <input type="password" id="user-password" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" placeholder="••••••••" required>
+              <div class="text-[10px] text-red-500 font-bold mt-1 form-error-msg hidden">Password is required.</div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-1">User Role</label>
+              <select id="user-role" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" onchange="toggleUserRoleFields()">
+                <option value="Admin">Admin</option>
+                <option value="Teacher">Teacher</option>
+                <option value="Student">Student</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- Role-specific link lists (TCH/STU IDs) -->
+          <div id="role-link-teacher-container" class="hidden">
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Link to Teacher Profile</label>
+            <select id="user-link-teacher" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+              <!-- Injected dynamically -->
+            </select>
+          </div>
+          <div id="role-link-student-container" class="hidden">
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Link to Student Profile</label>
+            <select id="user-link-student" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+              <!-- Injected dynamically -->
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-1">Account Status</label>
+            <select id="user-status" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+              <option value="Active">Active</option>
+              <option value="Suspended">Suspended</option>
+            </select>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-white/10 flex justify-end gap-2 bg-black/10">
+          <button type="button" class="px-4 py-2 border border-white/15 rounded text-xs font-bold text-white/80 hover:bg-white/5 transition-all cursor-pointer" onclick="closeModal('modal-add-user')">CANCEL</button>
+          <button type="submit" class="px-4 py-2 btn-primary text-white font-bold rounded text-xs transition-colors cursor-pointer">SAVE USER</button>
         </div>
       </form>
     </div>

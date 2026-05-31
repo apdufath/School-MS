@@ -3,7 +3,7 @@
    ========================================================================== */
 const SEEDS = {
   teachers: [
-    { id: 'TCH001', name: 'Dr. John Harrison', subject: 'Mathematics', qualification: 'PhD in Math', phone: '528630', email: 'john@abaarsotechuniversity.org', joiningDate: '2022-09-01', experience: '8 Years', status: 'Active' },
+    { id: 'TCH001', name: 'Mr. Hassan Ahmed', subject: 'Mathematics', qualification: 'PhD in Math', phone: '528630', email: 'teacher@abaarso.edu', joiningDate: '2022-09-01', experience: '8 Years', status: 'Active' },
     { id: 'TCH002', name: 'Mariam Muse', subject: 'English', qualification: 'MA in Applied Linguistics', phone: '528631', email: 'mariam@abaarsotechuniversity.org', joiningDate: '2023-01-15', experience: '5 Years', status: 'Active' },
     { id: 'TCH003', name: 'Mohamed Duale', subject: 'Science', qualification: 'MSc in Physics', phone: '528632', email: 'm.duale@abaarsotechuniversity.org', joiningDate: '2020-08-10', experience: '12 Years', status: 'Active' },
     { id: 'TCH004', name: 'Mustafe Gedi', subject: 'Somali', qualification: 'BA in Somali Literature', phone: '528633', email: 'gedi@abaarsotechuniversity.org', joiningDate: '2019-10-01', experience: '15 Years', status: 'Active' },
@@ -18,7 +18,7 @@ const SEEDS = {
     { id: 'CLS005', name: 'Grade 12-A', teacherId: 'TCH005', room: 'Main Lecture Hall' }
   ],
   students: [
-    { id: 'STU001', name: 'Abdiwahab Ahmed', age: 16, gender: 'Male', class: 'Grade 10-A', parentName: 'Ahmed Ali', phone: '511223', address: '26 June District, Hargeisa', status: 'Active' },
+    { id: 'STU001', name: 'Mohamed Ali', age: 16, gender: 'Male', class: 'Grade 10-A', parentName: 'Ali Mohamed', phone: '511223', address: '26 June District, Hargeisa', status: 'Active' },
     { id: 'STU002', name: 'Faduma Omer', age: 15, gender: 'Female', class: 'Grade 10-A', parentName: 'Omer Dahir', phone: '511224', address: 'Shaab Area, Hargeisa', status: 'Active' },
     { id: 'STU003', name: 'Hamza Yusuf', age: 16, gender: 'Male', class: 'Grade 10-B', parentName: 'Yusuf Elmi', phone: '511225', address: 'Koodbuur, Hargeisa', status: 'Active' },
     { id: 'STU004', name: 'Yasmin Warsame', age: 17, gender: 'Female', class: 'Grade 11-A', parentName: 'Warsame Abdi', phone: '511226', address: 'Jigjiga Yar, Hargeisa', status: 'Active' },
@@ -48,7 +48,7 @@ const SEEDS = {
     { id: 'RES008', studentId: 'STU005', subject: 'Mathematics', score: 45 }
   ],
   fees: [
-    { studentId: 'STU001', amountDue: 1500, amountPaid: 1500 },
+    { studentId: 'STU001', amountDue: 1500, amountPaid: 1350 },
     { studentId: 'STU002', amountDue: 1500, amountPaid: 1000 },
     { studentId: 'STU003', amountDue: 1500, amountPaid: 500 },
     { studentId: 'STU004', amountDue: 1500, amountPaid: 1500 },
@@ -84,6 +84,12 @@ const SEEDS = {
   }
 };
 
+const DEFAULT_USERS = [
+  { id: 'USR001', name: 'Admin Registrar', email: 'admin@abaarso.edu', password: 'admin123', role: 'Admin', status: 'Active', lastLogin: '2026-05-30 09:00 AM' },
+  { id: 'USR002', name: 'Mr. Hassan Ahmed', email: 'teacher@abaarso.edu', password: 'teacher123', role: 'Teacher', status: 'Active', lastLogin: '2026-05-30 10:15 AM', teacherId: 'TCH001' },
+  { id: 'USR003', name: 'Mohamed Ali', email: 'student@abaarso.edu', password: 'student123', role: 'Student', status: 'Active', lastLogin: '2026-05-30 08:30 AM', studentId: 'STU001' }
+];
+
 let teachers = JSON.parse(localStorage.getItem('teachers')) || [...SEEDS.teachers];
 let classes = JSON.parse(localStorage.getItem('classes')) || [...SEEDS.classes];
 let students = JSON.parse(localStorage.getItem('students')) || [...SEEDS.students];
@@ -93,6 +99,7 @@ let fees = JSON.parse(localStorage.getItem('fees')) || [...SEEDS.fees];
 let announcements = JSON.parse(localStorage.getItem('announcements')) || [...SEEDS.announcements];
 let timetable = JSON.parse(localStorage.getItem('timetable')) || {...SEEDS.timetable};
 let settings = JSON.parse(localStorage.getItem('settings')) || {...SEEDS.settings};
+let users = JSON.parse(localStorage.getItem('users')) || [...DEFAULT_USERS];
 
 /* Seeding historical data generator for 30 school days back (skipping Fridays) */
 function generateMockAttendance() {
@@ -166,6 +173,7 @@ function saveAllToLocalStorage() {
   localStorage.setItem('timetable', JSON.stringify(timetable));
   localStorage.setItem('settings', JSON.stringify(settings));
   localStorage.setItem('attendance', JSON.stringify(attendance));
+  localStorage.setItem('users', JSON.stringify(users));
 }
 
 /* ==========================================================================
@@ -215,28 +223,40 @@ const dictionary = {
 /* ==========================================================================
    === LOGIN ACCESS SECURE SYSTEM GATE ===
    ========================================================================== */
+// Current logged in user
+let currentUser = JSON.parse(sessionStorage.getItem('currentUser')) || null;
+
 function checkSessionGuard() {
   const isAuthorized = sessionStorage.getItem('loggedIn') === 'true';
   const loginScreen = document.getElementById('login-screen');
-  const appLayout = document.getElementById('app-layout');
   const splashScreen = document.getElementById('splash-screen');
 
+  // Ensure all role app containers are hidden initially
+  const adminApp = document.getElementById('admin-app');
+  const teacherApp = document.getElementById('teacher-app');
+  const studentApp = document.getElementById('student-app');
+  if (adminApp) adminApp.style.display = 'none';
+  if (teacherApp) teacherApp.style.display = 'none';
+  if (studentApp) studentApp.style.display = 'none';
+
   if (isAuthorized) {
-    if (loginScreen) loginScreen.classList.add('hidden');
-    if (appLayout) appLayout.classList.remove('hidden');
-    
-    // Play splash screen clean transition
-    if (splashScreen && !splashScreen.classList.contains('fade-out')) {
-      setTimeout(() => {
-        splashScreen.classList.add('fade-out');
-      }, 1000);
+    const user = JSON.parse(sessionStorage.getItem('currentUser'));
+    if (user) {
+      if (loginScreen) loginScreen.classList.add('hidden');
+      
+      // Play splash screen clean transition
+      if (splashScreen && !splashScreen.classList.contains('fade-out')) {
+        setTimeout(() => {
+          splashScreen.classList.add('fade-out');
+        }, 1000);
+      }
+      
+      loadApp(user);
+    } else {
+      handleLogout();
     }
-    
-    // Initialize Dashboard Elements and Charts
-    showSection(activeSection);
   } else {
     if (loginScreen) loginScreen.classList.remove('hidden');
-    if (appLayout) appLayout.classList.add('hidden');
     if (splashScreen) splashScreen.classList.add('fade-out');
   }
 }
@@ -246,24 +266,35 @@ function handleLogin(event) {
   const emailInput = document.getElementById('login-email').value.trim();
   const passwordInput = document.getElementById('login-password').value.trim();
 
-  // Validate credentials admin@abaarso.edu / admin123
-  if (emailInput === 'admin@abaarso.edu' && passwordInput === 'admin123') {
+  // Query unified users table
+  const user = users.find(u => u.email.toLowerCase() === emailInput.toLowerCase() && u.password === passwordInput);
+
+  if (user) {
+    if (user.status === 'Suspended') {
+      showToast('Account suspended', 'error');
+      return;
+    }
+
+    // Set last login time
+    const now = new Date();
+    user.lastLogin = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    saveAllToLocalStorage();
+
     sessionStorage.setItem('loggedIn', 'true');
-    showToast("Authorization Granted. Welcome Back", "success");
+    sessionStorage.setItem('currentUser', JSON.stringify(user));
+    currentUser = user;
+
+    showToast(`Access Granted. Welcome back, ${user.name}`, "success");
     
     // Transition clean fade
     const loginScreen = document.getElementById('login-screen');
-    const appLayout = document.getElementById('app-layout');
-    
     if (loginScreen) loginScreen.style.opacity = '0';
     setTimeout(() => {
       if (loginScreen) {
         loginScreen.classList.add('hidden');
         loginScreen.style.opacity = '1';
       }
-      if (appLayout) appLayout.classList.remove('hidden');
-      
-      showSection('dashboard');
+      loadApp(user);
     }, 400);
   } else {
     showToast("Unauthorized entry. Invalid credentials", "error");
@@ -274,16 +305,89 @@ function handleLogin(event) {
 
 function handleLogout() {
   sessionStorage.removeItem('loggedIn');
-  showToast("Logged out of management terminal", "info");
+  sessionStorage.removeItem('currentUser');
+  currentUser = null;
+  showToast("Logged out successfully", "info");
   
   const loginScreen = document.getElementById('login-screen');
-  const appLayout = document.getElementById('app-layout');
+  const adminApp = document.getElementById('admin-app');
+  const teacherApp = document.getElementById('teacher-app');
+  const studentApp = document.getElementById('student-app');
   
-  if (appLayout) appLayout.classList.add('hidden');
+  if (adminApp) adminApp.style.display = 'none';
+  if (teacherApp) teacherApp.style.display = 'none';
+  if (studentApp) studentApp.style.display = 'none';
+  
   if (loginScreen) {
     loginScreen.classList.remove('hidden');
     document.getElementById('login-password').value = '';
     document.getElementById('login-email').value = '';
+  }
+}
+
+function autofillDemo(role) {
+  const emailInput = document.getElementById('login-email');
+  const passwordInput = document.getElementById('login-password');
+  if (!emailInput || !passwordInput) return;
+  
+  if (role === 'admin') {
+    emailInput.value = 'admin@abaarso.edu';
+    passwordInput.value = 'admin123';
+    showToast('Admin credentials filled', 'info');
+  } else if (role === 'teacher') {
+    emailInput.value = 'teacher@abaarso.edu';
+    passwordInput.value = 'teacher123';
+    showToast('Teacher credentials filled', 'info');
+  } else if (role === 'student') {
+    emailInput.value = 'student@abaarso.edu';
+    passwordInput.value = 'student123';
+    showToast('Student credentials filled', 'info');
+  }
+}
+
+function hasPermission(action) {
+  const perms = {
+    Admin: ['all'],
+    Teacher: ['view_own_classes','mark_attendance',
+      'enter_grades','view_announcements',
+      'post_announcements','edit_own_profile'],
+    Student: ['view_own_attendance','view_own_results',
+      'view_own_fees','view_announcements',
+      'edit_own_profile']
+  };
+  const role = currentUser?.role;
+  return perms[role]?.includes('all') || 
+         perms[role]?.includes(action);
+}
+
+// Role-based app loader
+function loadApp(user) {
+  currentUser = user;
+  sessionStorage.setItem('currentUser', JSON.stringify(user));
+  
+  // Hide all role apps first
+  document.getElementById('admin-app').style.display = 'none';
+  document.getElementById('teacher-app').style.display = 'none';
+  document.getElementById('student-app').style.display = 'none';
+  
+  // Set role accent colors and load
+  const colors = {
+    Admin: '#C0392B',
+    Teacher: '#00d4ff',
+    Student: '#D4AF37'
+  };
+  document.documentElement.style.setProperty('--role-color', colors[user.role]);
+  
+  // Show correct app container
+  if (user.role === 'Admin') {
+    document.getElementById('admin-app').style.display = 'flex';
+    initAdminApp();
+  } else if (user.role === 'Teacher') {
+    document.getElementById('teacher-app').style.display = 'flex';
+    initTeacherApp();
+  } else if (user.role === 'Student') {
+    document.getElementById('student-app').style.display = 'flex';
+    initStudentApp();
   }
 }
 
@@ -293,33 +397,54 @@ function handleLogout() {
 let activeSection = 'dashboard';
 
 function showSection(sectionId) {
+  const role = currentUser?.role || 'Admin';
+  if (role === 'Admin') {
+    showAdminSection(sectionId);
+  } else if (role === 'Teacher') {
+    showTeacherSection(sectionId);
+  } else if (role === 'Student') {
+    showStudentSection(sectionId);
+  }
+}
+
+function initAdminApp() {
+  showAdminSection('dashboard');
+}
+
+function showAdminSection(sectionId) {
   activeSection = sectionId;
   
-  // Hide all sections, display target
-  document.querySelectorAll('main > section').forEach(sec => {
-    if (sec.id === sectionId) {
-      sec.classList.remove('hidden');
-    } else {
-      sec.classList.add('hidden');
-    }
-  });
+  // Hide all sections in admin main container
+  const mainEl = document.getElementById('admin-main');
+  if (mainEl) {
+    mainEl.querySelectorAll(':scope > section').forEach(sec => {
+      if (sec.id === `admin-${sectionId}`) {
+        sec.classList.remove('hidden');
+      } else {
+        sec.classList.add('hidden');
+      }
+    });
+  }
 
-  // Update active links in sidebar
-  document.querySelectorAll('.sidebar-link').forEach(link => {
-    if (link.getAttribute('data-view') === sectionId) {
-      link.classList.add('active');
-    } else {
-      link.classList.remove('active');
-    }
-  });
+  // Update active links in admin sidebar
+  const sidebarEl = document.getElementById('admin-sidebar');
+  if (sidebarEl) {
+    sidebarEl.querySelectorAll('.sidebar-link').forEach(link => {
+      if (link.getAttribute('data-view') === sectionId) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+  }
 
-  // Update page heading title in header navbar
+  // Update page heading title in admin header navbar
   const currentLang = settings.language || 'en';
   const headingText = dictionary[currentLang][sectionId] || sectionId.toUpperCase();
-  const pageHeaderTitle = document.getElementById('header-page-title');
+  const pageHeaderTitle = document.getElementById('admin-header-page-title');
   if (pageHeaderTitle) pageHeaderTitle.innerText = headingText;
 
-  // Trigger page-specific loaders
+  // Trigger admin-specific loaders
   if (sectionId === 'dashboard') {
     animateDashboardCounters();
     renderDashboardRecentAnnouncements();
@@ -342,6 +467,8 @@ function showSection(sectionId) {
     renderFees();
   } else if (sectionId === 'announcements') {
     renderAnnouncements();
+  } else if (sectionId === 'users') {
+    renderAdminUsers();
   } else if (sectionId === 'settings') {
     loadSettingsInputs();
   } else if (sectionId === 'attendance') {
@@ -353,8 +480,10 @@ function showSection(sectionId) {
    === SIDEBAR RESPONSIVE TRANSITIONS ===
    ========================================================================== */
 function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('overlay');
+  const role = currentUser?.role || 'Admin';
+  const rolePrefix = role.toLowerCase();
+  const sidebar = document.getElementById(`${rolePrefix}-sidebar`);
+  const overlay = document.getElementById(`${rolePrefix}-overlay`);
   if (!sidebar) return;
   
   sidebar.classList.toggle('open');
@@ -372,8 +501,10 @@ function toggleSidebar() {
 }
 
 function closeSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('overlay');
+  const role = currentUser?.role || 'Admin';
+  const rolePrefix = role.toLowerCase();
+  const sidebar = document.getElementById(`${rolePrefix}-sidebar`);
+  const overlay = document.getElementById(`${rolePrefix}-overlay`);
   if (sidebar) sidebar.classList.remove('open');
   if (overlay) {
     overlay.classList.add('opacity-0', 'pointer-events-none');
@@ -1721,6 +1852,163 @@ function translateNavigationMenu(lang) {
 }
 
 /* ==========================================================================
+   === USER MANAGEMENT PORTAL (Admin Only) ===
+   ========================================================================== */
+function renderAdminUsers() {
+  const tbody = document.getElementById('users-table-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  users.forEach(user => {
+    let roleBadgeClass = '';
+    if (user.role === 'Admin') roleBadgeClass = 'border-[#C0392B] text-[#C0392B] shadow-[0_0_10px_rgba(192,57,43,0.25)]';
+    else if (user.role === 'Teacher') roleBadgeClass = 'border-[#00d4ff] text-[#00d4ff] shadow-[0_0_10px_rgba(0,212,255,0.25)]';
+    else if (user.role === 'Student') roleBadgeClass = 'border-[#D4AF37] text-[#D4AF37] shadow-[0_0_10px_rgba(212,175,55,0.25)]';
+
+    let statusClass = user.status === 'Active' 
+      ? 'bg-green-955/60 text-green-400 border border-green-500/20' 
+      : 'bg-red-955/60 text-red-400 border border-red-500/20';
+
+    tbody.innerHTML += `
+      <tr class="app-table-row border-b border-white/5 hover:bg-white/5 transition-colors duration-150">
+        <td class="px-6 py-4 text-sm font-bold text-white">${user.name}</td>
+        <td class="px-6 py-4 text-xs text-white/60 font-mono">${user.email}</td>
+        <td class="px-6 py-4 text-center">
+          <span class="px-2 py-0.5 rounded border text-[10px] font-bold ${roleBadgeClass}">${user.role}</span>
+        </td>
+        <td class="px-6 py-4 text-center">
+          <span class="px-2.5 py-0.5 rounded-full font-bold text-[10px] ${statusClass}">${user.status}</span>
+        </td>
+        <td class="px-6 py-4 text-xs text-white/50">${user.lastLogin || '--'}</td>
+        <td class="px-6 py-4 text-xs text-white/60 no-print text-center flex justify-center gap-3">
+          <button type="button" class="text-school-cyan hover:text-white transition-all text-xs font-bold cursor-pointer" onclick="editUser('${user.id}')" title="Edit Role & Link"><i class="fa-solid fa-pen"></i></button>
+          <button type="button" class="${user.status === 'Active' ? 'text-amber-400 hover:text-amber-500' : 'text-green-400 hover:text-green-500'} transition-all text-xs font-bold cursor-pointer" onclick="toggleUserStatus('${user.id}')" title="${user.status === 'Active' ? 'Suspend Account' : 'Activate Account'}">
+            <i class="fa-solid ${user.status === 'Active' ? 'fa-ban' : 'fa-check-circle'}"></i>
+          </button>
+          <button type="button" class="text-red-400 hover:text-red-600 transition-all text-xs font-bold cursor-pointer" onclick="deleteUser('${user.id}')" title="Delete Account"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function toggleUserRoleFields() {
+  const role = document.getElementById('user-role').value;
+  const teacherCont = document.getElementById('role-link-teacher-container');
+  const studentCont = document.getElementById('role-link-student-container');
+  
+  if (teacherCont) teacherCont.classList.add('hidden');
+  if (studentCont) studentCont.classList.add('hidden');
+  
+  if (role === 'Teacher') {
+    if (teacherCont) {
+      teacherCont.classList.remove('hidden');
+      const select = document.getElementById('user-link-teacher');
+      if (select) {
+        select.innerHTML = teachers.map(t => `<option value="${t.id}">${t.name} (${t.id} - ${t.subject})</option>`).join('');
+      }
+    }
+  } else if (role === 'Student') {
+    if (studentCont) {
+      studentCont.classList.remove('hidden');
+      const select = document.getElementById('user-link-student');
+      if (select) {
+        select.innerHTML = students.map(s => `<option value="${s.id}">${s.name} (${s.id} - ${s.class})</option>`).join('');
+      }
+    }
+  }
+}
+
+function editUser(id) {
+  const user = users.find(u => u.id === id);
+  if (!user) return;
+  
+  openModal('modal-add-user');
+  
+  document.getElementById('user-modal-title').innerText = "Edit User Account";
+  document.getElementById('user-edit-id').value = user.id;
+  document.getElementById('user-name').value = user.name;
+  document.getElementById('user-email').value = user.email;
+  document.getElementById('user-password').value = user.password;
+  document.getElementById('user-role').value = user.role;
+  document.getElementById('user-status').value = user.status;
+  
+  toggleUserRoleFields();
+  
+  if (user.role === 'Teacher') {
+    const select = document.getElementById('user-link-teacher');
+    if (select) select.value = user.teacherId || '';
+  } else if (user.role === 'Student') {
+    const select = document.getElementById('user-link-student');
+    if (select) select.value = user.studentId || '';
+  }
+}
+
+function toggleUserStatus(id) {
+  const user = users.find(u => u.id === id);
+  if (!user) return;
+  
+  user.status = user.status === 'Active' ? 'Suspended' : 'Active';
+  saveAllToLocalStorage();
+  renderAdminUsers();
+  showToast(`Account status updated to ${user.status}`, "success");
+}
+
+function deleteUser(id) {
+  if (confirm("Are you sure you want to delete this user account?")) {
+    users = users.filter(u => u.id !== id);
+    saveAllToLocalStorage();
+    renderAdminUsers();
+    showToast("User account deleted successfully", "error");
+  }
+}
+
+function saveUserForm(event) {
+  event.preventDefault();
+  const form = document.getElementById('user-form');
+  if (!validateForm(form)) return;
+
+  const id = document.getElementById('user-edit-id').value;
+  const name = document.getElementById('user-name').value.trim();
+  const email = document.getElementById('user-email').value.trim();
+  const password = document.getElementById('user-password').value.trim();
+  const role = document.getElementById('user-role').value;
+  const status = document.getElementById('user-status').value;
+  
+  let teacherId = '';
+  let studentId = '';
+  
+  if (role === 'Teacher') {
+    teacherId = document.getElementById('user-link-teacher').value;
+  } else if (role === 'Student') {
+    studentId = document.getElementById('user-link-student').value;
+  }
+
+  if (id) {
+    // Edit mode
+    const idx = users.findIndex(u => u.id === id);
+    if (idx > -1) {
+      users[idx] = { ...users[idx], name, email, password, role, status, teacherId, studentId };
+      showToast("User account updated", "success");
+    }
+  } else {
+    // Add mode
+    const emailExists = users.some(u => u.email.toLowerCase() === email.toLowerCase());
+    if (emailExists) {
+      showToast("Email address already registered", "error");
+      return;
+    }
+    const nextId = 'USR' + String(users.length + 1).padStart(3, '0');
+    users.push({ id: nextId, name, email, password, role, status, teacherId, studentId, lastLogin: '' });
+    showToast("User account created successfully", "success");
+  }
+
+  saveAllToLocalStorage();
+  closeModal('modal-add-user');
+  renderAdminUsers();
+}
+
+/* ==========================================================================
    === MODALS CORE SYSTEM ===
    ========================================================================== */
 function openModal(modalId) {
@@ -2689,10 +2977,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initAttendanceSectionSelectors();
   initDashboardAttendanceWidget();
 
-  // 4. Time Update (Africa/Mogadishu zone matches Hargeisa time zone GMT+3)
+  // 4. Time Update for Hargeisa clock (Mogadishu time zone GMT+3) across all header panels
   setInterval(() => {
-    const clockEl = document.getElementById('live-clock');
-    if (!clockEl) return;
     const timeStr = new Date().toLocaleString("en-US", {
       timeZone: "Africa/Mogadishu",
       hour12: true,
@@ -2701,7 +2987,11 @@ document.addEventListener("DOMContentLoaded", () => {
       second: "2-digit"
     });
     const label = settings.language === 'so' ? 'Hargeysa: ' : 'Hargeisa: ';
-    clockEl.innerText = `${label}${timeStr}`;
+    
+    // Select all clocks
+    document.querySelectorAll('[id*="live-clock"]').forEach(clockEl => {
+      clockEl.querySelector('span').innerText = `${label}${timeStr}`;
+    });
   }, 1000);
 
   // 5. Connect modal click overlay dismissal bounds
@@ -2713,20 +3003,1774 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
   
-  // 6. Connect sidebar hamburger clicks
-  const toggleBtn = document.getElementById('sidebar-hamburger');
-  if (toggleBtn) {
+  // 6. Connect sidebar hamburger clicks for all roles
+  document.querySelectorAll('[id*="-sidebar-hamburger"], #sidebar-hamburger').forEach(toggleBtn => {
     toggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       toggleSidebar();
     });
-  }
+  });
   
-  // 7. Connect mobile overlay backdrops
-  const overlay = document.getElementById('overlay');
-  if (overlay) {
+  // 7. Connect mobile overlay backdrops for all roles
+  document.querySelectorAll('[id*="-overlay"]').forEach(overlay => {
     overlay.addEventListener('click', () => {
       closeSidebar();
     });
-  }
+  });
 });
+
+/* ==========================================================================
+   ==========================================================================
+   === TEACHER APP MODULES ===
+   ==========================================================================
+   ========================================================================== */
+function initTeacherApp() {
+  const sidebarName = document.getElementById('teacher-sidebar-name');
+  if (sidebarName) sidebarName.innerText = currentUser.name;
+  
+  const sidebarAvatar = document.getElementById('teacher-sidebar-avatar');
+  if (sidebarAvatar) {
+    const initials = currentUser.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    sidebarAvatar.innerText = initials;
+  }
+  
+  showTeacherSection('dashboard');
+}
+
+function showTeacherSection(sectionId) {
+  activeSection = sectionId;
+  const mainEl = document.getElementById('teacher-main');
+  if (mainEl) {
+    // Hide all sections first
+    mainEl.innerHTML = '';
+  }
+
+  // Update active links in teacher sidebar
+  const sidebarEl = document.getElementById('teacher-sidebar');
+  if (sidebarEl) {
+    sidebarEl.querySelectorAll('.sidebar-link').forEach(link => {
+      if (link.getAttribute('data-view') === sectionId) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+  }
+
+  // Update page heading title
+  const currentLang = settings.language || 'en';
+  const headingText = dictionary[currentLang][sectionId] || sectionId.toUpperCase();
+  const pageHeaderTitle = document.getElementById('teacher-header-page-title');
+  if (pageHeaderTitle) pageHeaderTitle.innerText = headingText;
+
+  // Trigger page load and inject layout dynamically
+  if (sectionId === 'dashboard') {
+    renderTeacherDashboard();
+  } else if (sectionId === 'classes') {
+    renderTeacherClasses();
+  } else if (sectionId === 'attendance') {
+    renderTeacherAttendance();
+  } else if (sectionId === 'exams') {
+    renderTeacherExams();
+  } else if (sectionId === 'announcements') {
+    renderTeacherAnnouncements();
+  } else if (sectionId === 'profile') {
+    renderTeacherProfile();
+  }
+}
+
+function renderTeacherDashboard() {
+  const container = document.getElementById('teacher-main');
+  if (!container) return;
+
+  const teacherRecord = teachers.find(t => t.id === currentUser.teacherId) || teachers[0];
+  const teacherClasses = classes.filter(c => c.teacherId === teacherRecord.id);
+  const totalStudents = teacherClasses.reduce((sum, c) => sum + students.filter(s => s.class === c.name).length, 0);
+
+  container.innerHTML = `
+    <!-- Moving Notice Bar -->
+    <div class="glass p-3 flex items-center gap-4 overflow-hidden select-none border-l-4 border-l-school-cyan shadow-lg">
+      <span class="bg-[#00d4ff] text-gray-950 text-[9px] font-bold px-2 py-0.5 rounded tracking-widest shrink-0 uppercase">Notice</span>
+      <div class="flex-grow whitespace-nowrap overflow-hidden">
+        <span class="inline-block animate-[marquee_20s_linear_infinite] hover:paused text-sm text-school-cyan font-semibold tracking-wider">
+          Abaarso Teacher Portal - Good Morning, ${currentUser.name}! Timetables and Grade Books are fully synced. Keep registers up to date.
+        </span>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 select-none">
+      <div class="glass p-5 border-b-2 border-school-cyan flex flex-col justify-between h-32 card-hover-lift">
+        <div class="flex justify-between items-start w-full">
+          <div>
+            <span class="text-3xl font-extrabold tracking-wide text-glow font-headings">${teacherClasses.length}</span>
+            <p class="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1.5">My Classes</p>
+          </div>
+          <div class="w-10 h-10 bg-school-cyan/15 rounded-full flex items-center justify-center border border-school-cyan/35 shadow-[0_0_15px_rgba(0,212,255,0.25)]">
+            <i class="fa-solid fa-school text-school-cyan text-sm"></i>
+          </div>
+        </div>
+      </div>
+      <div class="glass p-5 border-b-2 border-school-gold flex flex-col justify-between h-32 card-hover-lift">
+        <div class="flex justify-between items-start w-full">
+          <div>
+            <span class="text-3xl font-extrabold tracking-wide text-glow font-headings">${totalStudents}</span>
+            <p class="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1.5">My Students</p>
+          </div>
+          <div class="w-10 h-10 bg-school-gold/15 rounded-full flex items-center justify-center border border-school-gold/35 shadow-[0_0_15px_rgba(212,175,55,0.25)]">
+            <i class="fa-solid fa-graduation-cap text-school-gold text-sm"></i>
+          </div>
+        </div>
+      </div>
+      <div class="glass p-5 border-b-2 border-school-cyan flex flex-col justify-between h-32 card-hover-lift">
+        <div class="flex justify-between items-start w-full">
+          <div>
+            <span class="text-3xl font-extrabold tracking-wide text-glow font-headings">4</span>
+            <p class="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1.5">Today's Lessons</p>
+          </div>
+          <div class="w-10 h-10 bg-school-cyan/15 rounded-full flex items-center justify-center border border-school-cyan/35 shadow-[0_0_15px_rgba(0,212,255,0.25)]">
+            <i class="fa-solid fa-calendar-days text-school-cyan text-sm"></i>
+          </div>
+        </div>
+      </div>
+      <div class="glass p-5 border-b-2 border-school-red flex flex-col justify-between h-32 card-hover-lift">
+        <div class="flex justify-between items-start w-full">
+          <div>
+            <span class="text-3xl font-extrabold tracking-wide text-glow font-headings">12</span>
+            <p class="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1.5">Pending Grades</p>
+          </div>
+          <div class="w-10 h-10 bg-school-red/15 rounded-full flex items-center justify-center border border-school-red/35 shadow-[0_0_15px_rgba(139,0,0,0.25)]">
+            <i class="fa-solid fa-file-pen text-[#ff4f4f] text-sm"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Widgets row -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Timetable Widget -->
+      <div class="glass p-6 shadow-2xl flex flex-col justify-between relative overflow-hidden">
+        <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+          <h3 class="text-base font-bold text-white font-headings flex items-center gap-2">
+            <i class="fa-solid fa-clock text-school-cyan"></i>
+            <span>Today's Timetable</span>
+          </h3>
+          <span class="text-[9px] bg-school-cyan/20 text-school-cyan border border-school-cyan/35 px-2 py-0.5 rounded uppercase font-semibold">Lessons</span>
+        </div>
+        <div class="space-y-3 h-[250px] overflow-y-auto pr-1">
+          <div class="p-3 rounded-lg border border-school-cyan/30 bg-school-cyan/10 flex justify-between items-center shadow-[0_0_15px_rgba(0,212,255,0.15)] animate-pulse">
+            <div>
+              <span class="text-[9px] font-bold text-school-cyan uppercase tracking-wider block mb-0.5">Period 1 (08:00 - 08:45)</span>
+              <h4 class="font-bold text-white text-xs">Mathematics - Grade 10-A</h4>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-school-cyan text-gray-950 font-bold text-[9px]">Room 204</span>
+          </div>
+          <div class="p-3 rounded-lg border border-white/5 bg-white/5 flex justify-between items-center">
+            <div>
+              <span class="text-[9px] font-bold text-white/40 uppercase tracking-wider block mb-0.5">Period 2 (08:45 - 09:30)</span>
+              <h4 class="font-bold text-white text-xs">Mathematics - Grade 10-A</h4>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-white/10 text-white/70 font-bold text-[9px]">Room 204</span>
+          </div>
+          <div class="p-3 rounded-lg border border-white/5 bg-white/5 flex justify-between items-center">
+            <div>
+              <span class="text-[9px] font-bold text-white/40 uppercase tracking-wider block mb-0.5">Period 4 (10:30 - 11:15)</span>
+              <h4 class="font-bold text-white text-xs">Faculty Roster Review</h4>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-white/10 text-white/70 font-bold text-[9px]">Admin Hall</span>
+          </div>
+          <div class="p-3 rounded-lg border border-white/5 bg-white/5 flex justify-between items-center">
+            <div>
+              <span class="text-[9px] font-bold text-white/40 uppercase tracking-wider block mb-0.5">Period 6 (12:15 - 01:00)</span>
+              <h4 class="font-bold text-white text-xs">Grade 10 Syllabus Review</h4>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-white/10 text-white/70 font-bold text-[9px]">Room 204</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Classes Overview progress -->
+      <div class="glass p-6 shadow-2xl flex flex-col justify-between">
+        <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+          <h3 class="text-base font-bold text-white font-headings flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-school-cyan"></i>
+            <span>My Classes Overview</span>
+          </h3>
+        </div>
+        <div class="space-y-4 py-2">
+          ${teacherClasses.map(c => {
+            const classStudents = students.filter(s => s.class === c.name);
+            const classRecs = attendance.filter(r => r.class === c.name);
+            const present = classRecs.filter(r => r.status === 'present' || r.status === 'late').length;
+            const rate = classRecs.length > 0 ? ((present / classRecs.length) * 100).toFixed(0) : 92;
+            return `
+              <div class="space-y-1">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="text-white/80 font-bold">${c.name} (${classStudents.length} Students)</span>
+                  <span class="text-school-cyan font-bold">${rate}% Att.</span>
+                </div>
+                <div class="w-full bg-white/5 border border-white/10 rounded-full h-2 overflow-hidden">
+                  <div class="progress-bar-fill h-full rounded-full" style="width: ${rate}%; background: linear-gradient(90deg, #00b4ff, #00d4ff) !important;"></div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- Recent Attendance marked widget -->
+      <div class="glass p-6 shadow-2xl flex flex-col justify-between">
+        <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+          <h3 class="text-base font-bold text-white font-headings flex items-center gap-2">
+            <i class="fa-solid fa-calendar-check text-school-cyan"></i>
+            <span>Recent Registers Marked</span>
+          </h3>
+        </div>
+        <div class="space-y-3 h-[250px] overflow-y-auto pr-1">
+          <div class="p-3 bg-white/5 border border-white/10 rounded-lg flex justify-between items-center text-xs">
+            <div>
+              <span class="font-bold text-white block">Grade 10-A</span>
+              <span class="text-[9px] text-white/50">Mathematics · May 30</span>
+            </div>
+            <div class="text-right">
+              <span class="text-school-cyan font-bold block">11/12 Present</span>
+              <span class="text-[9px] text-white/40">Rate: 91.7%</span>
+            </div>
+          </div>
+          <div class="p-3 bg-white/5 border border-white/10 rounded-lg flex justify-between items-center text-xs">
+            <div>
+              <span class="font-bold text-white block">Grade 10-A</span>
+              <span class="text-[9px] text-white/50">Mathematics · May 28</span>
+            </div>
+            <div class="text-right">
+              <span class="text-school-cyan font-bold block">12/12 Present</span>
+              <span class="text-[9px] text-white/40">Rate: 100%</span>
+            </div>
+          </div>
+          <div class="p-3 bg-white/5 border border-white/10 rounded-lg flex justify-between items-center text-xs">
+            <div>
+              <span class="font-bold text-white block">Grade 10-A</span>
+              <span class="text-[9px] text-white/50">Mathematics · May 27</span>
+            </div>
+            <div class="text-right">
+              <span class="text-school-cyan font-bold block">10/12 Present</span>
+              <span class="text-[9px] text-white/40">Rate: 83.3%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  `;
+}
+
+function renderTeacherClasses() {
+  const container = document.getElementById('teacher-main');
+  if (!container) return;
+
+  const teacherRecord = teachers.find(t => t.id === currentUser.teacherId) || teachers[0];
+  const teacherClasses = classes.filter(c => c.teacherId === teacherRecord.id);
+
+  container.innerHTML = `
+    <div class="glass overflow-hidden shadow-xl border border-white/10">
+      <div class="p-6 border-b border-white/10">
+        <h3 class="text-xl font-bold text-school-gold font-serif">My Assigned Classes</h3>
+      </div>
+      <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        ${teacherClasses.map(c => {
+          const classStudents = students.filter(s => s.class === c.name);
+          return `
+            <div class="glass p-5 flex flex-col justify-between border border-white/10 card-hover-lift">
+              <div>
+                <h4 class="font-headings text-lg font-bold text-white mb-1">${c.name}</h4>
+                <p class="text-xs text-white/50 mb-3"><i class="fa-solid fa-location-dot"></i> Room: ${c.room}</p>
+                <div class="flex gap-5 text-xs text-white/80 font-bold border-t border-white/5 pt-3">
+                  <span>Students: <span class="text-school-cyan font-extrabold">${classStudents.length}</span></span>
+                  <span>Subject: <span class="text-school-gold font-extrabold">${teacherRecord.subject}</span></span>
+                </div>
+              </div>
+              
+              <div class="flex gap-2 mt-5">
+                <button type="button" class="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold rounded text-[10px] tracking-wider uppercase cursor-pointer flex-grow" onclick="viewTeacherClassStudents('${c.name}')">View Students</button>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+    
+    <!-- Expanded students roster section -->
+    <div id="teacher-class-students-container" class="glass overflow-hidden shadow-xl border border-white/10 hidden">
+      <div class="p-6 border-b border-white/10 flex justify-between items-center">
+        <h4 id="teacher-class-roster-title" class="font-bold text-white text-base font-headings">Class Student Roster</h4>
+        <button class="text-white/45 hover:text-red-500 font-bold cursor-pointer" onclick="document.getElementById('teacher-class-students-container').classList.add('hidden')">Close</button>
+      </div>
+      <div class="p-6 overflow-x-auto">
+        <div class="border border-white/10 rounded-xl bg-black/10">
+          <table class="w-full text-left text-sm border-collapse text-white/95">
+            <thead>
+              <tr class="bg-white/5 border-b border-white/10 text-school-cyan text-xs font-bold uppercase tracking-wider">
+                <th class="px-6 py-4">ID</th>
+                <th class="px-6 py-4">Student Name</th>
+                <th class="px-6 py-4">Gender</th>
+                <th class="px-6 py-4">Age</th>
+                <th class="px-6 py-4 text-center">Avg Grade</th>
+                <th class="px-6 py-4 text-center">Attendance %</th>
+              </tr>
+            </thead>
+            <tbody id="teacher-class-students-body">
+              <!-- JS Injected -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function viewTeacherClassStudents(className) {
+  const container = document.getElementById('teacher-class-students-container');
+  const tbody = document.getElementById('teacher-class-students-body');
+  const title = document.getElementById('teacher-class-roster-title');
+  if (!container || !tbody || !title) return;
+  
+  title.innerText = `Roster for ${className}`;
+  tbody.innerHTML = '';
+  
+  const classStudents = students.filter(s => s.class === className);
+  
+  if (classStudents.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-xs text-white/50 italic">No students enrolled.</td></tr>`;
+  } else {
+    classStudents.forEach(s => {
+      // Calculate avg grade
+      const studRes = results.filter(r => r.studentId === s.id);
+      const avgScore = studRes.length > 0 ? (studRes.reduce((sum, r) => sum + r.score, 0) / studRes.length).toFixed(0) : '--';
+      
+      // Calculate attendance
+      const studAtt = attendance.filter(r => r.studentId === s.id);
+      const presCount = studAtt.filter(r => r.status === 'present' || r.status === 'late').length;
+      const attRate = studAtt.length > 0 ? ((presCount / studAtt.length) * 100).toFixed(0) : '--';
+      
+      tbody.innerHTML += `
+        <tr class="app-table-row border-b border-white/5 hover:bg-white/5 transition-colors duration-150">
+          <td class="px-6 py-4 text-xs font-bold text-school-cyan font-mono">${s.id}</td>
+          <td class="px-6 py-4 text-sm font-bold text-white">${s.name}</td>
+          <td class="px-6 py-4 text-xs text-white/70">${s.gender}</td>
+          <td class="px-6 py-4 text-xs text-white/70">${s.age}</td>
+          <td class="px-6 py-4 text-center text-xs text-school-gold font-bold">${avgScore}%</td>
+          <td class="px-6 py-4 text-center text-xs text-school-cyan font-bold">${attRate}%</td>
+        </tr>
+      `;
+    });
+  }
+  container.classList.remove('hidden');
+  container.scrollIntoView({ behavior: 'smooth' });
+}
+
+function renderTeacherAttendance() {
+  const container = document.getElementById('teacher-main');
+  if (!container) return;
+
+  const teacherRecord = teachers.find(t => t.id === currentUser.teacherId) || teachers[0];
+  const teacherClasses = classes.filter(c => c.teacherId === teacherRecord.id);
+
+  container.innerHTML = `
+    <!-- Mark Register Pane -->
+    <div class="glass p-6 shadow-xl border border-white/10">
+      <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-3">
+        <h3 class="text-base font-bold text-white font-headings flex items-center gap-2">
+          <i class="fa-solid fa-calendar-check text-school-cyan"></i>
+          <span>Mark Class Register</span>
+        </h3>
+      </div>
+      <div class="flex flex-wrap gap-4 items-end justify-between">
+        <div class="flex flex-wrap gap-4 items-center">
+          <div class="flex flex-col gap-1 text-left">
+            <label class="text-[10px] font-bold text-white/50 uppercase tracking-wider">Date</label>
+            <input type="date" id="t-att-mark-date" class="glass-input px-3.5 py-2.5 rounded-lg text-xs focus:outline-none w-44" value="2026-05-30">
+          </div>
+          <div class="flex flex-col gap-1 text-left">
+            <label class="text-[10px] font-bold text-white/50 uppercase tracking-wider">My Classes</label>
+            <select id="t-att-mark-class" class="glass-input px-3.5 py-2.5 rounded-lg text-xs focus:outline-none w-44">
+              ${teacherClasses.map(c => `<option value="${c.name}">${c.name}</option>`).join('')}
+            </select>
+          </div>
+          <div class="flex flex-col gap-1 text-left">
+            <label class="text-[10px] font-bold text-white/50 uppercase tracking-wider">Subject</label>
+            <input type="text" class="glass-input px-3.5 py-2.5 rounded-lg text-xs focus:outline-none w-44" value="${teacherRecord.subject}" readonly>
+          </div>
+        </div>
+        <button onclick="loadTeacherAttendanceRoster()" class="px-5 py-3 btn-primary text-white font-bold rounded-lg text-xs tracking-widest uppercase cursor-pointer">
+          Load Class
+        </button>
+      </div>
+    </div>
+
+    <!-- Student Attendance marking table card -->
+    <div id="t-att-mark-container" class="glass overflow-hidden shadow-xl border border-white/10 hidden mt-6 animate-fade">
+      <div class="p-6 border-b border-white/10 flex justify-between items-center select-none">
+        <h4 class="font-bold text-white text-base font-headings">Student Roster</h4>
+        <div class="flex gap-2 text-[10px] font-semibold no-print">
+          <button onclick="markAllTeacherAttendance('present')" class="px-3 py-1.5 bg-white/5 border border-white/15 hover:border-school-cyan rounded-lg text-white hover:text-white transition-all cursor-pointer">Mark All Present</button>
+          <button onclick="markAllTeacherAttendance('absent')" class="px-3 py-1.5 bg-white/5 border border-white/15 hover:border-school-cyan rounded-lg text-white hover:text-white transition-all cursor-pointer">Mark All Absent</button>
+        </div>
+      </div>
+      <div class="p-6 overflow-x-auto">
+        <div class="border border-white/10 rounded-xl bg-black/10">
+          <table class="w-full text-left text-sm border-collapse text-white/95">
+            <thead>
+              <tr class="bg-white/5 border-b border-white/10 text-school-cyan text-xs font-bold uppercase tracking-wider">
+                <th class="px-6 py-4 w-12">#</th>
+                <th class="px-6 py-4">Student Name</th>
+                <th class="px-6 py-4 w-28">Roll No</th>
+                <th class="px-6 py-4 w-[380px]">Status</th>
+                <th class="px-6 py-4">Note / Reason</th>
+              </tr>
+            </thead>
+            <tbody id="t-att-mark-table-body">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="px-6 py-4 border-t border-white/10 flex justify-end gap-2.5 bg-black/20 no-print font-bold text-xs">
+        <button onclick="submitTeacherAttendance()" class="px-5 py-2.5 btn-primary text-white rounded-lg transition-all cursor-pointer">Save Register</button>
+      </div>
+    </div>
+  `;
+}
+
+let teacherAttendanceClass = '';
+let teacherAttendanceDate = '';
+
+function loadTeacherAttendanceRoster() {
+  const dateInput = document.getElementById('t-att-mark-date');
+  const classSelect = document.getElementById('t-att-mark-class');
+  if (!dateInput || !classSelect) return;
+
+  teacherAttendanceDate = dateInput.value;
+  teacherAttendanceClass = classSelect.value;
+  const teacherRecord = teachers.find(t => t.id === currentUser.teacherId) || teachers[0];
+
+  if (!teacherAttendanceDate) {
+    showToast("Please specify a marking date", "error");
+    return;
+  }
+
+  const list = students.filter(s => s.class === teacherAttendanceClass);
+  const tbody = document.getElementById('t-att-mark-table-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-xs text-white/50 italic">No students enrolled.</td></tr>`;
+    document.getElementById('t-att-mark-container').classList.remove('hidden');
+    return;
+  }
+
+  const existing = attendance.filter(r => r.date === teacherAttendanceDate && r.class === teacherAttendanceClass && r.subject === teacherRecord.subject);
+
+  list.forEach((s, idx) => {
+    const extRecord = existing.find(r => r.studentId === s.id);
+    const status = extRecord ? extRecord.status : 'present';
+    const note = extRecord ? extRecord.note : '';
+
+    tbody.innerHTML += `
+      <tr class="app-table-row border-b border-white/5" data-student-id="${s.id}" data-student-name="${s.name}">
+        <td class="px-6 py-4 text-xs text-white/50 font-bold">${idx + 1}</td>
+        <td class="px-6 py-4 text-sm font-bold text-white">${s.name}</td>
+        <td class="px-6 py-4 text-xs font-bold text-school-cyan">${s.id}</td>
+        <td class="px-6 py-4">
+          <div class="flex gap-1.5 no-print">
+            <button type="button" class="status-btn present ${status === 'present' ? 'active' : ''}" onclick="toggleRowStatus(this, 'present')">✅ Present</button>
+            <button type="button" class="status-btn absent ${status === 'absent' ? 'active' : ''}" onclick="toggleRowStatus(this, 'absent')">❌ Absent</button>
+            <button type="button" class="status-btn late ${status === 'late' ? 'active' : ''}" onclick="toggleRowStatus(this, 'late')">🕐 Late</button>
+            <button type="button" class="status-btn excused ${status === 'excused' ? 'active' : ''}" onclick="toggleRowStatus(this, 'excused')">🏥 Excused</button>
+          </div>
+        </td>
+        <td class="px-6 py-4">
+          <input type="text" class="glass-input px-3 py-1.5 rounded-lg text-xs w-full focus:outline-none placeholder-white/10" value="${note}" placeholder="Reason/Note...">
+        </td>
+      </tr>
+    `;
+  });
+
+  document.getElementById('t-att-mark-container').classList.remove('hidden');
+  showToast("Roster loaded successfully", "info");
+}
+
+function markAllTeacherAttendance(status) {
+  const tbody = document.getElementById('t-att-mark-table-body');
+  if (!tbody) return;
+
+  tbody.querySelectorAll('tr[data-student-id]').forEach(row => {
+    row.querySelectorAll('.status-btn').forEach(b => {
+      if (b.classList.contains(status)) {
+        b.classList.add('active');
+      } else {
+        b.classList.remove('active');
+      }
+    });
+  });
+  showToast(`Marked all as ${status.toUpperCase()}`, "info");
+}
+
+function submitTeacherAttendance() {
+  const tbody = document.getElementById('t-att-mark-table-body');
+  if (!tbody) return;
+
+  const rows = tbody.querySelectorAll('tr[data-student-id]');
+  if (rows.length === 0) return;
+
+  const teacherRecord = teachers.find(t => t.id === currentUser.teacherId) || teachers[0];
+  let collected = [];
+
+  rows.forEach(row => {
+    const studentId = row.getAttribute('data-student-id');
+    const studentName = row.getAttribute('data-student-name');
+    const activeBtn = row.querySelector('.status-btn.active');
+    const noteInput = row.querySelector('input[type="text"]');
+
+    let status = 'present';
+    if (activeBtn) {
+      if (activeBtn.classList.contains('present')) status = 'present';
+      else if (activeBtn.classList.contains('absent')) status = 'absent';
+      else if (activeBtn.classList.contains('late')) status = 'late';
+      else if (activeBtn.classList.contains('excused')) status = 'excused';
+    }
+
+    collected.push({
+      id: Date.now() + Math.random(),
+      date: teacherAttendanceDate,
+      studentId: studentId,
+      studentName: studentName,
+      class: teacherAttendanceClass,
+      subject: teacherRecord.subject,
+      status: status,
+      note: noteInput ? noteInput.value.trim() : '',
+      markedBy: currentUser.name,
+      markedAt: new Date().toISOString()
+    });
+  });
+
+  // Clear records for class+date+subject
+  attendance = attendance.filter(r => !(r.date === teacherAttendanceDate && r.class === teacherAttendanceClass && r.subject === teacherRecord.subject));
+  attendance.push(...collected);
+
+  saveAllToLocalStorage();
+  showToast(`Attendance recorded successfully for ${teacherAttendanceClass}!`, "success");
+  loadTeacherAttendanceRoster();
+}
+
+function renderTeacherExams() {
+  const container = document.getElementById('teacher-main');
+  if (!container) return;
+
+  const teacherRecord = teachers.find(t => t.id === currentUser.teacherId) || teachers[0];
+  const teacherClasses = classes.filter(c => c.teacherId === teacherRecord.id);
+
+  container.innerHTML = `
+    <div class="border-b border-white/10 no-print mb-6">
+      <nav class="flex gap-6 text-sm font-semibold select-none">
+        <button id="t-exam-tab-schedules" class="att-tab active py-3 font-headings text-base font-bold focus:outline-none cursor-pointer" onclick="switchTeacherExamsTab('schedules')">Exam Schedules</button>
+        <button id="t-exam-tab-grades" class="att-tab py-3 font-headings text-base font-bold focus:outline-none cursor-pointer" onclick="switchTeacherExamsTab('grades')">Enter Grades</button>
+      </nav>
+    </div>
+
+    <!-- PANE A: SCHEDULES -->
+    <div id="t-pane-exam-schedules" class="space-y-6">
+      <div class="glass overflow-hidden shadow-xl border border-white/10">
+        <div class="p-6 border-b border-white/10 flex justify-between items-center">
+          <h3 class="text-xl font-bold text-school-gold font-serif">Exams Schedules (${teacherRecord.subject})</h3>
+          <button class="px-4 py-2 btn-primary text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase" onclick="openModal('modal-add-exam')">
+            <i class="fa-solid fa-plus mr-1"></i> Add Exam
+          </button>
+        </div>
+        <div class="p-6 overflow-x-auto">
+          <div class="border border-white/10 rounded-xl bg-black/10">
+            <table class="w-full text-left text-sm border-collapse text-white/95">
+              <thead>
+                <tr class="bg-white/5 border-b border-white/10 text-school-cyan text-xs font-bold uppercase tracking-wider">
+                  <th class="px-6 py-4">Subject</th>
+                  <th class="px-6 py-4">Date</th>
+                  <th class="px-6 py-4">Time</th>
+                  <th class="px-6 py-4">Room</th>
+                </tr>
+              </thead>
+              <tbody id="t-exams-table-body">
+                <!-- Filtered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANE B: ENTER GRADES -->
+    <div id="t-pane-exam-grades" class="space-y-6 hidden">
+      <div class="glass p-6 shadow-xl border border-white/10">
+        <div class="flex flex-wrap gap-4 items-end">
+          <div class="flex flex-col gap-1 text-left">
+            <label class="text-[10px] font-bold text-white/50 uppercase tracking-wider">Select Class</label>
+            <select id="t-grade-class" class="glass-input px-3.5 py-2.5 rounded-lg text-xs focus:outline-none w-44">
+              ${teacherClasses.map(c => `<option value="${c.name}">${c.name}</option>`).join('')}
+            </select>
+          </div>
+          <div class="flex flex-col gap-1 text-left">
+            <label class="text-[10px] font-bold text-white/50 uppercase tracking-wider">Select Exam Subject</label>
+            <input type="text" class="glass-input px-3.5 py-2.5 rounded-lg text-xs focus:outline-none w-44" value="${teacherRecord.subject}" readonly>
+          </div>
+          <button onclick="loadTeacherGradeEntryRoster()" class="px-5 py-3 btn-primary text-white font-bold rounded-lg text-xs tracking-widest uppercase cursor-pointer">
+            Load Student List
+          </button>
+        </div>
+      </div>
+
+      <div id="t-grade-entry-card" class="glass overflow-hidden shadow-xl border border-white/10 hidden animate-fade">
+        <div class="p-6 border-b border-white/10">
+          <h4 class="font-bold text-white text-base font-headings">Student Grade Book</h4>
+        </div>
+        <div class="p-6 overflow-x-auto">
+          <div class="border border-white/10 rounded-xl bg-black/10">
+            <table class="w-full text-left text-sm border-collapse text-white/95">
+              <thead>
+                <tr class="bg-white/5 border-b border-white/10 text-school-cyan text-xs font-bold uppercase tracking-wider">
+                  <th class="px-6 py-4">Student</th>
+                  <th class="px-6 py-4 w-[200px]">Marks Obtained (0-100)</th>
+                  <th class="px-6 py-4 text-center w-28">Grade</th>
+                  <th class="px-6 py-4">Remarks / Notes</th>
+                </tr>
+              </thead>
+              <tbody id="t-grade-entry-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-white/10 flex justify-end gap-2.5 bg-black/20 no-print font-bold text-xs">
+          <button onclick="submitTeacherGrades()" class="px-5 py-2.5 btn-primary text-white rounded-lg transition-all cursor-pointer">Save Grades</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Render exam schedules (filtered to this teacher's subject)
+  const tbody = document.getElementById('t-exams-table-body');
+  if (tbody) {
+    const filteredExams = exams.filter(ex => ex.subject === teacherRecord.subject);
+    if (filteredExams.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center text-xs text-white/50 italic">No exams scheduled.</td></tr>`;
+    } else {
+      filteredExams.forEach(ex => {
+        tbody.innerHTML += `
+          <tr class="app-table-row border-b border-white/5 hover:bg-white/5 transition-colors duration-150">
+            <td class="px-6 py-4 text-sm font-bold text-white">${ex.subject}</td>
+            <td class="px-6 py-4 text-xs font-bold text-school-cyan">${ex.date}</td>
+            <td class="px-6 py-4 text-xs text-white/80">${ex.time}</td>
+            <td class="px-6 py-4 text-xs text-white/70">${ex.room}</td>
+          </tr>
+        `;
+      });
+    }
+  }
+}
+
+function switchTeacherExamsTab(tabName) {
+  const schedulesTab = document.getElementById('t-exam-tab-schedules');
+  const gradesTab = document.getElementById('t-exam-tab-grades');
+  const paneSchedules = document.getElementById('t-pane-exam-schedules');
+  const paneGrades = document.getElementById('t-pane-exam-grades');
+
+  if (tabName === 'schedules') {
+    schedulesTab.classList.add('active');
+    gradesTab.classList.remove('active');
+    paneSchedules.classList.remove('hidden');
+    paneGrades.classList.add('hidden');
+  } else {
+    schedulesTab.classList.remove('active');
+    gradesTab.classList.add('active');
+    paneSchedules.classList.add('hidden');
+    paneGrades.classList.remove('hidden');
+  }
+}
+
+let currentlyGradingClass = '';
+
+function loadTeacherGradeEntryRoster() {
+  const classSelect = document.getElementById('t-grade-class');
+  if (!classSelect) return;
+
+  currentlyGradingClass = classSelect.value;
+  const teacherRecord = teachers.find(t => t.id === currentUser.teacherId) || teachers[0];
+
+  const list = students.filter(s => s.class === currentlyGradingClass);
+  const tbody = document.getElementById('t-grade-entry-table-body');
+  const container = document.getElementById('t-grade-entry-card');
+  if (!tbody || !container) return;
+
+  tbody.innerHTML = '';
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" class="px-6 py-8 text-center text-xs text-white/50 italic">No students in Grade ${currentlyGradingClass}.</td></tr>`;
+    container.classList.remove('hidden');
+    return;
+  }
+
+  list.forEach(s => {
+    const existing = results.find(r => r.studentId === s.id && r.subject === teacherRecord.subject);
+    const score = existing ? existing.score : '';
+    const gradeVal = existing ? getGradeFromScore(existing.score) : '--';
+    
+    tbody.innerHTML += `
+      <tr class="app-table-row border-b border-white/5" data-student-id="${s.id}">
+        <td class="px-6 py-4 text-sm font-bold text-white">${s.name} (${s.id})</td>
+        <td class="px-6 py-4">
+          <input type="number" class="glass-input px-3 py-1.5 rounded-lg text-xs w-36 focus:outline-none" value="${score}" placeholder="Enter score..." min="0" max="100" oninput="updateGradeBookCell(this)">
+        </td>
+        <td class="px-6 py-4 text-center text-xs text-school-gold font-bold font-mono grade-cell-label">${gradeVal}</td>
+        <td class="px-6 py-4">
+          <input type="text" class="glass-input px-3 py-1.5 rounded-lg text-xs w-full focus:outline-none placeholder-white/10" value="${score >= 60 ? 'Passed' : (score === '' ? '' : 'Failed')}" placeholder="Remarks...">
+        </td>
+      </tr>
+    `;
+  });
+
+  container.classList.remove('hidden');
+  showToast("Grade sheet loaded", "info");
+}
+
+function updateGradeBookCell(input) {
+  const score = parseInt(input.value);
+  const row = input.closest('tr');
+  const gradeLabel = row.querySelector('.grade-cell-label');
+  const remarkInput = row.querySelectorAll('input')[1];
+
+  if (!isNaN(score) && score >= 0 && score <= 100) {
+    const grade = getGradeFromScore(score);
+    if (gradeLabel) gradeLabel.innerText = grade;
+    if (remarkInput) remarkInput.value = score >= 60 ? 'Passed' : 'Failed';
+  } else {
+    if (gradeLabel) gradeLabel.innerText = '--';
+    if (remarkInput) remarkInput.value = '';
+  }
+}
+
+function submitTeacherGrades() {
+  const tbody = document.getElementById('t-grade-entry-table-body');
+  if (!tbody) return;
+
+  const rows = tbody.querySelectorAll('tr[data-student-id]');
+  if (rows.length === 0) return;
+
+  const teacherRecord = teachers.find(t => t.id === currentUser.teacherId) || teachers[0];
+
+  rows.forEach(row => {
+    const studentId = row.getAttribute('data-student-id');
+    const scoreVal = row.querySelector('input[type="number"]').value.trim();
+
+    if (scoreVal !== '') {
+      const score = parseInt(scoreVal);
+      if (score >= 0 && score <= 100) {
+        // Clear old result
+        results = results.filter(r => !(r.studentId === studentId && r.subject === teacherRecord.subject));
+        // Add new
+        results.push({
+          id: 'RES' + String(results.length + 1).padStart(3, '0'),
+          studentId: studentId,
+          subject: teacherRecord.subject,
+          score: score
+        });
+      }
+    }
+  });
+
+  saveAllToLocalStorage();
+  showToast(`Grades recorded successfully!`, "success");
+  loadTeacherGradeEntryRoster();
+}
+
+function renderTeacherAnnouncements() {
+  const container = document.getElementById('teacher-main');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 space-y-4" id="t-announcements-timeline">
+        <!-- notice board -->
+      </div>
+
+      <div class="glass p-6 shadow-2xl h-fit">
+        <h3 class="text-lg font-bold text-school-gold border-b border-white/10 pb-3 mb-4 uppercase tracking-wider">Draft Announcement</h3>
+        <form id="t-announcement-form" onsubmit="saveTeacherAnnouncementForm(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-2">Title</label>
+            <input type="text" id="t-ann-title" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" required>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-2">Date</label>
+            <input type="date" id="t-ann-date" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" value="2026-05-30" required>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-2">Category</label>
+            <select id="t-ann-category" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none">
+              <option value="Academic">Academic</option>
+              <option value="Event">Event</option>
+              <option value="General">General</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-2">Message</label>
+            <textarea id="t-ann-message" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" rows="5" required></textarea>
+          </div>
+          <button type="submit" class="w-full py-3 btn-primary text-white font-bold rounded text-xs uppercase tracking-wider transition-all shadow-lg cursor-pointer">
+            <i class="fa-solid fa-paper-plane mr-1"></i> Publish Announcement
+          </button>
+        </form>
+      </div>
+    </div>
+  `;
+
+  // Timeline list
+  renderTeacherAnnouncementsTimeline();
+}
+
+function renderTeacherAnnouncementsTimeline() {
+  const container = document.getElementById('t-announcements-timeline');
+  if (!container) return;
+
+  container.innerHTML = '';
+  const sorted = [...announcements].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  if (sorted.length === 0) {
+    container.innerHTML = `<div class="p-8 text-center text-xs text-white/40 italic bg-white/5 rounded-xl border border-white/10">No announcements.</div>`;
+    return;
+  }
+
+  sorted.forEach(ann => {
+    let badgeClass = 'bg-white/5 text-white border border-white/10';
+    if (ann.category === 'Academic') badgeClass = 'bg-blue-955/60 text-blue-300 border border-blue-500/20';
+    else if (ann.category === 'Event') badgeClass = 'bg-purple-955/60 text-purple-300 border border-purple-500/20';
+
+    container.innerHTML += `
+      <div class="glass p-6 shadow-2xl transition-all relative">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${badgeClass}">${ann.category}</span>
+            <span class="text-[10px] text-white/40 font-semibold"><i class="fa-regular fa-clock"></i> ${ann.date}</span>
+          </div>
+        </div>
+        <h3 class="font-bold text-white text-base font-headings mb-2">${ann.title}</h3>
+        <p class="text-xs text-white/70 leading-relaxed">${ann.message}</p>
+      </div>
+    `;
+  });
+}
+
+function saveTeacherAnnouncementForm(event) {
+  event.preventDefault();
+  const form = document.getElementById('t-announcement-form');
+  if (!validateForm(form)) return;
+
+  const title = document.getElementById('t-ann-title').value.trim();
+  const date = document.getElementById('t-ann-date').value;
+  const category = document.getElementById('t-ann-category').value;
+  const message = document.getElementById('t-ann-message').value.trim();
+
+  const nextId = 'ANN' + String(announcements.length + 1).padStart(3, '0');
+  announcements.unshift({ id: nextId, title, date, category, message, pinned: false });
+
+  saveAllToLocalStorage();
+  form.reset();
+  renderTeacherAnnouncementsTimeline();
+  showToast("Notice published successfully", "success");
+}
+
+function renderTeacherProfile() {
+  const container = document.getElementById('teacher-main');
+  if (!container) return;
+
+  const teacher = teachers.find(t => t.id === currentUser.teacherId) || teachers[0];
+  const teacherClasses = classes.filter(c => c.teacherId === teacher.id);
+  const totalStudents = teacherClasses.reduce((sum, c) => sum + students.filter(s => s.class === c.name).length, 0);
+
+  // Calculate Avg Class Grade
+  const classAvgSum = teacherClasses.reduce((sum, c) => {
+    const classStudents = students.filter(s => s.class === c.name);
+    if (classStudents.length === 0) return sum + 80;
+    const scores = results.filter(r => r.subject === teacher.subject && classStudents.some(s => s.id === r.studentId));
+    return sum + (scores.length > 0 ? scores.reduce((sSum, sc) => sSum + sc.score, 0) / scores.length : 82);
+  }, 0);
+  const avgClassGrade = teacherClasses.length > 0 ? (classAvgSum / teacherClasses.length).toFixed(0) : 84;
+
+  container.innerHTML = `
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Edit Profile form -->
+      <div class="glass p-6 shadow-2xl lg:col-span-2">
+        <h3 class="text-lg font-bold text-school-gold border-b border-white/10 pb-3 mb-6 uppercase tracking-wider">My Professional Profile</h3>
+        <form id="t-profile-form" onsubmit="saveTeacherProfileForm(event)" class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-2">Instructor Name</label>
+              <input type="text" id="t-prof-name" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" value="${teacher.name}" required>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-2">Subject Specialty</label>
+              <input type="text" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" value="${teacher.subject}" readonly>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-2">Qualification</label>
+              <input type="text" id="t-prof-qual" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" value="${teacher.qualification}" required>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-2">Phone</label>
+              <input type="text" id="t-prof-phone" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" value="${teacher.phone}" required>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-2">Email Address</label>
+            <input type="email" id="t-prof-email" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" value="${teacher.email}" required>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-2">Professional Biography</label>
+            <textarea id="t-prof-bio" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" rows="4">${currentUser.bio || 'Dedicated educator committed to supporting student growth and excellence.'}</textarea>
+          </div>
+          <button type="submit" class="w-full py-3 btn-primary text-white font-bold rounded text-xs uppercase tracking-wider transition-all shadow-lg cursor-pointer">
+            <i class="fa-solid fa-save mr-1"></i> Save Profile Changes
+          </button>
+        </form>
+      </div>
+
+      <!-- Professional Sidebar summary card -->
+      <div class="glass p-6 flex flex-col justify-between shadow-2xl relative overflow-hidden card-hover-lift h-fit">
+        <div class="flex flex-col items-center text-center p-4">
+          <div class="w-24 h-24 bg-gradient-to-tr from-school-cyan to-blue-600 border-2 border-school-cyan rounded-full flex items-center justify-center font-bold text-4xl shadow-[0_0_20px_rgba(0,212,255,0.4)] text-white mb-4">
+            ${teacher.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+          </div>
+          <h4 class="font-headings text-lg font-bold text-white">${teacher.name}</h4>
+          <span class="text-xs text-school-cyan font-bold uppercase tracking-widest mt-1">${teacher.subject} Tutor</span>
+        </div>
+
+        <div class="space-y-4 pt-6 border-t border-white/5 mt-4">
+          <div class="bg-white/5 border border-white/10 rounded-xl p-3 flex justify-between items-center text-xs">
+            <span class="text-white/50 uppercase font-bold tracking-wider">Total Students</span>
+            <span class="font-extrabold text-white font-mono">${totalStudents} Students</span>
+          </div>
+          <div class="bg-white/5 border border-white/10 rounded-xl p-3 flex justify-between items-center text-xs">
+            <span class="text-white/50 uppercase font-bold tracking-wider">Avg Attendance</span>
+            <span class="font-extrabold text-green-400 font-mono">94.8%</span>
+          </div>
+          <div class="bg-white/5 border border-white/10 rounded-xl p-3 flex justify-between items-center text-xs">
+            <span class="text-white/50 uppercase font-bold tracking-wider">Avg Grade Roster</span>
+            <span class="font-extrabold text-school-gold font-mono">${avgClassGrade}%</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  `;
+}
+
+function saveTeacherProfileForm(event) {
+  event.preventDefault();
+  
+  const name = document.getElementById('t-prof-name').value.trim();
+  const qual = document.getElementById('t-prof-qual').value.trim();
+  const phone = document.getElementById('t-prof-phone').value.trim();
+  const email = document.getElementById('t-prof-email').value.trim();
+  const bio = document.getElementById('t-prof-bio').value.trim();
+
+  // Find user and teacher records
+  const teacherIdx = teachers.findIndex(t => t.id === currentUser.teacherId);
+  if (teacherIdx > -1) {
+    teachers[teacherIdx].name = name;
+    teachers[teacherIdx].qualification = qual;
+    teachers[teacherIdx].phone = phone;
+    teachers[teacherIdx].email = email;
+  }
+
+  const userIdx = users.findIndex(u => u.id === currentUser.id);
+  if (userIdx > -1) {
+    users[userIdx].name = name;
+    users[userIdx].email = email;
+    users[userIdx].bio = bio;
+  }
+
+  currentUser.name = name;
+  currentUser.email = email;
+  currentUser.bio = bio;
+  sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+  saveAllToLocalStorage();
+  showToast("Teacher profile configurations synced", "success");
+  
+  // Re-sync sidebar and header names
+  document.getElementById('teacher-sidebar-name').innerText = name;
+  document.getElementById('teacher-sidebar-avatar').innerText = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  
+  renderTeacherProfile();
+}
+
+
+/* ==========================================================================
+   ==========================================================================
+   === STUDENT APP MODULES ===
+   ==========================================================================
+   ========================================================================== */
+function initStudentApp() {
+  const sidebarName = document.getElementById('student-sidebar-name');
+  if (sidebarName) sidebarName.innerText = currentUser.name;
+
+  const sidebarAvatar = document.getElementById('student-sidebar-avatar');
+  if (sidebarAvatar) {
+    const initials = currentUser.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    sidebarAvatar.innerText = initials;
+  }
+
+  showStudentSection('dashboard');
+}
+
+function showStudentSection(sectionId) {
+  activeSection = sectionId;
+  const mainEl = document.getElementById('student-main');
+  if (mainEl) {
+    mainEl.innerHTML = '';
+  }
+
+  // Update links in student sidebar
+  const sidebarEl = document.getElementById('student-sidebar');
+  if (sidebarEl) {
+    sidebarEl.querySelectorAll('.sidebar-link').forEach(link => {
+      if (link.getAttribute('data-view') === sectionId) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+  }
+
+  // Update page heading title
+  const currentLang = settings.language || 'en';
+  const headingText = dictionary[currentLang][sectionId] || sectionId.toUpperCase();
+  const pageHeaderTitle = document.getElementById('student-header-page-title');
+  if (pageHeaderTitle) pageHeaderTitle.innerText = headingText;
+
+  // Trigger loads dynamically
+  if (sectionId === 'dashboard') {
+    renderStudentDashboard();
+  } else if (sectionId === 'attendance') {
+    renderStudentAttendance();
+  } else if (sectionId === 'results') {
+    renderStudentResults();
+  } else if (sectionId === 'fees') {
+    renderStudentFees();
+  } else if (sectionId === 'announcements') {
+    renderStudentAnnouncements();
+  } else if (sectionId === 'profile') {
+    renderStudentProfile();
+  }
+}
+
+let studentPerformanceChart = null;
+
+function renderStudentDashboard() {
+  const container = document.getElementById('student-main');
+  if (!container) return;
+
+  const student = students.find(s => s.id === currentUser.studentId) || students[0];
+  
+  // Calculate attendance rate
+  const studAtt = attendance.filter(r => r.studentId === student.id);
+  const present = studAtt.filter(r => r.status === 'present' || r.status === 'late').length;
+  const attRate = studAtt.length > 0 ? ((present / studAtt.length) * 100).toFixed(0) : 92;
+
+  // Calculate Avg Grade
+  const studRes = results.filter(r => r.studentId === student.id);
+  const avgScore = studRes.length > 0 ? studRes.reduce((sum, r) => sum + r.score, 0) / studRes.length : 85;
+  const letterGrade = getGradeFromScore(avgScore);
+
+  // Calculate fees balance
+  const studFees = fees.find(f => f.studentId === student.id) || { amountDue: 1500, amountPaid: 1350 };
+  const balanceDue = studFees.amountDue - studFees.amountPaid;
+
+  container.innerHTML = `
+    <!-- Top banner -->
+    <div class="glass p-5 border-l-4 border-l-school-gold shadow-lg flex justify-between items-center flex-wrap gap-4">
+      <div>
+        <h3 class="font-headings text-xl font-bold text-white">Hello, ${currentUser.name}! 🎓</h3>
+        <p class="text-xs text-school-gold mt-1 font-semibold uppercase tracking-wider">${student.class} · Student ID: ${student.id}</p>
+      </div>
+      <span class="bg-school-gold/20 text-school-gold border border-school-gold/30 text-[10px] font-bold px-2.5 py-1 rounded uppercase">TERM A</span>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 select-none">
+      <div class="glass p-5 border-b-2 border-school-cyan flex flex-col justify-between h-32 card-hover-lift">
+        <div class="flex justify-between items-start w-full">
+          <div>
+            <span class="text-3xl font-extrabold tracking-wide text-glow font-headings">${attRate}%</span>
+            <p class="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1.5">Attendance Rate</p>
+          </div>
+          <div class="w-10 h-10 bg-school-cyan/15 rounded-full flex items-center justify-center border border-school-cyan/35 shadow-[0_0_15px_rgba(0,212,255,0.25)]">
+            <i class="fa-solid fa-calendar-check text-school-cyan text-sm"></i>
+          </div>
+        </div>
+      </div>
+      <div class="glass p-5 border-b-2 border-school-gold flex flex-col justify-between h-32 card-hover-lift">
+        <div class="flex justify-between items-start w-full">
+          <div>
+            <span class="text-3xl font-extrabold tracking-wide text-glow font-headings">${letterGrade}</span>
+            <p class="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1.5">Average Grade</p>
+          </div>
+          <div class="w-10 h-10 bg-school-gold/15 rounded-full flex items-center justify-center border border-school-gold/35 shadow-[0_0_15px_rgba(212,175,55,0.25)]">
+            <i class="fa-solid fa-graduation-cap text-school-gold text-sm"></i>
+          </div>
+        </div>
+      </div>
+      <div class="glass p-5 border-b-2 border-[#C0392B] flex flex-col justify-between h-32 card-hover-lift">
+        <div class="flex justify-between items-start w-full">
+          <div>
+            <span class="text-3xl font-extrabold tracking-wide text-glow font-headings" style="color: ${balanceDue > 0 ? '#ff4f4f' : '#10B981'}">$${balanceDue}</span>
+            <p class="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1.5">Fees Balance</p>
+          </div>
+          <div class="w-10 h-10 bg-red-955/40 rounded-full flex items-center justify-center border border-red-500/20">
+            <i class="fa-solid fa-wallet text-[#ff4f4f] text-sm"></i>
+          </div>
+        </div>
+      </div>
+      <div class="glass p-5 border-b-2 border-purple-500 flex flex-col justify-between h-32 card-hover-lift">
+        <div class="flex justify-between items-start w-full">
+          <div>
+            <span class="text-3xl font-extrabold tracking-wide text-glow font-headings">3</span>
+            <p class="text-[10px] text-white/50 font-bold uppercase tracking-widest mt-1.5">Upcoming Exams</p>
+          </div>
+          <div class="w-10 h-10 bg-purple-500/15 rounded-full flex items-center justify-center border border-purple-500/35">
+            <i class="fa-solid fa-file-signature text-purple-400 text-sm"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Widgets row -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Timetable -->
+      <div class="glass p-6 shadow-2xl flex flex-col justify-between relative overflow-hidden">
+        <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+          <h3 class="text-base font-bold text-white font-headings flex items-center gap-2">
+            <i class="fa-solid fa-clock text-school-cyan"></i>
+            <span>Today's Timetable</span>
+          </h3>
+        </div>
+        <div class="space-y-3 h-[240px] overflow-y-auto pr-1">
+          <div class="p-3 rounded-lg border border-school-cyan/30 bg-school-cyan/10 flex justify-between items-center animate-pulse">
+            <div>
+              <span class="text-[8px] font-bold text-school-cyan uppercase tracking-wider block mb-0.5">Period 1 (08:00 - 08:45)</span>
+              <h4 class="font-bold text-white text-xs">Mathematics - Mr. Hassan Ahmed</h4>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-school-cyan text-gray-950 font-bold text-[9px]">Room 204</span>
+          </div>
+          <div class="p-3 rounded-lg border border-white/5 bg-white/5 flex justify-between items-center">
+            <div>
+              <span class="text-[8px] font-bold text-white/40 uppercase tracking-wider block mb-0.5">Period 2 (08:45 - 09:30)</span>
+              <h4 class="font-bold text-white text-xs">Mathematics - Mr. Hassan Ahmed</h4>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-white/10 text-white/70 font-bold text-[9px]">Room 204</span>
+          </div>
+          <div class="p-3 rounded-lg border border-white/5 bg-white/5 flex justify-between items-center">
+            <div>
+              <span class="text-[8px] font-bold text-white/40 uppercase tracking-wider block mb-0.5">Period 3 (09:45 - 10:30)</span>
+              <h4 class="font-bold text-white text-xs">Somali Language - Mustafe Gedi</h4>
+            </div>
+            <span class="px-2 py-0.5 rounded bg-white/10 text-white/70 font-bold text-[9px]">Room 204</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Performance graph -->
+      <div class="glass p-6 shadow-2xl flex flex-col justify-between relative overflow-hidden">
+        <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+          <h3 class="text-base font-bold text-white font-headings flex items-center gap-2">
+            <i class="fa-solid fa-chart-line text-school-cyan"></i>
+            <span>My Performance Trend</span>
+          </h3>
+        </div>
+        <div class="relative h-[200px] w-full mb-2">
+          <canvas id="student-dashboard-chart"></canvas>
+        </div>
+      </div>
+
+      <!-- Recent Grades Roster -->
+      <div class="glass p-6 shadow-2xl flex flex-col justify-between">
+        <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+          <h3 class="text-base font-bold text-white font-headings flex items-center gap-2">
+            <i class="fa-solid fa-file-pen text-school-cyan"></i>
+            <span>Recent Exam Marks</span>
+          </h3>
+        </div>
+        <div class="space-y-3 h-[240px] overflow-y-auto pr-1">
+          ${studRes.slice(0, 5).map(r => {
+            const letter = getGradeFromScore(r.score);
+            let pillClass = 'bg-[#00d4ff]/10 text-school-cyan border-[#00d4ff]/20';
+            if (letter === 'F') pillClass = 'bg-[#8B0000]/10 text-red-400 border-red-500/20';
+            return `
+              <div class="p-3 bg-white/5 border border-white/10 rounded-lg flex justify-between items-center text-xs">
+                <div>
+                  <span class="font-bold text-white block">${r.subject}</span>
+                  <span class="text-[9px] text-white/50">End-of-Term Score</span>
+                </div>
+                <div class="text-right flex items-center gap-3">
+                  <span class="text-white font-bold block">${r.score}%</span>
+                  <span class="px-2 py-0.5 rounded border text-[10px] font-extrabold ${pillClass}">${letter}</span>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+
+    </div>
+  `;
+
+  // Draw chart
+  setTimeout(() => {
+    const canvas = document.getElementById('student-dashboard-chart');
+    if (!canvas) return;
+    
+    const isLightTheme = document.documentElement.classList.contains('light');
+    const fontColor = isLightTheme ? '#1A1A1A' : 'rgba(255, 255, 255, 0.7)';
+    const gridColor = isLightTheme ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.05)';
+
+    if (studentPerformanceChart) studentPerformanceChart.destroy();
+
+    const subjects = studRes.map(r => r.subject);
+    const scores = studRes.map(r => r.score);
+
+    const ctx = canvas.getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 150);
+    gradient.addColorStop(0, 'rgba(0, 212, 255, 0.45)');
+    gradient.addColorStop(1, 'rgba(0, 212, 255, 0)');
+
+    studentPerformanceChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: subjects.length > 0 ? subjects : ['Math', 'English', 'Science'],
+        datasets: [{
+          label: 'Exam Grades',
+          data: scores.length > 0 ? scores : [92, 85, 78],
+          borderColor: '#00d4ff',
+          borderWidth: 2.5,
+          pointBackgroundColor: '#00d4ff',
+          pointBorderColor: '#ffffff',
+          fill: true,
+          backgroundColor: gradient,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: gridColor }, ticks: { color: fontColor, font: { size: 9 } } },
+          y: { min: 0, max: 100, grid: { color: gridColor }, ticks: { color: fontColor, font: { size: 9 } } }
+        }
+      }
+    });
+  }, 100);
+}
+
+function renderStudentAttendance() {
+  const container = document.getElementById('student-main');
+  if (!container) return;
+
+  const student = students.find(s => s.id === currentUser.studentId) || students[0];
+  const studAtt = attendance.filter(r => r.studentId === student.id);
+  
+  const present = studAtt.filter(r => r.status === 'present').length;
+  const absent = studAtt.filter(r => r.status === 'absent').length;
+  const late = studAtt.filter(r => r.status === 'late').length;
+  const excused = studAtt.filter(r => r.status === 'excused').length;
+  const rate = studAtt.length > 0 ? (((present + late) / studAtt.length) * 100).toFixed(0) : 92;
+
+  container.innerHTML = `
+    <!-- Stats Row -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-6 select-none text-center">
+      <div class="glass p-4 border-t-2 border-t-school-cyan">
+        <span class="text-white/40 text-[9px] uppercase font-bold tracking-widest block mb-1">Total Days</span>
+        <span class="text-xl font-extrabold text-white">${studAtt.length}</span>
+      </div>
+      <div class="glass p-4 border-t-2 border-t-green-500">
+        <span class="text-white/40 text-[9px] uppercase font-bold tracking-widest block mb-1">Present</span>
+        <span class="text-xl font-extrabold text-green-400">${present}</span>
+      </div>
+      <div class="glass p-4 border-t-2 border-t-red-500">
+        <span class="text-white/40 text-[9px] uppercase font-bold tracking-widest block mb-1">Absent</span>
+        <span class="text-xl font-extrabold text-red-400">${absent}</span>
+      </div>
+      <div class="glass p-4 border-t-2 border-t-school-gold">
+        <span class="text-white/40 text-[9px] uppercase font-bold tracking-widest block mb-1">Late</span>
+        <span class="text-xl font-extrabold text-school-gold">${late}</span>
+      </div>
+      <div class="glass p-4 border-t-2 border-t-purple-500">
+        <span class="text-white/40 text-[9px] uppercase font-bold tracking-widest block mb-1">Attendance Rate</span>
+        <span class="text-xl font-extrabold text-school-cyan">${rate}%</span>
+      </div>
+    </div>
+
+    <!-- Monthly Calendar View -->
+    <div class="glass overflow-hidden shadow-xl border border-white/10 mt-6">
+      <div class="p-6 border-b border-white/10">
+        <h4 class="font-bold text-white text-base font-headings">Attendance Calendar - May 2026</h4>
+      </div>
+      <div class="p-6">
+        <!-- Calendar Grid -->
+        <div class="grid grid-cols-7 gap-3 text-center text-xs font-bold text-white/40 mb-3 select-none">
+          <div>SAT</div><div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div class="text-red-400">FRI</div>
+        </div>
+        <div class="grid grid-cols-7 gap-3 text-center" id="student-calendar-grid">
+          <!-- Calendar cells generated below -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Attendance table logs -->
+    <div class="glass overflow-hidden shadow-xl border border-white/10 mt-6">
+      <div class="p-6 border-b border-white/10 flex justify-between items-center">
+        <h4 class="font-bold text-white text-base font-headings">Complete Attendance Ledger</h4>
+        <select class="glass-input px-3.5 py-1.5 rounded-lg text-xs focus:outline-none w-40 select-none">
+          <option>May 2026</option>
+          <option>April 2026</option>
+        </select>
+      </div>
+      <div class="p-6 overflow-x-auto">
+        <div class="border border-white/10 rounded-xl bg-black/10">
+          <table class="w-full text-left text-sm border-collapse text-white/95">
+            <thead>
+              <tr class="bg-white/5 border-b border-white/10 text-school-cyan text-xs font-bold uppercase tracking-wider">
+                <th class="px-6 py-4">Date</th>
+                <th class="px-6 py-4">Subject</th>
+                <th class="px-6 py-4 text-center">Status</th>
+                <th class="px-6 py-4">Note / Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${studAtt.slice(0, 10).map(r => {
+                let statusLabel = 'Present';
+                let colorClass = 'bg-green-955/60 text-green-400 border border-green-500/20';
+                if (r.status === 'absent') {
+                  statusLabel = 'Absent';
+                  colorClass = 'bg-red-955/60 text-red-400 border-red-500/20';
+                } else if (r.status === 'late') {
+                  statusLabel = 'Late';
+                  colorClass = 'bg-amber-955/60 text-school-gold border-school-gold/20';
+                } else if (r.status === 'excused') {
+                  statusLabel = 'Excused';
+                  colorClass = 'bg-purple-955/60 text-purple-400 border border-purple-500/20';
+                }
+                return `
+                  <tr class="app-table-row border-b border-white/5 hover:bg-white/5 transition-colors duration-150">
+                    <td class="px-6 py-4 text-xs font-bold text-white font-mono">${r.date}</td>
+                    <td class="px-6 py-4 text-xs font-bold text-white">${r.subject}</td>
+                    <td class="px-6 py-4 text-center">
+                      <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${colorClass}">${statusLabel}</span>
+                    </td>
+                    <td class="px-6 py-4 text-xs text-white/60">${r.note || '--'}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Populate calendar dots
+  setTimeout(() => {
+    const grid = document.getElementById('student-calendar-grid');
+    if (!grid) return;
+    
+    grid.innerHTML = '';
+    // Skip 5 days offset (Fri)
+    // Render 31 days of May
+    for (let d = 1; d <= 31; d++) {
+      const formatted = `2026-05-${String(d).padStart(2, '0')}`;
+      const record = studAtt.find(r => r.date === formatted);
+      const isWeekend = d % 7 === 0; // mockup Fri
+      
+      let dotColor = 'bg-white/10';
+      let title = 'Weekend/Holiday';
+      
+      if (record) {
+        if (record.status === 'present') { dotColor = 'bg-green-400'; title = 'Present'; }
+        else if (record.status === 'absent') { dotColor = 'bg-red-500'; title = 'Absent'; }
+        else if (record.status === 'late') { dotColor = 'bg-yellow-400'; title = 'Late'; }
+        else if (record.status === 'excused') { dotColor = 'bg-blue-400'; title = 'Excused'; }
+      } else if (isWeekend) {
+        dotColor = 'bg-white/20';
+      }
+      
+      grid.innerHTML += `
+        <div class="glass p-3 rounded-lg border border-white/5 relative flex flex-col items-center justify-between h-14" title="${title}">
+          <span class="text-[10px] font-bold text-white/50 font-mono">${d}</span>
+          <span class="w-2.5 h-2.5 rounded-full ${dotColor} block"></span>
+        </div>
+      `;
+    }
+  }, 50);
+}
+
+function renderStudentResults() {
+  const container = document.getElementById('student-main');
+  if (!container) return;
+
+  const student = students.find(s => s.id === currentUser.studentId) || students[0];
+  const studRes = results.filter(r => r.studentId === student.id);
+  
+  // Calculate GPA
+  const totalScore = studRes.reduce((sum, r) => sum + r.score, 0);
+  const avgScore = studRes.length > 0 ? (totalScore / studRes.length).toFixed(1) : 88.0;
+  const letter = getGradeFromScore(parseFloat(avgScore));
+
+  container.innerHTML = `
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- GPA indicators card -->
+      <div class="glass p-6 flex flex-col justify-between shadow-2xl relative overflow-hidden card-hover-lift h-fit">
+        <div class="flex flex-col items-center text-center p-4">
+          <span class="text-[9px] text-white/40 uppercase font-bold tracking-widest block mb-2">My Semester Grade Point</span>
+          <div class="w-28 h-28 bg-gradient-to-tr from-school-gold to-yellow-600 border-2 border-school-gold rounded-full flex flex-col items-center justify-center font-bold text-4xl shadow-[0_0_20px_rgba(212,175,55,0.4)] text-gray-950 mb-4 select-none">
+            <span class="font-extrabold leading-none">${letter}</span>
+            <span class="text-[10px] font-bold font-headings leading-none mt-1.5">${avgScore}%</span>
+          </div>
+          <h4 class="font-headings text-lg font-bold text-white">Overall Standing</h4>
+          <span class="text-xs text-school-gold font-bold uppercase tracking-widest mt-1">Class Rank: 12th out of 42</span>
+        </div>
+      </div>
+
+      <!-- Subject Performance Cards Grid -->
+      <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
+        ${studRes.map(r => {
+          const letterGrade = getGradeFromScore(r.score);
+          let glowClass = 'text-school-cyan shadow-[0_0_10px_rgba(0,212,255,0.2)]';
+          if (letterGrade === 'F') glowClass = 'text-red-400';
+          return `
+            <div class="glass p-5 border border-white/10 card-hover-lift flex flex-col justify-between h-36">
+              <div>
+                <span class="text-[8px] font-bold text-white/40 uppercase block mb-1">Subject Performance</span>
+                <h4 class="font-headings text-sm font-bold text-white leading-tight">${r.subject}</h4>
+              </div>
+              <div class="flex justify-between items-end mt-4">
+                <div>
+                  <span class="text-[8px] text-white/40 font-bold block">Score Obtained</span>
+                  <span class="text-sm font-bold text-white font-mono">${r.score}%</span>
+                </div>
+                <span class="px-2.5 py-0.5 rounded border text-[10px] font-extrabold font-mono ${glowClass}">${letterGrade}</span>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+    </div>
+
+    <!-- Complete Ledger Table -->
+    <div class="glass overflow-hidden shadow-xl border border-white/10 mt-6">
+      <div class="p-6 border-b border-white/10">
+        <h4 class="font-bold text-white text-base font-headings">Full Term Results Ledger</h4>
+      </div>
+      <div class="p-6 overflow-x-auto">
+        <div class="border border-white/10 rounded-xl bg-black/10">
+          <table class="w-full text-left text-sm border-collapse text-white/95">
+            <thead>
+              <tr class="bg-white/5 border-b border-white/10 text-school-cyan text-xs font-bold uppercase tracking-wider">
+                <th class="px-6 py-4">Subject</th>
+                <th class="px-6 py-4 text-center">Term Code</th>
+                <th class="px-6 py-4 text-center">Score Obtained</th>
+                <th class="px-6 py-4 text-center">Grade</th>
+                <th class="px-6 py-4">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${studRes.map(r => {
+                const gradeVal = getGradeFromScore(r.score);
+                return `
+                  <tr class="app-table-row border-b border-white/5 hover:bg-white/5 transition-colors duration-150">
+                    <td class="px-6 py-4 text-sm font-bold text-white">${r.subject}</td>
+                    <td class="px-6 py-4 text-center text-xs font-semibold text-white/70">TERM-2026A</td>
+                    <td class="px-6 py-4 text-center text-xs font-bold text-white font-mono">${r.score}%</td>
+                    <td class="px-6 py-4 text-center text-xs text-school-gold font-extrabold font-mono">${gradeVal}</td>
+                    <td class="px-6 py-4 text-xs font-bold ${r.score >= 60 ? 'text-green-400' : 'text-red-400'}">${r.score >= 60 ? 'Passed' : 'Failed'}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderStudentFees() {
+  const container = document.getElementById('student-main');
+  if (!container) return;
+
+  const student = students.find(s => s.id === currentUser.studentId) || students[0];
+  const studFees = fees.find(f => f.studentId === student.id) || { amountDue: 1500, amountPaid: 1350 };
+  const balanceDue = studFees.amountDue - studFees.amountPaid;
+
+  container.innerHTML = `
+    <!-- Summary Row -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 select-none text-center">
+      <div class="glass p-6 border-t-4 border-t-school-cyan">
+        <span class="text-white/50 text-[10px] uppercase font-bold tracking-widest block mb-1">Total Term Fees</span>
+        <h3 class="text-2xl font-bold text-white font-headings font-mono">$${studFees.amountDue.toLocaleString()}</h3>
+      </div>
+      <div class="glass p-6 border-t-4 border-t-green-500">
+        <span class="text-white/50 text-[10px] uppercase font-bold tracking-widest block mb-1">Amount Paid</span>
+        <h3 class="text-2xl font-bold text-white font-headings font-mono">$${studFees.amountPaid.toLocaleString()}</h3>
+      </div>
+      <div class="glass p-6 border-t-4 border-t-red-500">
+        <span class="text-white/50 text-[10px] uppercase font-bold tracking-widest block mb-1">Balance Due</span>
+        <h3 class="text-2xl font-bold font-headings font-mono ${balanceDue > 0 ? 'text-red-400' : 'text-green-400'}" id="student-fees-balance">$${balanceDue.toLocaleString()}</h3>
+      </div>
+    </div>
+
+    <!-- Fees invoices and payments ledger list -->
+    <div class="glass overflow-hidden shadow-xl border border-white/10 mt-6">
+      <div class="p-6 border-b border-white/10 flex justify-between items-center flex-wrap gap-4">
+        <h4 class="font-bold text-white text-base font-headings">Transactions & Payments History</h4>
+        ${balanceDue > 0 ? `
+          <button class="px-5 py-2 btn-primary text-white font-bold rounded text-xs tracking-wider transition-all shadow-lg cursor-pointer uppercase font-headings" onclick="openStudentPayNowModal()">
+            <i class="fa-solid fa-credit-card mr-1.5 animate-bounce"></i> Pay Outstanding
+          </button>
+        ` : ''}
+      </div>
+      <div class="p-6 overflow-x-auto">
+        <div class="border border-white/10 rounded-xl bg-black/10">
+          <table class="w-full text-left text-sm border-collapse text-white/95">
+            <thead>
+              <tr class="bg-white/5 border-b border-white/10 text-school-cyan text-xs font-bold uppercase tracking-wider">
+                <th class="px-6 py-4">Receipt #</th>
+                <th class="px-6 py-4">Description</th>
+                <th class="px-6 py-4">Amount</th>
+                <th class="px-6 py-4">Date</th>
+                <th class="px-6 py-4">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="app-table-row border-b border-white/5 hover:bg-white/5 transition-colors duration-150">
+                <td class="px-6 py-4 text-xs font-bold text-school-cyan font-mono">REC-2026040</td>
+                <td class="px-6 py-4 text-xs font-semibold text-white">First Installment Term Fees</td>
+                <td class="px-6 py-4 text-xs font-bold text-white font-mono">$${studFees.amountPaid.toLocaleString()}</td>
+                <td class="px-6 py-4 text-xs text-white/50">2026-05-10</td>
+                <td class="px-6 py-4 text-xs">
+                  <span class="px-2.5 py-0.5 rounded-full font-bold bg-green-955/60 text-green-400 border border-green-500/20 text-[10px]">Paid</span>
+                </td>
+              </tr>
+              ${balanceDue > 0 ? `
+                <tr class="app-table-row border-b border-white/5 hover:bg-white/5 transition-colors duration-150">
+                  <td class="px-6 py-4 text-xs font-bold text-white/40 font-mono">--</td>
+                  <td class="px-6 py-4 text-xs font-semibold text-white/70">Outstanding Roster Balance</td>
+                  <td class="px-6 py-4 text-xs font-bold text-red-400 font-mono">$${balanceDue.toLocaleString()}</td>
+                  <td class="px-6 py-4 text-xs text-white/30">Immediate</td>
+                  <td class="px-6 py-4 text-xs">
+                    <span class="px-2.5 py-0.5 rounded-full font-bold bg-red-955/60 text-red-400 border border-red-500/20 text-[10px] animate-pulse">Overdue ⚠️</span>
+                  </td>
+                </tr>
+              ` : ''}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function openStudentPayNowModal() {
+  const schoolPhone = settings.phone || '528629';
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay active';
+  overlay.id = 'modal-pay-now-custom';
+  overlay.innerHTML = `
+    <div class="glass modal-box w-full max-w-sm overflow-hidden relative shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/15 p-6 animate-fade text-center">
+      <i class="fa-solid fa-circle-info text-school-gold text-4xl mb-3 block animate-pulse"></i>
+      <h3 class="font-bold text-white text-lg font-headings mb-2">Process Fees Payment</h3>
+      <p class="text-xs text-white/75 leading-relaxed mb-6">
+        Please contact the school administrative office or finance department directly to process payments.
+      </p>
+      <div class="bg-white/5 border border-white/10 rounded-xl p-3 mb-6 flex justify-between items-center text-xs font-bold font-mono text-school-gold">
+        <span>SCHOOL PHONE</span>
+        <span>${schoolPhone}</span>
+      </div>
+      <button class="w-full py-2.5 btn-primary text-white font-bold rounded text-xs uppercase tracking-wider cursor-pointer" onclick="document.getElementById('modal-pay-now-custom').remove()">DISMISS</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function renderStudentAnnouncements() {
+  const container = document.getElementById('student-main');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="space-y-4" id="s-announcements-timeline">
+      <!-- Injected -->
+    </div>
+  `;
+
+  const timeline = document.getElementById('s-announcements-timeline');
+  const sorted = [...announcements].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  if (sorted.length === 0) {
+    timeline.innerHTML = `<div class="p-8 text-center text-xs text-white/40 italic bg-white/5 rounded-xl border border-white/10">No announcements posted.</div>`;
+    return;
+  }
+
+  sorted.forEach(ann => {
+    let badgeClass = 'bg-white/5 text-white border border-white/10';
+    if (ann.category === 'Academic') badgeClass = 'bg-blue-955/60 text-blue-300 border border-blue-500/20';
+    else if (ann.category === 'Event') badgeClass = 'bg-purple-955/60 text-purple-300 border border-purple-500/20';
+
+    timeline.innerHTML += `
+      <div class="glass p-6 shadow-2xl transition-all relative">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-3">
+            <span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${badgeClass}">${ann.category}</span>
+            <span class="text-[10px] text-white/40 font-semibold"><i class="fa-regular fa-clock"></i> ${ann.date}</span>
+          </div>
+        </div>
+        <h3 class="font-bold text-white text-base font-headings mb-2">${ann.title}</h3>
+        <p class="text-xs text-white/70 leading-relaxed">${ann.message}</p>
+      </div>
+    `;
+  });
+}
+
+function renderStudentProfile() {
+  const container = document.getElementById('student-main');
+  if (!container) return;
+
+  const student = students.find(s => s.id === currentUser.studentId) || students[0];
+  const studAtt = attendance.filter(r => r.studentId === student.id);
+  const present = studAtt.filter(r => r.status === 'present' || r.status === 'late').length;
+  const attRate = studAtt.length > 0 ? ((present / studAtt.length) * 100).toFixed(0) : 92;
+
+  const studRes = results.filter(r => r.studentId === student.id);
+  const avgScore = studRes.length > 0 ? (studRes.reduce((sum, r) => sum + r.score, 0) / studRes.length).toFixed(0) : 85;
+
+  container.innerHTML = `
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Edit Profile form -->
+      <div class="glass p-6 shadow-2xl lg:col-span-2">
+        <h3 class="text-lg font-bold text-school-gold border-b border-white/10 pb-3 mb-6 uppercase tracking-wider">My Student Profile</h3>
+        <form id="s-profile-form" onsubmit="saveStudentProfileForm(event)" class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-2">Student Name</label>
+              <input type="text" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" value="${student.name}" readonly>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-2">Student ID</label>
+              <input type="text" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" value="${student.id}" readonly>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-2">Class Section</label>
+              <input type="text" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" value="${student.class}" readonly>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-2">Phone</label>
+              <input type="text" id="s-prof-phone" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" value="${student.phone}" required>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-2">Parent/Guardian Name</label>
+              <input type="text" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" value="${student.parentName}" readonly>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-white/50 uppercase mb-2">Residential Address</label>
+              <input type="text" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" value="${student.address || 'Hargeisa, Somaliland'}" readonly>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-white/50 uppercase mb-2">Personal Biography</label>
+            <textarea id="s-prof-bio" class="glass-input w-full p-2.5 rounded text-sm focus:outline-none" rows="4">${currentUser.bio || 'Hardworking Grade 10 student dedicated to mathematical sciences.'}</textarea>
+          </div>
+          <button type="submit" class="w-full py-3 btn-primary text-white font-bold rounded text-xs uppercase tracking-wider transition-all shadow-lg cursor-pointer">
+            <i class="fa-solid fa-save mr-1"></i> Save Profile Details
+          </button>
+        </form>
+      </div>
+
+      <!-- Academic Summary Sidebar card -->
+      <div class="glass p-6 flex flex-col justify-between shadow-2xl relative overflow-hidden card-hover-lift h-fit">
+        <div class="flex flex-col items-center text-center p-4">
+          <div class="w-24 h-24 bg-gradient-to-tr from-school-gold to-yellow-600 border-2 border-school-gold rounded-full flex items-center justify-center font-bold text-4xl shadow-[0_0_20px_rgba(212,175,55,0.4)] text-gray-950 mb-4 select-none">
+            ${student.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+          </div>
+          <h4 class="font-headings text-lg font-bold text-white">${student.name}</h4>
+          <span class="text-xs text-school-gold font-bold uppercase tracking-widest mt-1">${student.class} · STU001</span>
+        </div>
+
+        <div class="space-y-4 pt-6 border-t border-white/5 mt-4">
+          <div class="bg-white/5 border border-white/10 rounded-xl p-3 flex justify-between items-center text-xs">
+            <span class="text-white/50 uppercase font-bold tracking-wider">Average Grade</span>
+            <span class="font-extrabold text-school-gold font-mono">${avgScore}% (${getGradeFromScore(parseFloat(avgScore))})</span>
+          </div>
+          <div class="bg-white/5 border border-white/10 rounded-xl p-3 flex justify-between items-center text-xs">
+            <span class="text-white/50 uppercase font-bold tracking-wider">Attendance Rate</span>
+            <span class="font-extrabold text-green-400 font-mono">${attRate}%</span>
+          </div>
+          <div class="bg-white/5 border border-white/10 rounded-xl p-3 flex justify-between items-center text-xs">
+            <span class="text-white/50 uppercase font-bold tracking-wider">Class Rank</span>
+            <span class="font-extrabold text-school-cyan font-mono">12th of 42</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  `;
+}
+
+function saveStudentProfileForm(event) {
+  event.preventDefault();
+
+  const phone = document.getElementById('s-prof-phone').value.trim();
+  const bio = document.getElementById('s-prof-bio').value.trim();
+
+  // Find student index
+  const studentIdx = students.findIndex(s => s.id === currentUser.studentId);
+  if (studentIdx > -1) {
+    students[studentIdx].phone = phone;
+  }
+
+  const userIdx = users.findIndex(u => u.id === currentUser.id);
+  if (userIdx > -1) {
+    users[userIdx].bio = bio;
+  }
+
+  currentUser.bio = bio;
+  sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+  saveAllToLocalStorage();
+  showToast("Student profile settings synchronized", "success");
+  renderStudentProfile();
+}
+
+function getGradeFromScore(score) {
+  if (score >= 90) return 'A';
+  if (score >= 80) return 'B';
+  if (score >= 70) return 'C';
+  if (score >= 60) return 'D';
+  return 'F';
+}
